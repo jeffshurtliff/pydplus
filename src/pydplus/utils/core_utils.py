@@ -6,7 +6,7 @@
 :Example:           ``encoded_string = core_utils.encode_url(decoded_string)``
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     06 May 2025
+:Modified Date:     07 May 2025
 """
 
 import random
@@ -14,8 +14,6 @@ import string
 import os.path
 import warnings
 import urllib.parse
-
-import requests
 
 from . import log_utils
 from .. import errors
@@ -46,5 +44,63 @@ def url_decode(encoded_string):
     :returns: The unencoded string
     """
     return urllib.parse.unquote_plus(encoded_string)
+
+
+def display_warning(warn_msg):
+    """This function displays a :py:exc:`UserWarning` message via the :py:mod:`warnings` module.
+
+    .. versionadded:: 1.0.0
+
+    :param warn_msg: The message to be displayed
+    :type warn_msg: str
+    :returns: None
+    """
+    warnings.warn(warn_msg, UserWarning)
+
+
+def get_file_type(file_path):
+    """This function attempts to identify if a given file path is for a YAML or JSON file.
+
+    .. versionadded:: 1.0.0
+
+    :param file_path: The full path to the file
+    :type file_path: str
+    :returns: The file type in string format (e.g. ``yaml`` or ``json``)
+    :raises: :py:exc:`FileNotFoundError`, :py:exc:`khoros.errors.exceptions.UnknownFileTypeError`
+    """
+    file_type = 'unknown'
+    if os.path.isfile(file_path):
+        if file_path.endswith('.json'):
+            file_type = 'json'
+        elif file_path.endswith('.yml') or file_path.endswith('.yaml'):
+            file_type = 'yaml'
+        else:
+            display_warning(f"Unable to recognize the file type of '{file_path}' by its extension.")
+            with open(file_path) as cfg_file:
+                for line in cfg_file:
+                    if line.startswith('#'):
+                        continue
+                    else:
+                        if '{' in line:
+                            file_type = 'json'
+                            break
+        if file_type == 'unknown':
+            raise errors.exceptions.UnknownFileTypeError(file=file_path)
+    else:
+        raise FileNotFoundError(f"Unable to locate the following file: {file_path}")
+    return file_type
+
+
+def get_random_string(length=32, prefix_string=""):
+    """This function returns a random alphanumeric string.
+
+    :param length: The length of the string (``32`` by default)
+    :type length: int
+    :param prefix_string: A string to which the random string should be appended (optional)
+    :type prefix_string: str
+    :returns: The alphanumeric string
+    """
+    return f"{prefix_string}{''.join([random.choice(string.ascii_letters + string.digits) for _ in range(length)])}"
+
 
 
