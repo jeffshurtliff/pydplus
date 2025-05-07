@@ -66,7 +66,8 @@ def get_file_type(file_path):
     :param file_path: The full path to the file
     :type file_path: str
     :returns: The file type in string format (e.g. ``yaml`` or ``json``)
-    :raises: :py:exc:`FileNotFoundError`, :py:exc:`khoros.errors.exceptions.UnknownFileTypeError`
+    :raises: :py:exc:`FileNotFoundError`,
+             :py:exc:`pydplus.errors.exceptions.UnknownFileTypeError`
     """
     file_type = 'unknown'
     if os.path.isfile(file_path):
