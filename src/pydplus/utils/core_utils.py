@@ -102,6 +102,3 @@ def get_random_string(length=32, prefix_string=""):
     :returns: The alphanumeric string
     """
     return f"{prefix_string}{''.join([random.choice(string.ascii_letters + string.digits) for _ in range(length)])}"
-
-
-
