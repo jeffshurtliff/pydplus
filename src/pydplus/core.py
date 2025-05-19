@@ -65,8 +65,7 @@ class PyDPlus(object):
         # Check for custom environment variable names
         if env_variables:
             if not isinstance(env_variables, dict):
-                error_msg = "The 'env_variables' parameter must be a dictionary and will be ignored."
-                logger.error(error_msg)
+                logger.error("The 'env_variables' parameter must be a dictionary and will be ignored.")
             else:
                 self._env_variable_names = self._get_env_variable_names(env_variables)
         elif 'env_variables' in self._helper_settings:
@@ -100,6 +99,8 @@ class PyDPlus(object):
 
         # Update the dictionary to use any defined custom names instead of the default names
         _custom_dict = {} if _custom_dict is None else _custom_dict
+        if not isinstance(_custom_dict, dict):
+            raise TypeError('Unable to parse custom environment variable names because variable is not a dictionary.')
         if _custom_dict:
             for _name_key, _name_value in _custom_dict.items():
                 if _name_key in _env_variable_names:
