@@ -17,6 +17,9 @@ from .. import errors
 from . import log_utils
 from .core_utils import get_file_type
 
+# Define constants
+DEFAULT_HELPER_FILE_TYPE = 'json'
+
 # Initialize logging within the module
 logger = log_utils.initialize_logging(__name__)
 
