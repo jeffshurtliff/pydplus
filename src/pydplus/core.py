@@ -6,7 +6,7 @@
 :Example:           ``prod = PyDPlus()``
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     18 May 2025
+:Modified Date:     19 May 2025
 """
 
 from . import errors
@@ -37,22 +37,29 @@ class PyDPlus(object):
         # Define the default settings
         self._helper_settings = {}
 
+        # Check for a supplied helper file
+        if helper:
+            # Parse the helper file contents
+            if any((isinstance(helper, tuple), isinstance(helper, list), isinstance(helper, set))):
+                helper_file_path, helper_file_type = helper
+            elif isinstance(helper, str):
+                helper_file_path, helper_file_type = (helper, DEFAULT_HELPER_FILE_TYPE)
+            elif isinstance(helper, dict):
+                helper_file_path, helper_file_type = helper.values()
+            else:
+                error_msg = "The 'helper' argument can only be supplied as string, tuple, list, set or dict."
+                logger.error(error_msg)
+                raise TypeError(error_msg)
+            self.helper_path = helper_file_path
+            self._helper_settings = get_helper_settings(helper_file_path, helper_file_type)
+
         # Check for provided connection info
         if connection_info is None:
-            # Check for a supplied helper file
-            if helper:
-                # Parse the helper file contents
-                if any((isinstance(helper, tuple), isinstance(helper, list), isinstance(helper, set))):
-                    helper_file_path, helper_file_type = helper
-                elif isinstance(helper, str):
-                    helper_file_path, helper_file_type = (helper, DEFAULT_HELPER_FILE_TYPE)
-                elif isinstance(helper, dict):
-                    helper_file_path, helper_file_type = helper.values()
-                else:
-                    error_msg = "The 'helper' argument can only be supplied as string, tuple, list, set or dict."
-                    logger.error(error_msg)
-                    raise TypeError(error_msg)
-                self.helper_path = helper_file_path
-                self._helper_settings = get_helper_settings(helper_file_path, helper_file_type)
+            # Check for defined helper settings
+            if self._helper_settings:
+                # TODO: Define connection_info using _helper_settings
+                pass
+
+
 
 
