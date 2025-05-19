@@ -43,6 +43,7 @@ class PyDPlus(object):
         """
         # Define the default settings
         self._helper_settings = {}
+        self._env_variables = {}
         self.connection_type = connection_type if connection_type in VALID_CONNECTION_TYPES else DEFAULT_CONNECTION_TYPE
 
         # Check for a supplied helper file
@@ -61,6 +62,18 @@ class PyDPlus(object):
             self.helper_path = helper_file_path
             self._helper_settings = get_helper_settings(helper_file_path, helper_file_type)
 
+        # Check for custom environment variable names
+        if env_variables:
+            if not isinstance(env_variables, dict):
+                error_msg = "The 'env_variables' parameter must be a dictionary and will be ignored."
+                logger.error(error_msg)
+            else:
+                self._env_variable_names = self._get_env_variable_names(env_variables)
+        elif 'env_variables' in self._helper_settings:
+            self._env_variable_names = self._get_env_variable_names(self._helper_settings.get('env_variables', {}))
+        else:
+            self._env_variable_names = self._get_env_variable_names()
+
         # Check for provided connection info
         if connection_info is None:
             # Check for defined helper settings
@@ -68,6 +81,29 @@ class PyDPlus(object):
                 # TODO: Define connection_info using _helper_settings
                 pass
 
+    @staticmethod
+    def _get_env_variable_names(_custom_dict=None):
+        """This function returns the environment variable names to use when checking the OS for environment variables.
 
+        .. versionadded:: 1.0.0
+        """
+        # Define the dictionary with the default environment variable names
+        _env_variable_names = {
+            'connection_type': 'PYDPLUS_CONNECTION_TYPE',
+            'legacy_access_id': 'PYDPLUS_LEGACY_ACCESS_ID',
+            'legacy_key_path': 'PYDPLUS_LEGACY_KEY_PATH',
+            'legacy_key_file': 'PYDPLUS_LEGACY_KEY_FILE',
+            'oauth_issuer_url': 'PYDPLUS_OAUTH_ISSUER_URL',
+            'oauth_client_id': 'PYDPLUS_OAUTH_CLIENT_ID',
+            'oauth_grant_type': 'PYDPLUS_OAUTH_GRANT_TYPE'
+        }
 
+        # Update the dictionary to use any defined custom names instead of the default names
+        _custom_dict = {} if _custom_dict is None else _custom_dict
+        if _custom_dict:
+            for _name_key, _name_value in _custom_dict.items():
+                if _name_key in _env_variable_names:
+                    _env_variable_names.update({_name_key: _name_value})
 
+        # Return the finalized dictionary with the mapped environment variable names
+        return _env_variable_names
