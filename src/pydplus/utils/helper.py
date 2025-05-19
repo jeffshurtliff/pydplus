@@ -96,7 +96,7 @@ def _collect_values(_top_level_keys, _helper_cfg, _helper_dict=None, _ignore_mis
             if _key_val in HelperParsing.yaml_boolean_values:
                 _key_val = HelperParsing.yaml_boolean_values.get(_key_val)
             _helper_dict[_key] = _key_val
-        elif _key == "ssl_verify":
+        elif _key == 'ssl_verify':
             # Verify SSL certificates by default unless explicitly set to false
             _helper_dict[_key] = True
         else:
