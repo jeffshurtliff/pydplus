@@ -6,11 +6,12 @@
 :Example:           ``prod = PyDPlus()``
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     07 May 2025
+:Modified Date:     18 May 2025
 """
 
 from . import errors
 from .utils import core_utils, log_utils
+from .utils.helper import get_helper_settings, DEFAULT_HELPER_FILE_TYPE
 
 # Initialize logging
 logger = log_utils.initialize_logging(__name__)
@@ -41,16 +42,17 @@ class PyDPlus(object):
             # Check for a supplied helper file
             if helper:
                 # Parse the helper file contents
-                self.helper_path = helper
                 if any((isinstance(helper, tuple), isinstance(helper, list), isinstance(helper, set))):
                     helper_file_path, helper_file_type = helper
                 elif isinstance(helper, str):
-                    helper_file_path, helper_file_type = (helper, 'json')
+                    helper_file_path, helper_file_type = (helper, DEFAULT_HELPER_FILE_TYPE)
                 elif isinstance(helper, dict):
                     helper_file_path, helper_file_type = helper.values()
                 else:
                     error_msg = "The 'helper' argument can only be supplied as string, tuple, list, set or dict."
                     logger.error(error_msg)
                     raise TypeError(error_msg)
+                self.helper_path = helper_file_path
+                self._helper_settings = get_helper_settings(helper_file_path, helper_file_type)
 
 
