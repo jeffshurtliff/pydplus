@@ -16,11 +16,16 @@ from .utils.helper import get_helper_settings, DEFAULT_HELPER_FILE_TYPE
 # Initialize logging
 logger = log_utils.initialize_logging(__name__)
 
+# Define constants
+DEFAULT_CONNECTION_TYPE = 'oauth'
+VALID_CONNECTION_TYPES = {'oauth', 'legacy'}
+
 
 class PyDPlus(object):
     """This is the class for the core object leveraged in this module."""
     # Define the function that initializes the object instance (i.e. instantiates the object)
-    def __init__(self, connection_info=None, connection_type='oauth', private_key=None, helper=None):
+    def __init__(self, connection_info=None, connection_type=DEFAULT_CONNECTION_TYPE, private_key=None,
+                 env_variables=None, helper=None):
         """This method instantiates the core Salesforce object.
 
         :param connection_info: Dictionary that defines the connection info to use
@@ -29,6 +34,8 @@ class PyDPlus(object):
         :type connection_type: str, None
         :param private_key: The file path to the private key used for API authentication
         :type private_key: str, None
+        :param env_variables: Optionally define custom environment variable names to use instead of the default names
+        :type env_variables: dict, None
         :param helper: The file path of a helper file (when applicable)
         :type helper: str, None
         :returns: The instantiated object
@@ -36,6 +43,7 @@ class PyDPlus(object):
         """
         # Define the default settings
         self._helper_settings = {}
+        self.connection_type = connection_type if connection_type in VALID_CONNECTION_TYPES else DEFAULT_CONNECTION_TYPE
 
         # Check for a supplied helper file
         if helper:
