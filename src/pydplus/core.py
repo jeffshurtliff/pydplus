@@ -21,6 +21,8 @@ logger = log_utils.initialize_logging(__name__)
 # Define constants
 DEFAULT_CONNECTION_TYPE = 'oauth'
 VALID_CONNECTION_TYPES = {'oauth', 'legacy'}
+LEGACY_CONNECTION_FIELDS = {'access_id', 'private_key_path', 'private_key_file'}
+OAUTH_CONNECTION_FIELDS = {'issuer_url', 'client_id', 'grant_type', 'client_authentication'}
 
 
 class PyDPlus(object):
@@ -82,8 +84,8 @@ class PyDPlus(object):
         if connection_info is None:
             # Check for defined helper settings
             if self._helper_settings:
-                # TODO: Define connection_info using _helper_settings
-                pass
+                connection_info = self._parse_helper_connection_info()
+
 
     @staticmethod
     def _get_env_variable_names(_custom_dict=None):
@@ -124,3 +126,17 @@ class PyDPlus(object):
             _var_value = os.getenv(_var_name)                               # Returns None if not found
             _env_variables.update({_config_name: _var_value})
         return _env_variables
+
+    def _parse_helper_connection_info(self):
+        """This method parses the helper content to populate the connection info.
+
+        .. versionadded:: 1.0.0
+        """
+        _connection_info = {'legacy': {}, 'oauth': {}}
+        for _section, _key_list in {'legacy': LEGACY_CONNECTION_FIELDS, 'oauth': OAUTH_CONNECTION_FIELDS}.items():
+            for _key in _key_list:
+                if _key in self._helper_settings['connection'][_section]:
+                    _connection_info[_section][_key] = self._helper_settings['connection'][_section][_key]
+                else:
+                    _connection_info[_section][_key] = None
+        return _connection_info
