@@ -76,7 +76,7 @@ class PyDPlus(object):
             self._env_variable_names = self._get_env_variable_names()
 
         # Check for any defined environment variables
-        self._env_variables = self._get_env_variables(self._env_variable_names)
+        self._env_variables = self._get_env_variables()
 
         # Check for provided connection info
         if connection_info is None:
@@ -114,14 +114,13 @@ class PyDPlus(object):
         # Return the finalized dictionary with the mapped environment variable names
         return _env_variable_names
 
-    @staticmethod
-    def _get_env_variables(_env_variable_names):
+    def _get_env_variables(self):
         """This function retrieves any defined environment variables to use with the instantiated core object.
 
         .. versionadded:: 1.0.0
         """
         _env_variables = {}
-        for _config_name, _var_name in _env_variable_names.items():
+        for _config_name, _var_name in self._env_variable_names.items():
             _var_value = os.getenv(_var_name)                               # Returns None if not found
             _env_variables.update({_config_name: _var_value})
         return _env_variables
