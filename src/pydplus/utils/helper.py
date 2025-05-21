@@ -6,7 +6,7 @@
 :Example:           ``helper_settings = helper.get_settings('/tmp/helper.yml', 'yaml')``
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     19 May 2025
+:Modified Date:     21 May 2025
 """
 
 import json
@@ -134,6 +134,10 @@ def get_helper_settings(file_path, file_type='json', defined_settings=None):
     # Import the helper configuration file
     helper_cfg = import_helper_file(file_path, file_type)
 
+    # Populate the top-level fields that do not require further validation
+    top_level_values = ['base_url', 'connection_type', 'ssl_verify']
+    helper_settings = _collect_values(top_level_values, helper_cfg, defined_settings)
+
     # Populate the connection information in the helper dictionary
     if 'connection' in helper_cfg and 'connection' not in defined_settings:
         helper_settings['connection'] = _get_connection_info(helper_cfg)
@@ -141,10 +145,6 @@ def get_helper_settings(file_path, file_type='json', defined_settings=None):
     # Populate the environment variables information in the helper dictionary
     if 'env_variables' in helper_cfg and 'env_variables' not in defined_settings:
         helper_settings.update(_collect_values('env_variables', helper_cfg))
-
-    # Populate the SSL certificate verification setting in the helper dictionary
-    if 'ssl_verify' not in defined_settings:
-        helper_settings.update(_collect_values('ssl_verify', helper_cfg))
 
     # Return the helper_settings dictionary
     return helper_settings
