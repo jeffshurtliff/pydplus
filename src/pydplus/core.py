@@ -159,18 +159,21 @@ class PyDPlus(object):
 
 
 def compile_connection_info(connection_type, base_url, private_key, legacy_access_id, oauth_client_id, verify_ssl):
+    private_key_path, private_key_file = core_utils.split_file_path(private_key)
     connection_info = {
         'base_url': base_url,
         'connection_type': connection_type,
         'connection': {
             'legacy': {
                 'access_id': legacy_access_id,
-                # TODO: Call core_utils.split_full_file_path() for private key fields
+                'private_key_path': private_key_path,
+                'private_key_file': private_key_file,
             },
             'oauth': {
                 # TODO: Use the base_url to get the issuer URL
                 'client_id': oauth_client_id,
-                # TODO: Retrieve other OAuth fields from constants in the auth.py module
+                'grant_type': auth.OAUTH_GRANT_TYPE,
+                'client_authentication': auth.OAUTH_CLIENT_AUTH,
             }
         },
         'verify_ssl': verify_ssl,
