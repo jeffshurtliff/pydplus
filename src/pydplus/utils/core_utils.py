@@ -92,6 +92,23 @@ def get_file_type(file_path):
     return file_type
 
 
+def split_file_path(full_path):
+    """This function splits a full file path into separate variables for file path and file name.
+
+    .. versionadded:: 1.0.0
+
+    :param full_path: The full path to the file including the file name
+    :type full_path: str
+    :returns: The file path and file name strings as separate variables
+    :raises: :py:exc:`TypeError`
+    """
+    file_path = os.path.dirname(full_path)
+    if file_path and not file_path.endswith(os.sep):
+        file_path = f'{file_path}{os.sep}'
+    file_name = os.path.basename(full_path)
+    return file_path, file_name
+
+
 def get_random_string(length=32, prefix_string=""):
     """This function returns a random alphanumeric string.
 
