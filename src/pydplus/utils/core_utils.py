@@ -6,12 +6,12 @@
 :Example:           ``encoded_string = core_utils.encode_url(decoded_string)``
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     07 May 2025
+:Modified Date:     24 May 2025
 """
 
+import os
 import random
 import string
-import os.path
 import warnings
 import urllib.parse
 
