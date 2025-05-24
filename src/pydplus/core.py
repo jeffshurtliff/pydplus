@@ -6,38 +6,41 @@
 :Example:           ``prod = PyDPlus()``
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     20 May 2025
+:Modified Date:     24 May 2025
 """
 
 import os
 
-from . import errors
+from . import auth, errors
 from .utils import core_utils, log_utils
 from .utils.helper import get_helper_settings, DEFAULT_HELPER_FILE_TYPE
 
 # Initialize logging
 logger = log_utils.initialize_logging(__name__)
 
-# Define constants
-DEFAULT_CONNECTION_TYPE = 'oauth'
-VALID_CONNECTION_TYPES = {'oauth', 'legacy'}
-LEGACY_CONNECTION_FIELDS = {'access_id', 'private_key_path', 'private_key_file'}
-OAUTH_CONNECTION_FIELDS = {'issuer_url', 'client_id', 'grant_type', 'client_authentication'}
-
 
 class PyDPlus(object):
     """This is the class for the core object leveraged in this module."""
     # Define the function that initializes the object instance (i.e. instantiates the object)
-    def __init__(self, connection_info=None, connection_type=DEFAULT_CONNECTION_TYPE, private_key=None,
-                 env_variables=None, helper=None):
+    def __init__(self, connection_info=None, connection_type=auth.DEFAULT_CONNECTION_TYPE, base_url=None,
+                 private_key=None, legacy_access_id=None, oauth_client_id=None, verify_ssl=True, env_variables=None,
+                 helper=None):
         """This method instantiates the core Salesforce object.
 
         :param connection_info: Dictionary that defines the connection info to use
         :type connection_info: dict, None
-        :param connection_type: Defines the connection type to leverage ``oauth`` (default) or ``legacy``
+        :param connection_type: Determines whether to leverage a(n) ``oauth`` (default) or ``legacy`` connection
         :type connection_type: str, None
-        :param private_key: The file path to the private key used for API authentication
+        :param base_url: The base URL to leverage when performing API calls
+        :type base_url: str, None
+        :param private_key: The file path to the private key used for API authentication (OAuth or Legacy)
         :type private_key: str, None
+        :param legacy_access_id: The Access ID associated with the Legacy API connection
+        :type legacy_access_id: str, None
+        :param oauth_client_id: The Client ID associated with the OAuth API connection
+        :type oauth_client_id: str, None
+        :param verify_ssl: Determines if SSL connections should be verified (``True`` by default)
+        :type verify_ssl: bool
         :param env_variables: Optionally define custom environment variable names to use instead of the default names
         :type env_variables: dict, None
         :param helper: The file path of a helper file (when applicable)
@@ -48,7 +51,10 @@ class PyDPlus(object):
         # Define the default settings
         self._helper_settings = {}
         self._env_variables = {}
-        self.connection_type = connection_type if connection_type in VALID_CONNECTION_TYPES else DEFAULT_CONNECTION_TYPE
+        if connection_type in auth.VALID_CONNECTION_TYPES:
+            self.connection_type = connection_type
+        else:
+            self.connection_type = auth.DEFAULT_CONNECTION_TYPE
 
         # Check for a supplied helper file
         if helper:
@@ -82,9 +88,18 @@ class PyDPlus(object):
 
         # Check for provided connection info
         if connection_info is None:
+            # Check for individual parameters defined in object instantiation
+            # TODO: Add logic to check for individually defined parameters
+
             # Check for defined helper settings
             if self._helper_settings:
                 connection_info = self._parse_helper_connection_info()
+
+            # Check for defined environment variables
+            # TODO: Check for defined environment variables
+
+            # Add missing field values where possible and when needed
+            # TODO: Define the OAuth Issuer URL using the base_url
 
 
     @staticmethod
@@ -133,10 +148,31 @@ class PyDPlus(object):
         .. versionadded:: 1.0.0
         """
         _connection_info = {'legacy': {}, 'oauth': {}}
-        for _section, _key_list in {'legacy': LEGACY_CONNECTION_FIELDS, 'oauth': OAUTH_CONNECTION_FIELDS}.items():
+        _connection_fields = {'legacy': auth.LEGACY_CONNECTION_FIELDS, 'oauth': auth.OAUTH_CONNECTION_FIELDS}
+        for _section, _key_list in _connection_fields.items():
             for _key in _key_list:
                 if _key in self._helper_settings['connection'][_section]:
                     _connection_info[_section][_key] = self._helper_settings['connection'][_section][_key]
                 else:
                     _connection_info[_section][_key] = None
         return _connection_info
+
+
+def compile_connection_info(connection_type, base_url, private_key, legacy_access_id, oauth_client_id, verify_ssl):
+    connection_info = {
+        'base_url': base_url,
+        'connection_type': connection_type,
+        'connection': {
+            'legacy': {
+                'access_id': legacy_access_id,
+                # TODO: Call core_utils.split_full_file_path() for private key fields
+            },
+            'oauth': {
+                # TODO: Use the base_url to get the issuer URL
+                'client_id': oauth_client_id,
+                # TODO: Retrieve other OAuth fields from constants in the auth.py module
+            }
+        },
+        'verify_ssl': verify_ssl,
+    }
+    return connection_info
