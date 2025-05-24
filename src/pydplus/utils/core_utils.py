@@ -109,6 +109,24 @@ def split_file_path(full_path):
     return file_path, file_name
 
 
+def get_base_url(url, include_scheme=True):
+    """This function parses a URL to return only the base URL with or without the scheme.
+
+    .. versionadded:: 1.0.0
+
+    :param url: The URL to parse
+    :type url: str
+    :param include_scheme: Determines if the scheme (e.g. ``https://``) should be included (``True`` by default)
+    :type include_scheme: bool
+    :returns: The base URL as a string
+    :raises: :py:exc:`TypeError`
+    """
+    parsed_url = urllib.parse.urlparse(url)
+    base_url = parsed_url.netloc
+    base_url = f'{parsed_url.scheme}://{base_url}' if include_scheme else base_url
+    return base_url
+
+
 def get_random_string(length=32, prefix_string=""):
     """This function returns a random alphanumeric string.
 
