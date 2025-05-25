@@ -23,8 +23,8 @@ class PyDPlus(object):
     """This is the class for the core object leveraged in this module."""
     # Define the function that initializes the object instance (i.e. instantiates the object)
     def __init__(self, connection_info=None, connection_type=auth.DEFAULT_CONNECTION_TYPE, base_url=None,
-                 private_key=None, legacy_access_id=None, oauth_client_id=None, verify_ssl=True, env_variables=None,
-                 helper=None):
+                 private_key=None, legacy_access_id=None, oauth_client_id=None, verify_ssl=True, auto_connect=True,
+                 env_variables=None, helper=None):
         """This method instantiates the core Salesforce object.
 
         :param connection_info: Dictionary that defines the connection info to use
@@ -41,6 +41,9 @@ class PyDPlus(object):
         :type oauth_client_id: str, None
         :param verify_ssl: Determines if SSL connections should be verified (``True`` by default)
         :type verify_ssl: bool
+        :param auto_connect: Determines if an API connection should be established when the object is instantiated
+                             (``True`` by default)
+        :type auto_connect: bool
         :param env_variables: Optionally define custom environment variable names to use instead of the default names
         :type env_variables: dict, None
         :param helper: The file path of a helper file (when applicable)
@@ -48,13 +51,11 @@ class PyDPlus(object):
         :returns: The instantiated object
         :raises: :py:exc:`TypeError`
         """
+        # TODO: Determine if base_url should be replaced with base_access_url and base_auth_url
+
         # Define the default settings
         self._helper_settings = {}
         self._env_variables = {}
-        if connection_type in auth.VALID_CONNECTION_TYPES:
-            self.connection_type = connection_type
-        else:
-            self.connection_type = auth.DEFAULT_CONNECTION_TYPE
 
         # Check for a supplied helper file
         if helper:
@@ -71,6 +72,8 @@ class PyDPlus(object):
                 raise TypeError(error_msg)
             self.helper_path = helper_file_path
             self._helper_settings = get_helper_settings(helper_file_path, helper_file_type)
+        else:
+            self._helper_settings = {}
 
         # Check for custom environment variable names
         if env_variables:
@@ -86,21 +89,60 @@ class PyDPlus(object):
         # Check for any defined environment variables
         self._env_variables = self._get_env_variables()
 
-        # Check for provided connection info
-        if connection_info is None:
+        # Define the connection type to use
+        if connection_type in auth.VALID_CONNECTION_TYPES:
+            self.connection_type = connection_type
+        elif (self._helper_settings and 'connection_type' in self._helper_settings
+                and self._helper_settings['connection_type'] is not None):
+            if self._helper_settings.get('connection_type') in auth.VALID_CONNECTION_TYPES:
+                self.connection_type = self._helper_settings.get('connection_type')
+            else:
+                logger.error('The connection_type value in the helper settings in invalid and will be ignored.')
+                self.connection_type = auth.DEFAULT_CONNECTION_TYPE
+        elif 'connection_type' in self._env_variables and self._env_variables['connection_type'] is not None:
+            if self._env_variables.get('connection_type') in auth.VALID_CONNECTION_TYPES:
+                self.connection_type = self._env_variables.get('connection_type')
+            else:
+                logger.error('The connection_type environment variable in invalid and will be ignored.')
+                self.connection_type = auth.DEFAULT_CONNECTION_TYPE
+        else:
+            self.connection_type = auth.DEFAULT_CONNECTION_TYPE
+
+        # Attempt to define the base URL value
+        if base_url:
+            self.base_url = core_utils.get_base_url(base_url)
+        elif (self._helper_settings and 'base_url' in self._helper_settings
+                and self._helper_settings.get('base_url') is not None):
+            self.base_url = core_utils.get_base_url(self._helper_settings.get('base_url'))
+        elif 'base_url' in self._env_variables and self._env_variables.get('base_url') is not None:
+            self.base_url = core_utils.get_base_url(self._env_variables.get('base_url'))
+        else:
+            self.base_url = None
+
+        # Raise an exception if a base URL could not be defined
+        if not self.base_url:
+            error_msg = 'A base URL must be defined in order to instantiate the PyDPlus object.'
+            logger.error(error_msg)
+            raise errors.exceptions.MissingRequiredDataError(error_msg)
+
+        # Check for provided connection info and define the class object attribute
+        if not connection_info:
             # Check for individual parameters defined in object instantiation
-            # TODO: Add logic to check for individually defined parameters
+            connection_info = compile_connection_info(base_url, private_key, legacy_access_id, oauth_client_id)
 
             # Check for defined helper settings
             if self._helper_settings:
-                connection_info = self._parse_helper_connection_info()
+                helper_connection_info = self._parse_helper_connection_info()
+                connection_info = self._merge_connection_variables(connection_info, helper_connection_info)
 
             # Check for defined environment variables
-            # TODO: Check for defined environment variables
+            if self._env_variables:
+                env_connection_info = self._parse_env_connection_info()
+                connection_info = self._merge_connection_variables(connection_info, env_connection_info)
 
             # Add missing field values where possible and when needed
-            # TODO: Define the OAuth Issuer URL using the base_url
-
+            connection_info = self._populate_missing_connection_details(connection_info)
+        self.connection_info = connection_info
 
     @staticmethod
     def _get_env_variable_names(_custom_dict=None):
@@ -147,9 +189,8 @@ class PyDPlus(object):
 
         .. versionadded:: 1.0.0
         """
-        _connection_info = {'legacy': {}, 'oauth': {}}
-        _connection_fields = {'legacy': auth.LEGACY_CONNECTION_FIELDS, 'oauth': auth.OAUTH_CONNECTION_FIELDS}
-        for _section, _key_list in _connection_fields.items():
+        _connection_info = auth.EMPTY_CONNECTION_INFO
+        for _section, _key_list in auth.STRUCTURED_CONNECTION_FIELDS.items():
             for _key in _key_list:
                 if _key in self._helper_settings['connection'][_section]:
                     _connection_info[_section][_key] = self._helper_settings['connection'][_section][_key]
@@ -157,25 +198,108 @@ class PyDPlus(object):
                     _connection_info[_section][_key] = None
         return _connection_info
 
+    def _parse_env_connection_info(self):
+        """This function parses the environment variable definitions to populate the connection info dictionary.
 
-def compile_connection_info(connection_type, base_url, private_key, legacy_access_id, oauth_client_id, verify_ssl):
-    private_key_path, private_key_file = core_utils.split_file_path(private_key)
+        .. versionadded:: 1.0.0
+        """
+        _connection_info = auth.EMPTY_CONNECTION_INFO
+        _legacy_mapping = {
+            'access_id': 'legacy_access_id',
+            'private_key_path': 'legacy_key_path',
+            'private_key_file': 'legacy_key_file',
+        }
+        _oauth_mapping = {
+            'issuer_url': 'oauth_issuer_url',
+            'client_id': 'oauth_client_id',
+            'grant_type': 'oauth_grant_type',
+        }
+
+        # Populate the legacy API connection values where defined
+        for _legacy_key in _legacy_mapping:
+            _connection_info['legacy'][_legacy_key] = self._env_variables.get(_legacy_mapping.get(_legacy_key), None)
+
+        # Populate the OAuth connection values where defined
+        for _oauth_key in _oauth_mapping:
+            _connection_info['oauth'][_oauth_key] = self._env_variables.get(_oauth_mapping.get(_oauth_key), None)
+
+        # Return the populated connection information
+        return _connection_info
+
+    @staticmethod
+    def _merge_connection_variables(_defined_info=None, _supplemental_info=None):
+        """This function merges the connection variables explicitly passed as parameters with the values defined
+           in the helper settings or environmental variables.
+
+        .. versionadded:: 1.0.0
+        """
+        _connection_info = auth.EMPTY_CONNECTION_INFO
+        for _section, _key_list in auth.STRUCTURED_CONNECTION_FIELDS.items():
+            for _key in _key_list:
+                # Leverage the defined value first if it is not None or missing
+                if (_defined_info and _section in _defined_info and _key in _defined_info[_section]
+                        and _defined_info[_section][_key] is not None):
+                    _connection_info[_section][_key] = _defined_info[_section][_key]
+                # Leverage the supplemental settings when the key was not explicitly defined in parameters
+                elif (_supplemental_info and _section in _supplemental_info and _key in _supplemental_info[_section]
+                        and _supplemental_info[_section][_key] is not None):
+                    _connection_info[_section][_key] = _supplemental_info[_section][_key]
+                # Define the key as None if no defined or helper value exists
+                else:
+                    _connection_info[_section][_key] = None
+        return _connection_info
+
+    def _populate_missing_connection_details(self, connection_info):
+        # Populate the Issuer URL value for OAuth connections if not defined
+        if (('issuer_url' not in connection_info['oauth'] or not connection_info['oauth']['issuer_url'])
+                and self.base_url is not None):
+            connection_info['oauth']['issuer_url'] = f'{self.base_url}/oauth'
+
+        # Populate the Grant Type value for OAuth connections if not defined
+        if 'grant_type' not in connection_info['oauth'] or not connection_info['oauth']['grant_type']:
+            connection_info['oauth']['grant_type'] = auth.OAUTH_GRANT_TYPE
+
+        # Populate the Client Authentication value for OAuth connections if not defined
+        dict_key = 'client_authentication'
+        if dict_key not in connection_info['oauth'][dict_key] or not connection_info['oauth'][dict_key]:
+            connection_info['oauth'][dict_key] = auth.OAUTH_CLIENT_AUTH
+
+        # Return the updated connection info dictionary
+        return connection_info
+
+
+def compile_connection_info(base_url, private_key, legacy_access_id, oauth_client_id):
+    """This function compiles the connection_info dictionary to use when authenticating to the API.
+
+    .. versionadded:: 1.0.0
+
+    :param base_url: The base URL to leverage when performing API calls
+    :type base_url: str, None
+    :param private_key: The file path to the private key used for API authentication (OAuth or Legacy)
+    :type private_key: str, None
+    :param legacy_access_id: The Access ID associated with the Legacy API connection
+    :type legacy_access_id: str, None
+    :param oauth_client_id: The Client ID associated with the OAuth API connection
+    :type oauth_client_id: str, None
+    :returns: The compiled connection_info dictionary
+    :raises: :py:exc:`TypeError`
+    """
+    private_key_path, private_key_file = None, None
+    if private_key and isinstance(private_key, str):
+        private_key_path, private_key_file = core_utils.split_file_path(private_key)
+    base_url = core_utils.get_base_url(base_url) if base_url else base_url
+    issuer_url = f'{base_url}/oauth' if base_url else None
     connection_info = {
-        'base_url': base_url,
-        'connection_type': connection_type,
-        'connection': {
-            'legacy': {
-                'access_id': legacy_access_id,
-                'private_key_path': private_key_path,
-                'private_key_file': private_key_file,
-            },
-            'oauth': {
-                # TODO: Use the base_url to get the issuer URL
-                'client_id': oauth_client_id,
-                'grant_type': auth.OAUTH_GRANT_TYPE,
-                'client_authentication': auth.OAUTH_CLIENT_AUTH,
-            }
+        'legacy': {
+            'access_id': legacy_access_id,
+            'private_key_path': private_key_path,
+            'private_key_file': private_key_file,
         },
-        'verify_ssl': verify_ssl,
+        'oauth': {
+            'issuer_url': issuer_url,
+            'client_id': oauth_client_id,
+            'grant_type': auth.OAUTH_GRANT_TYPE,
+            'client_authentication': auth.OAUTH_CLIENT_AUTH,
+        }
     }
     return connection_info
