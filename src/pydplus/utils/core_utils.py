@@ -46,6 +46,19 @@ def url_decode(encoded_string):
     return urllib.parse.unquote_plus(encoded_string)
 
 
+def ensure_ending_slash(url):
+    """This function ensures that a URL ends with a forward slash (``/``).
+
+    .. versionadded:: 1.0.0
+
+    :param url: The URL to check and potentially add an ending forward slash
+    :type url: str
+    :returns: The URL string with an ending forward slash
+    :raises: :py:exc:`TypeError`
+    """
+    return f'{url}/' if not url.endswith('/') else url
+
+
 def display_warning(warn_msg):
     """This function displays a :py:exc:`UserWarning` message via the :py:mod:`warnings` module.
 
