@@ -6,7 +6,7 @@
 :Example:           ``encoded_string = core_utils.encode_url(decoded_string)``
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     24 May 2025
+:Modified Date:     26 May 2025
 """
 
 import os
@@ -129,6 +129,8 @@ def get_base_url(url, include_scheme=True):
 
 def get_random_string(length=32, prefix_string=""):
     """This function returns a random alphanumeric string.
+
+    .. versionadded:: 1.0.0
 
     :param length: The length of the string (``32`` by default)
     :type length: int
