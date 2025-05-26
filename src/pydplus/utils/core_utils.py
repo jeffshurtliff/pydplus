@@ -66,7 +66,6 @@ def display_warning(warn_msg):
 
     :param warn_msg: The message to be displayed
     :type warn_msg: str
-    :returns: None
     """
     warnings.warn(warn_msg, UserWarning)
 
@@ -101,7 +100,7 @@ def get_file_type(file_path):
         if file_type == 'unknown':
             raise errors.exceptions.UnknownFileTypeError(file=file_path)
     else:
-        raise FileNotFoundError(f"Unable to locate the following file: {file_path}")
+        raise FileNotFoundError(f'Unable to locate the following file: {file_path}')
     return file_type
 
 
@@ -140,7 +139,7 @@ def get_base_url(url, include_scheme=True):
     return base_url
 
 
-def get_random_string(length=32, prefix_string=""):
+def get_random_string(length=32, prefix_string=''):
     """This function returns a random alphanumeric string.
 
     .. versionadded:: 1.0.0
