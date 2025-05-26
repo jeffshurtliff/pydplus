@@ -24,7 +24,7 @@ class PyDPlus(object):
     """This is the class for the core object leveraged in this module."""
     # Define the function that initializes the object instance (i.e. instantiates the object)
     def __init__(self, connection_info=None, connection_type=auth.DEFAULT_CONNECTION_TYPE, base_url=None,
-                 private_key=None, legacy_access_id=None, oauth_client_id=None, verify_ssl=True, auto_connect=True,
+                 private_key=None, legacy_access_id=None, oauth_client_id=None, verify_ssl=None, auto_connect=True,
                  env_variables=None, helper=None):
         """This method instantiates the core Salesforce object.
 
@@ -41,7 +41,7 @@ class PyDPlus(object):
         :param oauth_client_id: The Client ID associated with the OAuth API connection
         :type oauth_client_id: str, None
         :param verify_ssl: Determines if SSL connections should be verified (``True`` by default)
-        :type verify_ssl: bool
+        :type verify_ssl: bool, None
         :param auto_connect: Determines if an API connection should be established when the object is instantiated
                              (``True`` by default)
         :type auto_connect: bool
@@ -99,15 +99,25 @@ class PyDPlus(object):
                 self.connection_type = self._helper_settings.get('connection_type')
             else:
                 logger.error('The connection_type value in the helper settings in invalid and will be ignored.')
-                self.connection_type = copy.deepcopy(auth.DEFAULT_CONNECTION_TYPE)
+                self.connection_type = auth.DEFAULT_CONNECTION_TYPE
         elif 'connection_type' in self._env_variables and self._env_variables['connection_type'] is not None:
             if self._env_variables.get('connection_type') in auth.VALID_CONNECTION_TYPES:
                 self.connection_type = self._env_variables.get('connection_type')
             else:
                 logger.error('The connection_type environment variable in invalid and will be ignored.')
-                self.connection_type = copy.deepcopy(auth.DEFAULT_CONNECTION_TYPE)
+                self.connection_type = auth.DEFAULT_CONNECTION_TYPE
         else:
-            self.connection_type = copy.deepcopy(auth.DEFAULT_CONNECTION_TYPE)
+            self.connection_type = auth.DEFAULT_CONNECTION_TYPE
+
+        # Define the verify_ssl value
+        if verify_ssl is not None:
+            self.verify_ssl = verify_ssl
+        elif self._helper_settings and 'verify_ssl' in self._helper_settings:
+            self.verify_ssl = self._helper_settings.get('verify_ssl', True)
+        elif self._env_variables and 'verify_ssl' in self._env_variables:
+            self.verify_ssl = self._env_variables.get('verify_ssl', True)
+        else:
+            self.verify_ssl = True
 
         # Attempt to define the base URL value
         if base_url:
@@ -125,6 +135,9 @@ class PyDPlus(object):
             error_msg = 'A base URL must be defined in order to instantiate the PyDPlus object.'
             logger.error(error_msg)
             raise errors.exceptions.MissingRequiredDataError(error_msg)
+
+        # Define the Admin API base URL to use in API calls
+        self.admin_base_url = f'{core_utils.ensure_ending_slash(self.base_url)}AdminInterface/restapi'
 
         # Check for provided connection info and define the class object attribute
         if not connection_info:
@@ -159,7 +172,8 @@ class PyDPlus(object):
             'legacy_key_file': 'PYDPLUS_LEGACY_KEY_FILE',
             'oauth_issuer_url': 'PYDPLUS_OAUTH_ISSUER_URL',
             'oauth_client_id': 'PYDPLUS_OAUTH_CLIENT_ID',
-            'oauth_grant_type': 'PYDPLUS_OAUTH_GRANT_TYPE'
+            'oauth_grant_type': 'PYDPLUS_OAUTH_GRANT_TYPE',
+            'verify_ssl': 'PYDPLUS_VERIFY_SSL',
         }
 
         # Update the dictionary to use any defined custom names instead of the default names
@@ -251,6 +265,10 @@ class PyDPlus(object):
         return _merged_connection_info
 
     def _populate_missing_connection_details(self, _partial_connection_info):
+        """This function adds missing field values the connection info dictionary as needed.
+
+        .. versionadded:: 1.0.0
+        """
         # Populate the Issuer URL value for OAuth connections if not defined
         if (('issuer_url' not in _partial_connection_info['oauth'] or
                 not _partial_connection_info['oauth']['issuer_url']) and self.base_url is not None):
