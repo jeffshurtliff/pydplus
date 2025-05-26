@@ -23,7 +23,7 @@ logger = log_utils.initialize_logging(__name__)
 class PyDPlus(object):
     """This is the class for the core object leveraged in this module."""
     # Define the function that initializes the object instance (i.e. instantiates the object)
-    def __init__(self, connection_info=None, connection_type=auth.DEFAULT_CONNECTION_TYPE, base_url=None,
+    def __init__(self, connection_info=None, connection_type=None, base_url=None,
                  private_key=None, legacy_access_id=None, oauth_client_id=None, verify_ssl=None, auto_connect=True,
                  env_variables=None, helper=None):
         """This method instantiates the core Salesforce object.
@@ -52,8 +52,6 @@ class PyDPlus(object):
         :returns: The instantiated object
         :raises: :py:exc:`TypeError`
         """
-        # TODO: Determine if base_url should be replaced with base_access_url and base_auth_url
-
         # Define the default settings
         self._helper_settings = {}
         self._env_variables = {}
