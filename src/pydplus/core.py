@@ -6,10 +6,11 @@
 :Example:           ``prod = PyDPlus()``
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     24 May 2025
+:Modified Date:     26 May 2025
 """
 
 import os
+import copy
 
 from . import auth, errors
 from .utils import core_utils, log_utils
@@ -98,15 +99,15 @@ class PyDPlus(object):
                 self.connection_type = self._helper_settings.get('connection_type')
             else:
                 logger.error('The connection_type value in the helper settings in invalid and will be ignored.')
-                self.connection_type = auth.DEFAULT_CONNECTION_TYPE
+                self.connection_type = copy.deepcopy(auth.DEFAULT_CONNECTION_TYPE)
         elif 'connection_type' in self._env_variables and self._env_variables['connection_type'] is not None:
             if self._env_variables.get('connection_type') in auth.VALID_CONNECTION_TYPES:
                 self.connection_type = self._env_variables.get('connection_type')
             else:
                 logger.error('The connection_type environment variable in invalid and will be ignored.')
-                self.connection_type = auth.DEFAULT_CONNECTION_TYPE
+                self.connection_type = copy.deepcopy(auth.DEFAULT_CONNECTION_TYPE)
         else:
-            self.connection_type = auth.DEFAULT_CONNECTION_TYPE
+            self.connection_type = copy.deepcopy(auth.DEFAULT_CONNECTION_TYPE)
 
         # Attempt to define the base URL value
         if base_url:
@@ -189,21 +190,21 @@ class PyDPlus(object):
 
         .. versionadded:: 1.0.0
         """
-        _connection_info = auth.EMPTY_CONNECTION_INFO
+        _helper_connection_info = copy.deepcopy(auth.EMPTY_CONNECTION_INFO)
         for _section, _key_list in auth.STRUCTURED_CONNECTION_FIELDS.items():
             for _key in _key_list:
                 if _key in self._helper_settings['connection'][_section]:
-                    _connection_info[_section][_key] = self._helper_settings['connection'][_section][_key]
+                    _helper_connection_info[_section][_key] = self._helper_settings['connection'][_section][_key]
                 else:
-                    _connection_info[_section][_key] = None
-        return _connection_info
+                    _helper_connection_info[_section][_key] = None
+        return _helper_connection_info
 
     def _parse_env_connection_info(self):
         """This function parses the environment variable definitions to populate the connection info dictionary.
 
         .. versionadded:: 1.0.0
         """
-        _connection_info = auth.EMPTY_CONNECTION_INFO
+        _env_connection_info = copy.deepcopy(auth.EMPTY_CONNECTION_INFO)
         _legacy_mapping = {
             'access_id': 'legacy_access_id',
             'private_key_path': 'legacy_key_path',
@@ -217,14 +218,14 @@ class PyDPlus(object):
 
         # Populate the legacy API connection values where defined
         for _legacy_key in _legacy_mapping:
-            _connection_info['legacy'][_legacy_key] = self._env_variables.get(_legacy_mapping.get(_legacy_key), None)
+            _env_connection_info['legacy'][_legacy_key] = self._env_variables.get(_legacy_mapping.get(_legacy_key), None)
 
         # Populate the OAuth connection values where defined
         for _oauth_key in _oauth_mapping:
-            _connection_info['oauth'][_oauth_key] = self._env_variables.get(_oauth_mapping.get(_oauth_key), None)
+            _env_connection_info['oauth'][_oauth_key] = self._env_variables.get(_oauth_mapping.get(_oauth_key), None)
 
         # Return the populated connection information
-        return _connection_info
+        return _env_connection_info
 
     @staticmethod
     def _merge_connection_variables(_defined_info=None, _supplemental_info=None):
@@ -233,39 +234,40 @@ class PyDPlus(object):
 
         .. versionadded:: 1.0.0
         """
-        _connection_info = auth.EMPTY_CONNECTION_INFO
+        _merged_connection_info = copy.deepcopy(auth.EMPTY_CONNECTION_INFO)
         for _section, _key_list in auth.STRUCTURED_CONNECTION_FIELDS.items():
             for _key in _key_list:
                 # Leverage the defined value first if it is not None or missing
                 if (_defined_info and _section in _defined_info and _key in _defined_info[_section]
                         and _defined_info[_section][_key] is not None):
-                    _connection_info[_section][_key] = _defined_info[_section][_key]
+                    _merged_connection_info[_section][_key] = _defined_info[_section][_key]
                 # Leverage the supplemental settings when the key was not explicitly defined in parameters
                 elif (_supplemental_info and _section in _supplemental_info and _key in _supplemental_info[_section]
                         and _supplemental_info[_section][_key] is not None):
-                    _connection_info[_section][_key] = _supplemental_info[_section][_key]
+                    _merged_connection_info[_section][_key] = _supplemental_info[_section][_key]
                 # Define the key as None if no defined or helper value exists
                 else:
-                    _connection_info[_section][_key] = None
-        return _connection_info
+                    _merged_connection_info[_section][_key] = None
+        return _merged_connection_info
 
-    def _populate_missing_connection_details(self, connection_info):
+    def _populate_missing_connection_details(self, _partial_connection_info):
         # Populate the Issuer URL value for OAuth connections if not defined
-        if (('issuer_url' not in connection_info['oauth'] or not connection_info['oauth']['issuer_url'])
-                and self.base_url is not None):
-            connection_info['oauth']['issuer_url'] = f'{self.base_url}/oauth'
+        if (('issuer_url' not in _partial_connection_info['oauth'] or
+                not _partial_connection_info['oauth']['issuer_url']) and self.base_url is not None):
+            _partial_connection_info['oauth']['issuer_url'] = f'{self.base_url}/oauth'
 
         # Populate the Grant Type value for OAuth connections if not defined
-        if 'grant_type' not in connection_info['oauth'] or not connection_info['oauth']['grant_type']:
-            connection_info['oauth']['grant_type'] = auth.OAUTH_GRANT_TYPE
+        if 'grant_type' not in _partial_connection_info['oauth'] or not _partial_connection_info['oauth']['grant_type']:
+            _partial_connection_info['oauth']['grant_type'] = auth.OAUTH_GRANT_TYPE
 
         # Populate the Client Authentication value for OAuth connections if not defined
         dict_key = 'client_authentication'
-        if dict_key not in connection_info['oauth'][dict_key] or not connection_info['oauth'][dict_key]:
-            connection_info['oauth'][dict_key] = auth.OAUTH_CLIENT_AUTH
+        if (dict_key not in _partial_connection_info['oauth'][dict_key] or
+                not _partial_connection_info['oauth'][dict_key]):
+            _partial_connection_info['oauth'][dict_key] = auth.OAUTH_CLIENT_AUTH
 
         # Return the updated connection info dictionary
-        return connection_info
+        return _partial_connection_info
 
 
 def compile_connection_info(base_url, private_key, legacy_access_id, oauth_client_id):
