@@ -62,11 +62,11 @@ def ensure_ending_slash(path, path_type='url'):
     """
     if not isinstance(path_type, str) or path_type not in ('url', 'file'):
         raise TypeError("The url_path parameter must be defined as 'url' or 'file'")
-    if path_type.lower() == 'url':
-        new_path = f'{path}/' if not path.endswith('/') else path
-    else:
-        new_path = f'{path}{os.sep}' if not path.endswith(os.sep) else path
-    return new_path
+    if path and path_type.lower() == 'url':
+        path = f'{path}/' if not path.endswith('/') else path
+    elif path and path_type.lower() == 'file':
+        path = f'{path}{os.sep}' if not path.endswith(os.sep) else path
+    return path
 
 
 def display_warning(warn_msg):
