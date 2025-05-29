@@ -30,6 +30,7 @@ def url_encode(raw_string):
     :param raw_string: The raw string to be encoded
     :type raw_string: str
     :returns: The encoded string
+    :raises: :py:exc:`TypeError`
     """
     return urllib.parse.quote_plus(raw_string)
 
@@ -42,6 +43,7 @@ def url_decode(encoded_string):
     :param encoded_string: The url-encoded string
     :type encoded_string: str
     :returns: The unencoded string
+    :raises: :py:exc:`TypeError`
     """
     return urllib.parse.unquote_plus(encoded_string)
 
@@ -74,8 +76,22 @@ def display_warning(warn_msg):
 
     :param warn_msg: The message to be displayed
     :type warn_msg: str
+    :raises: :py:exc:`TypeError`
     """
     warnings.warn(warn_msg, UserWarning)
+
+
+def file_exists(file_path):
+    """This function checks to see if a file exists at a given file path.
+
+    .. versionadded:: 1.0.0
+
+    :param file_path: The full path to the file
+    :type file_path: str
+    :returns: Boolean value indicating if the file exists
+    :raises: :py:exc:`TypeError`
+    """
+    return os.path.isfile(file_path)
 
 
 def get_file_type(file_path):
@@ -86,7 +102,8 @@ def get_file_type(file_path):
     :param file_path: The full path to the file
     :type file_path: str
     :returns: The file type in string format (e.g. ``yaml`` or ``json``)
-    :raises: :py:exc:`FileNotFoundError`,
+    :raises: :py:exc:`TypeError`,
+             :py:exc:`FileNotFoundError`,
              :py:exc:`pydplus.errors.exceptions.UnknownFileTypeError`
     """
     file_type = 'unknown'
