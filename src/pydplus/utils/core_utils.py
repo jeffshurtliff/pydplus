@@ -6,7 +6,7 @@
 :Example:           ``encoded_string = core_utils.encode_url(decoded_string)``
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     26 May 2025
+:Modified Date:     29 May 2025
 """
 
 import os
@@ -46,17 +46,25 @@ def url_decode(encoded_string):
     return urllib.parse.unquote_plus(encoded_string)
 
 
-def ensure_ending_slash(url):
-    """This function ensures that a URL ends with a forward slash (``/``).
+def ensure_ending_slash(path, path_type='url'):
+    """This function ensures that a URL ends with a forward slash (``/``) or backslash (``\\``).
 
     .. versionadded:: 1.0.0
 
-    :param url: The URL to check and potentially add an ending forward slash
-    :type url: str
+    :param path: The path (URL or file path) to check and potentially add an ending slash
+    :type path: str
+    :param path_type: Indicates that the path is for a ``url`` (default) or a ``file``
+    :type path_type: str
     :returns: The URL string with an ending forward slash
     :raises: :py:exc:`TypeError`
     """
-    return f'{url}/' if not url.endswith('/') else url
+    if not isinstance(path_type, str) or path_type not in ('url', 'file'):
+        raise TypeError("The url_path parameter must be defined as 'url' or 'file'")
+    if path_type.lower() == 'url':
+        new_path = f'{path}/' if not path.endswith('/') else path
+    else:
+        new_path = f'{path}{os.sep}' if not path.endswith(os.sep) else path
+    return new_path
 
 
 def display_warning(warn_msg):
