@@ -6,7 +6,7 @@
 :Example:           ``prod = PyDPlus()``
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     26 May 2025
+:Modified Date:     06 June 2025
 """
 
 import os
@@ -55,6 +55,8 @@ class PyDPlus(object):
         # Define the default settings
         self._helper_settings = {}
         self._env_variables = {}
+        self.base_headers = {}
+        self.connected = False
 
         # Check for a supplied helper file
         if helper:
@@ -155,6 +157,10 @@ class PyDPlus(object):
             # Add missing field values where possible and when needed
             connection_info = self._populate_missing_connection_details(connection_info)
         self.connection_info = connection_info
+
+        # Connect to the tenant (if auto-connect is enabled) and retrieve the base API headers
+        if auto_connect:
+            self.connected, self.base_headers = self.connect()
 
     @staticmethod
     def _get_env_variable_names(_custom_dict=None):
@@ -284,6 +290,37 @@ class PyDPlus(object):
 
         # Return the updated connection info dictionary
         return _partial_connection_info
+
+    def connect(self):
+        """This function connects to the RSA ID Plus tenant using the Legacy API or OAuth method.
+
+        .. versionadded:: 1.0.0
+
+        :returns: Boolean value indicating if connection was established and dictionary with base API headers
+        :raises: :py:exc:`errors.exceptions.APIConnectionError`,
+                 :py:exc:`errors.exceptions.FeatureNotConfiguredError`
+        """
+        base_headers = None
+        connected = self.connected
+        if not connected:
+            if self.connection_type == 'legacy':
+                # Connect to the tenant using the legacy API method
+                try:
+                    base_headers = auth.get_legacy_headers(
+                        base_url=self.base_url,
+                        connection_info=self.connection_info
+                    )
+                    connected = True
+                except Exception as exc:
+                    exc_type = type(exc).__name__
+                    error_msg = f'Failed to connect using Legacy API due to the following {exc_type} exception: {exc}'
+                    logger.error(error_msg)
+                    raise errors.exceptions.APIConnectionError(error_msg)
+            elif self.connection_type == 'oauth':
+                # Connect to the tenant using the OAuth method
+                # TODO: Define the base headers using OAuth instead of raising the exception below
+                raise errors.exceptions.FeatureNotConfiguredError('OAuth connections are not currently supported')
+        return connected, base_headers
 
 
 def compile_connection_info(base_url, private_key, legacy_access_id, oauth_client_id):
