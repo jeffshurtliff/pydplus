@@ -38,6 +38,7 @@ def get(pydp_object, endpoint, params=None, headers=None, api_type='admin', time
     :param return_json: Determines if the response should be returned in JSON format (defaults to ``True``)
     :returns: The API response in JSON format or as a ``requests`` object
     :raises: :py:exc:`errors.exceptions.APIRequestError`,
+             :py:exc:`errors.exceptions.APIResponseConversionError`,
              :py:exc:`errors.exceptions.InvalidFieldError`
     """
     # Define the parameters as an empty dictionary if none are provided
@@ -86,6 +87,10 @@ def api_call_with_payload(pydp_object, method, endpoint, payload, params=None, h
     :type show_full_error: bool
     :param return_json: Determines if the response should be returned in JSON format (defaults to ``True``)
     :returns: The API response in JSON format or as a ``requests`` object
+    :raises: :py:exc:`errors.exceptions.APIMethodError`,
+             :py:exc:`errors.exceptions.APIRequestError`,
+             :py:exc:`errors.exceptions.APIResponseConversionError`,
+             :py:exc:`errors.exceptions.InvalidFieldError`
     """
     # Define the parameters as an empty dictionary if none are provided
     params = {} if params is None else params
@@ -105,10 +110,12 @@ def api_call_with_payload(pydp_object, method, endpoint, payload, params=None, h
     elif isinstance(method, str) and method.lower() == 'put':
         response = requests.put(full_api_url, json=payload, headers=headers, params=params, timeout=timeout,
                                 verify=pydp_object.verify_ssl)
-    elif isinstance(method, str) and method.lower() == 'get':
-        raise ValueError("The 'GET' API call method is not valid when a payload has been provided.")
     else:
-        raise ValueError('A valid API call method (POST or PATCH or PUT) must be defined.')
+        error_msg = 'A valid API call method (POST or PATCH or PUT) must be defined.'
+        if isinstance(method, str) and method.lower() == 'get':
+            error_msg = "The 'GET' API call method is not valid when a payload has been provided."
+        logger.error(error_msg)
+        raise errors.exceptions.APIMethodError(error_msg)
 
     # Examine the result
     if response.status_code >= 300:
