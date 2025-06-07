@@ -13,6 +13,7 @@ import os
 import copy
 
 from . import auth, api, errors
+from . import users as users_module
 from .utils import core_utils, log_utils
 from .utils.helper import get_helper_settings, DEFAULT_HELPER_FILE_TYPE
 
@@ -165,6 +166,14 @@ class PyDPlus(object):
         # Connect to the tenant (if auto-connect is enabled) and retrieve the base API headers
         if auto_connect:
             self.connected, self.base_headers = self.connect()
+            # TODO: Figure out how to connect after instantiation and update self.connected and self.base_headers
+
+        # Import inner object classes so their methods can be called from the primary object
+        self.users = self._import_user_class()
+
+    def _import_user_class(self):
+        """This method allows the :py:class:`pydplus.core.PyDPlus.User` class to be utilized in the core object."""
+        return PyDPlus.User(self)
 
     @staticmethod
     def _get_env_variable_names(_custom_dict=None):
@@ -428,6 +437,16 @@ class PyDPlus(object):
         self._check_if_connected()
         return api.put(self, endpoint=endpoint, payload=payload, params=params, headers=headers, api_type=api_type,
                        timeout=timeout, show_full_error=show_full_error, return_json=return_json)
+    
+    class User(object):
+        """This class includes user-related methods."""
+        def __init__(self, pydp_object):
+            """This method initializes the :py:class:`pydplus.core.PyDPlus.User` inner class object.
+
+            :param pydp_object: The core :py:class:`pydplus.PyDPlus` object
+            :type pydp_object: class[pydplus.PyDPlus]
+            """
+            self.pydp_object = pydp_object
 
 
 def compile_connection_info(base_url, private_key, legacy_access_id, oauth_client_id):
