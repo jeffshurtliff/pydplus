@@ -6,7 +6,7 @@
 :Example:           ``prod = PyDPlus()``
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     07 June 2025
+:Modified Date:     07 Jun 2025
 """
 
 import os
