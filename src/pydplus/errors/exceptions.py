@@ -4,7 +4,7 @@
 :Synopsis:          Collection of exception classes relating to the pydplus library
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     06 May 2025
+:Modified Date:     07 June 2025
 """
 
 #################
@@ -179,6 +179,19 @@ class APIRequestError(PyDPlusError):
     def __init__(self, *args, **kwargs):
         """This method defines the default or custom message for the exception."""
         default_msg = "The API request did not return a successful response."
+        if not (args or kwargs):
+            args = (default_msg,)
+        super().__init__(*args)
+
+
+class APIResponseConversionError(PyDPlusError):
+    """This exception is used for errors when attempting to convert an API response to another data format.
+
+    .. versionadded:: 1.0.0
+    """
+    def __init__(self, *args, **kwargs):
+        """This method defines the default or custom message for the exception."""
+        default_msg = "The API response failed to be converted to the specified data format."
         if not (args or kwargs):
             args = (default_msg,)
         super().__init__(*args)
