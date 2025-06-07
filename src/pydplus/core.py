@@ -448,6 +448,33 @@ class PyDPlus(object):
             """
             self.pydp_object = pydp_object
 
+        def get_user_details(self, email, search_unsynced=None, timeout=api.DEFAULT_TIMEOUT, show_full_error=True,
+                             return_json=True):
+            """This method retrieves the details for a specific user based on their email address.
+
+            .. versionadded:: 1.0.0
+
+            :param email: The email address of the user for whom to retrieve details
+            :type email: str
+            :param search_unsynced: Indicates if the user search should include unsynchronized users (optional)
+            :type search_unsynced: bool, None
+            :param timeout: The timeout period in seconds (defaults to ``30``)
+            :type timeout: int, str, None
+            :param show_full_error: Determines if the full error message should be displayed (defaults to ``True``)
+            :type show_full_error: bool
+            :param return_json: Determines if the response should be returned in JSON format (defaults to ``True``)
+            :returns: The user details in JSON format or the API response as a ``requests`` object
+            :raises: :py:exc:`TypeError`,
+                     :py:exc:`errors.exceptions.APIMethodError`,
+                     :py:exc:`errors.exceptions.APIRequestError`,
+                     :py:exc:`errors.exceptions.APIResponseConversionError`,
+                     :py:exc:`errors.exceptions.InvalidFieldError`
+            """
+            # TODO: Check to ensure connection to the tenant has already been established
+            return users_module.get_user_details(self.pydp_object, email=email, search_unsynced=search_unsynced,
+                                                 timeout=timeout, show_full_error=show_full_error,
+                                                 return_json=return_json)
+
 
 def compile_connection_info(base_url, private_key, legacy_access_id, oauth_client_id):
     """This function compiles the connection_info dictionary to use when authenticating to the API.
