@@ -336,9 +336,33 @@ class PyDPlus(object):
                 raise errors.exceptions.FeatureNotConfiguredError('OAuth connections are not currently supported')
         return connected, base_headers
 
-    def get(self, endpoint, params=None, headers=None, timeout=30, show_full_error=True, return_json=True):
+    def get(self, endpoint, params=None, headers=None, api_type='admin', timeout=30, show_full_error=True,
+            return_json=True):
+        """This method performs a GET request against the ID Plus tenant.
+
+        .. versionadded:: 1.0.0
+
+        :param endpoint: The API endpoint to query
+        :type endpoint: str
+        :param params: The query parameters (where applicable)
+        :type params: dict, None
+        :param headers: Specific API headers to use when performing the API call (beyond the base headers)
+        :type headers: dict, None
+        :param api_type: Indicates if the ``admin`` (default) or ``auth`` API will be leveraged.
+        :type api_type: str
+        :param timeout: The timeout period in seconds (defaults to ``30``)
+        :type timeout: int, str, None
+        :param show_full_error: Determines if the full error message should be displayed (defaults to ``True``)
+        :type show_full_error: bool
+        :param return_json: Determines if the response should be returned in JSON format (defaults to ``True``)
+        :returns: The API response in JSON format or as a ``requests`` object
+        :raises: :py:exc:`errors.exceptions.APIRequestError`,
+                 :py:exc:`errors.exceptions.APIResponseConversionError`,
+                 :py:exc:`errors.exceptions.InvalidFieldError`
+        """
         self._check_if_connected()
-        # TODO: Finish configuring this method
+        return api.get(self, endpoint=endpoint, params=params, headers=headers, api_type=api_type, timeout=timeout,
+                       show_full_error=show_full_error, return_json=return_json)
 
 
 def compile_connection_info(base_url, private_key, legacy_access_id, oauth_client_id):
