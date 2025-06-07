@@ -15,8 +15,12 @@ from .utils import log_utils
 # Initialize logging
 logger = log_utils.initialize_logging(__name__)
 
+# Define constants
+DEFAULT_TIMEOUT = 30
+DEFAULT_API_TYPE = 'admin'
 
-def get(pydp_object, endpoint, params=None, headers=None, api_type='admin', timeout=30,
+
+def get(pydp_object, endpoint, params=None, headers=None, api_type=DEFAULT_API_TYPE, timeout=DEFAULT_TIMEOUT,
         show_full_error=True, return_json=True):
     """This function performs a GET request against the ID Plus tenant.
 
@@ -65,8 +69,8 @@ def get(pydp_object, endpoint, params=None, headers=None, api_type='admin', time
     return response
 
 
-def api_call_with_payload(pydp_object, method, endpoint, payload, params=None, headers=None, api_type='admin',
-                          timeout=30, show_full_error=True, return_json=True):
+def api_call_with_payload(pydp_object, method, endpoint, payload, params=None, headers=None, api_type=DEFAULT_API_TYPE,
+                          timeout=DEFAULT_TIMEOUT, show_full_error=True, return_json=True):
     """This function performs an API call with payload against the ID Plus tenant.
 
     .. versionadded:: 1.0.0
@@ -129,7 +133,7 @@ def api_call_with_payload(pydp_object, method, endpoint, payload, params=None, h
     return response
 
 
-def post(pydp_object, endpoint, payload, params=None, headers=None, api_type='admin', timeout=30,
+def post(pydp_object, endpoint, payload, params=None, headers=None, api_type=DEFAULT_API_TYPE, timeout=DEFAULT_TIMEOUT,
          show_full_error=True, return_json=True):
     """This function performs a POST call with payload against the ID Plus tenant.
 
@@ -163,7 +167,7 @@ def post(pydp_object, endpoint, payload, params=None, headers=None, api_type='ad
                                  show_full_error=show_full_error, return_json=return_json)
 
 
-def put(pydp_object, endpoint, payload, params=None, headers=None, api_type='admin', timeout=30,
+def put(pydp_object, endpoint, payload, params=None, headers=None, api_type=DEFAULT_API_TYPE, timeout=DEFAULT_TIMEOUT,
         show_full_error=True, return_json=True):
     """This function performs a PUT call with payload against the ID Plus tenant.
 
@@ -208,7 +212,7 @@ def _get_headers(_headers, _additional_headers=None, _header_type='default'):
     return _headers
 
 
-def _get_full_api_url(_pydp_object, _endpoint, _api_type='admin'):
+def _get_full_api_url(_pydp_object, _endpoint, _api_type=DEFAULT_API_TYPE):
     """This function constructs the full API URL to use in an API call based on the API type.
 
     .. versionadded:: 1.0.0
