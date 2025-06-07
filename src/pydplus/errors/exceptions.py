@@ -171,6 +171,19 @@ class APIConnectionError(PyDPlusError):
         super().__init__(*args)
 
 
+class APIMethodError(PyDPlusError):
+    """This exception is used when an invalid API call method is used when performing an API call.
+
+    .. versionadded:: 1.0.0
+    """
+    def __init__(self, *args, **kwargs):
+        """This method defines the default or custom message for the exception."""
+        default_msg = "A valid API call method (GET or POST or PATCH or PUT) must be defined."
+        if not (args or kwargs):
+            args = (default_msg,)
+        super().__init__(*args)
+
+
 class APIRequestError(PyDPlusError):
     """This exception is used for generic API request errors when there is not a more specific exception.
 

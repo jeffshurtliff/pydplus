@@ -6,13 +6,13 @@
 :Example:           ``prod = PyDPlus()``
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     06 June 2025
+:Modified Date:     07 June 2025
 """
 
 import os
 import copy
 
-from . import auth, errors
+from . import auth, api, errors
 from .utils import core_utils, log_utils
 from .utils.helper import get_helper_settings, DEFAULT_HELPER_FILE_TYPE
 
@@ -110,7 +110,7 @@ class PyDPlus(object):
             self.connection_type = auth.DEFAULT_CONNECTION_TYPE
 
         # Define the verify_ssl value
-        if verify_ssl is not None:
+        if verify_ssl is not None and isinstance(verify_ssl, bool):
             self.verify_ssl = verify_ssl
         elif self._helper_settings and 'verify_ssl' in self._helper_settings:
             self.verify_ssl = self._helper_settings.get('verify_ssl', True)
@@ -138,6 +138,10 @@ class PyDPlus(object):
 
         # Define the Admin API base URL to use in API calls
         self.admin_base_url = f'{core_utils.ensure_ending_slash(self.base_url)}AdminInterface/restapi'
+
+        # Define the Authentication API base URL to use in API calls
+        # Refer to https://community.securid.com/s/article/RSA-SecurID-Authentication-API-Developer-s-Guide pg 15
+        self.auth_base_url = f'{core_utils.ensure_ending_slash(self.base_url)}mfa/v1_1/authn'
 
         # Check for provided connection info and define the class object attribute
         if not connection_info:
@@ -291,6 +295,16 @@ class PyDPlus(object):
         # Return the updated connection info dictionary
         return _partial_connection_info
 
+    def _check_if_connected(self):
+        """This function checks to see if the object is connected to the tenant and raises an exception if not.
+
+        .. versionadded:: 1.0.0
+        """
+        if not self.connected:
+            error_msg = 'Must be connected to the tenant before performing an API call. Call the connect() method.'
+            logger.error(error_msg)
+            raise errors.exceptions.APIConnectionError(error_msg)
+
     def connect(self):
         """This function connects to the RSA ID Plus tenant using the Legacy API or OAuth method.
 
@@ -321,6 +335,10 @@ class PyDPlus(object):
                 # TODO: Define the base headers using OAuth instead of raising the exception below
                 raise errors.exceptions.FeatureNotConfiguredError('OAuth connections are not currently supported')
         return connected, base_headers
+
+    def get(self, endpoint, params=None, headers=None, timeout=30, show_full_error=True, return_json=True):
+        self._check_if_connected()
+        # TODO: Finish configuring this method
 
 
 def compile_connection_info(base_url, private_key, legacy_access_id, oauth_client_id):
