@@ -18,7 +18,7 @@ logger = log_utils.initialize_logging(__name__)
 
 def get(pydp_object, endpoint, params=None, headers=None, api_type='admin', timeout=30,
         show_full_error=True, return_json=True):
-    """This method performs a GET request against the ID Plus tenant.
+    """This function performs a GET request against the ID Plus tenant.
 
     .. versionadded:: 1.0.0
 
@@ -66,7 +66,7 @@ def get(pydp_object, endpoint, params=None, headers=None, api_type='admin', time
 
 def api_call_with_payload(pydp_object, method, endpoint, payload, params=None, headers=None, api_type='admin',
                           timeout=30, show_full_error=True, return_json=True):
-    """This method performs an API call with payload against the ID Plus tenant.
+    """This function performs an API call with payload against the ID Plus tenant.
 
     .. versionadded:: 1.0.0
 
@@ -129,7 +129,7 @@ def api_call_with_payload(pydp_object, method, endpoint, payload, params=None, h
 
 def post(pydp_object, endpoint, payload, params=None, headers=None, api_type='admin', timeout=30,
          show_full_error=True, return_json=True):
-    """This method performs a POST call with payload against the ID Plus tenant.
+    """This function performs a POST call with payload against the ID Plus tenant.
 
     .. versionadded:: 1.0.0
 
@@ -162,7 +162,7 @@ def post(pydp_object, endpoint, payload, params=None, headers=None, api_type='ad
 
 def put(pydp_object, endpoint, payload, params=None, headers=None, api_type='admin', timeout=30,
         show_full_error=True, return_json=True):
-    """This method performs a PUT call with payload against the ID Plus tenant.
+    """This function performs a PUT call with payload against the ID Plus tenant.
 
     .. versionadded:: 1.0.0
 
