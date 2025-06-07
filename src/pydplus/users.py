@@ -32,7 +32,11 @@ def get_user_details(pydp_object, email, search_unsynced=None, timeout=api.DEFAU
     :type show_full_error: bool
     :param return_json: Determines if the response should be returned in JSON format (defaults to ``True``)
     :returns: The user details in JSON format or the API response as a ``requests`` object
-    :raises:
+    :raises: :py:exc:`TypeError`,
+             :py:exc:`errors.exceptions.APIMethodError`,
+             :py:exc:`errors.exceptions.APIRequestError`,
+             :py:exc:`errors.exceptions.APIResponseConversionError`,
+             :py:exc:`errors.exceptions.InvalidFieldError`
     """
     # Define the API endpoint to call and other API details
     endpoint = 'v1/users/lookup'
