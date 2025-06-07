@@ -4,7 +4,7 @@
 :Synopsis:          This module contains the package version information
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     06 May 2025
+:Modified Date:     07 Jun 2025
 """
 
 from . import log_utils
@@ -13,7 +13,7 @@ from . import log_utils
 logger = log_utils.initialize_logging(__name__)
 
 # Define special and global variables
-__version__ = "1.0.0"
+__version__ = "1.0.0b1"
 
 
 def get_full_version():
