@@ -185,7 +185,7 @@ class APIRequestError(PyDPlusError):
 
 
 class APIResponseConversionError(PyDPlusError):
-    """This exception is used for errors when attempting to convert an API response to another data format.
+    """This exception is used for errors when attempting to convert an API response to another data format. (e.g. JSON)
 
     .. versionadded:: 1.0.0
     """
