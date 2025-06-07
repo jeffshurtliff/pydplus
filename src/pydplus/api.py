@@ -23,6 +23,7 @@ def get(pydp_object, endpoint, params=None, headers=None, api_type='admin', time
     .. versionadded:: 1.0.0
 
     :param pydp_object: The instantiated pydplus object
+    :type pydp_object: class[pydplus.PyDPlus]
     :param endpoint: The API endpoint to query
     :type endpoint: str
     :param params: The query parameters (where applicable)
@@ -71,6 +72,7 @@ def api_call_with_payload(pydp_object, method, endpoint, payload, params=None, h
     .. versionadded:: 1.0.0
 
     :param pydp_object: The instantiated pydplus object
+    :type pydp_object: class[pydplus.PyDPlus]
     :param method: The API method (``post``, ``put``, or ``patch``)
     :type method: str
     :param endpoint: The API endpoint to query
@@ -134,6 +136,7 @@ def post(pydp_object, endpoint, payload, params=None, headers=None, api_type='ad
     .. versionadded:: 1.0.0
 
     :param pydp_object: The instantiated pydplus object
+    :type pydp_object: class[pydplus.PyDPlus]
     :param endpoint: The API endpoint to query
     :type endpoint: str
     :param payload: The payload to leverage in the API call
@@ -167,6 +170,7 @@ def put(pydp_object, endpoint, payload, params=None, headers=None, api_type='adm
     .. versionadded:: 1.0.0
 
     :param pydp_object: The instantiated pydplus object
+    :type pydp_object: class[pydplus.PyDPlus]
     :param endpoint: The API endpoint to query
     :type endpoint: str
     :param payload: The payload to leverage in the API call
