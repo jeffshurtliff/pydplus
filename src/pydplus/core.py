@@ -356,7 +356,8 @@ class PyDPlus(object):
         :type show_full_error: bool
         :param return_json: Determines if the response should be returned in JSON format (defaults to ``True``)
         :returns: The API response in JSON format or as a ``requests`` object
-        :raises: :py:exc:`errors.exceptions.APIRequestError`,
+        :raises: :py:exc:`errors.exceptions.APIConnectionError`,
+                 :py:exc:`errors.exceptions.APIRequestError`,
                  :py:exc:`errors.exceptions.APIResponseConversionError`,
                  :py:exc:`errors.exceptions.InvalidFieldError`
         """
@@ -386,7 +387,8 @@ class PyDPlus(object):
         :type show_full_error: bool
         :param return_json: Determines if the response should be returned in JSON format (defaults to ``True``)
         :returns: The API response in JSON format or as a ``requests`` object
-        :raises: :py:exc:`errors.exceptions.APIMethodError`,
+        :raises: :py:exc:`errors.exceptions.APIConnectionError`,
+                 :py:exc:`errors.exceptions.APIMethodError`,
                  :py:exc:`errors.exceptions.APIRequestError`,
                  :py:exc:`errors.exceptions.APIResponseConversionError`,
                  :py:exc:`errors.exceptions.InvalidFieldError`
@@ -417,7 +419,8 @@ class PyDPlus(object):
         :type show_full_error: bool
         :param return_json: Determines if the response should be returned in JSON format (defaults to ``True``)
         :returns: The API response in JSON format or as a ``requests`` object
-        :raises: :py:exc:`errors.exceptions.APIMethodError`,
+        :raises: :py:exc:`errors.exceptions.APIConnectionError`,
+                 :py:exc:`errors.exceptions.APIMethodError`,
                  :py:exc:`errors.exceptions.APIRequestError`,
                  :py:exc:`errors.exceptions.APIResponseConversionError`,
                  :py:exc:`errors.exceptions.InvalidFieldError`
