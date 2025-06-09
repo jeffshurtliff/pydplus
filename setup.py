@@ -70,6 +70,7 @@ setuptools.setup(
         'urllib3>=2.4.0',
         'requests>=2.32.3',
         'setuptools>=65.5.1',
+        'pytest>=8.3.5',
         'PyYAML>=6.0.2',
         'PyJWT>=2.10.1',
         'cryptography>=45.0.3',
