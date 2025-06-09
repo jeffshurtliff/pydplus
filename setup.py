@@ -65,7 +65,7 @@ setuptools.setup(
         'Topic :: Software Development :: Libraries :: Python Modules',
         'Topic :: System :: Systems Administration :: Authentication/Directory',
     ],
-    python_requires='>=3.9',
+    python_requires='>=3.9.23',
     install_requires=[
         'urllib3>=2.4.0',
         'requests>=2.32.3',
