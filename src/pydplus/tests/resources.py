@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 """
-:Module:            pydplus.utils.tests.resources
+:Module:            pydplus.tests.resources
 :Synopsis:          Frequently used resources for performing unit testing
-:Usage:             ``from pydplus.utils.tests import resources``
+:Usage:             ``from pydplus.tests import resources``
 :Example:           TBD
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     06 May 2025
+:Modified Date:     10 Jun 2025
 """
 
 import os
@@ -38,11 +38,8 @@ def mock_success_post(*args, **kwargs):
 
     .. versionadded:: 1.0.0
     """
-    # TODO: Update mock response below to mimic general Admin API success response
     return MockResponse({
-        "id": "001D000000IqhSLIAZ",
-        "errors": [],
-        "success": True
+        "id": "54082ac6-4713-6368-2251-df813c41159f"
     })
 
 
