@@ -21,7 +21,7 @@ A Python toolset for the RSA ID Plus cloud authentication platform.
     <tr>
         <td>Build Status</td>
         <td>
-            <a href="https://github.com/jeffshurtliff/pydplus/blob/master/.github/workflows/python-package.yml">
+            <a href="https://github.com/jeffshurtliff/pydplus/blob/main/.github/workflows/python-package.yml">
                 <img alt="GitHub Workflow Status" 
                 src="https://img.shields.io/github/actions/workflow/status/jeffshurtliff/pydplus/python-package.yml?branch=main">
             </a>
@@ -40,7 +40,7 @@ A Python toolset for the RSA ID Plus cloud authentication platform.
         <td>Code Coverage</td>
         <td>
             <a href="https://codecov.io/gh/jeffshurtliff/pydplus">
-                <img src="https://codecov.io/gh/jeffshurtliff/pydplus/branch/master/graph/badge.svg" />
+                <img src="https://codecov.io/gh/jeffshurtliff/pydplus/branch/main/graph/badge.svg" />
             </a>
         </td>
     </tr>
@@ -64,7 +64,7 @@ A Python toolset for the RSA ID Plus cloud authentication platform.
     <tr>
         <td>License</td>
         <td>
-            <a href="https://github.com/jeffshurtliff/pydplus/blob/master/LICENSE">
+            <a href="https://github.com/jeffshurtliff/pydplus/blob/main/LICENSE">
                 <img alt="License (GitHub)" src="https://img.shields.io/github/license/jeffshurtliff/pydplus">
             </a>
         </td>
@@ -120,7 +120,7 @@ _Coming Soon..._
 The documentation is located here: [https://pydplus.readthedocs.io/en/latest/](https://pydplus.readthedocs.io/en/latest/)
 
 ## License
-[MIT License](https://github.com/jeffshurtliff/pydplus/blob/master/LICENSE)
+[MIT License](https://github.com/jeffshurtliff/pydplus/blob/main/LICENSE)
 
 ## Reporting Issues
 Issues can be reported within the [GitHub repository](https://github.com/jeffshurtliff/pydplus/issues).
