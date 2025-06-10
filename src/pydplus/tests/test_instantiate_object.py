@@ -14,7 +14,7 @@ from .. import errors
 
 
 def test_instantiate_empty_core_object():
-    """This function tests the ability to instantiate the core object.
+    """This function tests the ability to instantiate an empty core object.
 
     .. versionadded:: 1.0.0
     """
