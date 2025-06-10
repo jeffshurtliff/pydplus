@@ -21,9 +21,9 @@ A Python toolset for the RSA ID Plus cloud authentication platform.
     <tr>
         <td>Build Status</td>
         <td>
-            <a href="https://github.com/jeffshurtliff/pydplus/blob/master/.github/workflows/pythonpackage.yml">
+            <a href="https://github.com/jeffshurtliff/pydplus/blob/master/.github/workflows/python-package.yml">
                 <img alt="GitHub Workflow Status" 
-                src="https://img.shields.io/github/actions/workflow/status/jeffshurtliff/pydplus/pythonpackage.yml?branch=master">
+                src="https://img.shields.io/github/actions/workflow/status/jeffshurtliff/pydplus/python-package.yml?branch=main">
             </a>
         </td>
     </tr>
