@@ -1,0 +1,27 @@
+{
+  "base_url": "https://example-company.access.securid.com",
+  "connection_type": "legacy",
+  "connection": {
+    "legacy": {
+      "access_id": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
+      "private_key_path": "/Users/johndoe/Development/pydplus/local",
+      "private_key_file": "prod_legacy_private_key.pem"
+    },
+    "oauth": {
+      "issuer_url": "https://example-company.auth.securid.com/oauth",
+      "client_id": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
+      "grant_type": "Client Credentials",
+      "client_authentication": "Private Key JWT"
+    }
+  },
+  "verify_ssl": true,
+  "env_variables": {
+    "connection_type": "PYDPLUS_CONNECTION_TYPE",
+    "legacy_access_id": "PYDPLUS_LEGACY_ACCESS_ID",
+    "legacy_key_path": "PYDPLUS_LEGACY_KEY_PATH",
+    "legacy_key_file": "PYDPLUS_LEGACY_KEY_FILE",
+    "oauth_issuer_url": "PYDPLUS_OAUTH_ISSUER_URL",
+    "oauth_client_id": "PYDPLUS_OAUTH_CLIENT_ID",
+    "oauth_grant_type": "PYDPLUS_OAUTH_GRANT_TYPE"
+  }
+}
