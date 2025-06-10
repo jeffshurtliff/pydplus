@@ -4,7 +4,7 @@
 :Synopsis:          This script is the primary configuration file for the pydplus project
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     09 Jun 2025
+:Modified Date:     10 Jun 2025
 """
 
 import setuptools
@@ -58,6 +58,9 @@ setuptools.setup(
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.11',
+        'Programming Language :: Python :: 3.12',
+        'Programming Language :: Python :: 3.13',
         'Topic :: Communications :: FIDO',
         'Topic :: Office/Business',
         'Topic :: Security',
