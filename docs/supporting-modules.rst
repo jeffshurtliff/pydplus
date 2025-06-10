@@ -14,8 +14,8 @@ which are listed below.
     * `Logging Utilities Module (pydplus.utils.log_utils)`_
     * `Version Module (pydplus.utils.version)`_
 * `Unit Testing`_
-    * `Tests Module (pydplus.utils.tests)`_
-        * `Resources Module (pydplus.utils.tests.resources)`_
+    * `Tests Module (pydplus.tests)`_
+        * `Resources Module (pydplus.tests.resources)`_
 
 |
 
@@ -117,22 +117,22 @@ This section includes modules that are used in unit testing the library.
 
 |
 
-Tests Module (pydplus.utils.tests)
-==================================
+Tests Module (pydplus.tests)
+============================
 This module includes unit tests for the package that are performed using pytest.
 
-.. automodule:: pydplus.utils.tests
+.. automodule:: pydplus.tests
    :members:
 
 :doc:`Return to Top <supporting-modules>`
 
 |
 
-Resources Module (pydplus.utils.tests.resources)
-------------------------------------------------
+Resources Module (pydplus.tests.resources)
+------------------------------------------
 This module includes frequently used resources for performing unit testing.
 
-.. automodule:: pydplus.utils.tests.resources
+.. automodule:: pydplus.tests.resources
    :members:
 
 :doc:`Return to Top <supporting-modules>`
