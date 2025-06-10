@@ -346,7 +346,7 @@ class PyDPlus(object):
         return connected, base_headers
 
     def get(self, endpoint, params=None, headers=None, api_type='admin', timeout=30, show_full_error=True,
-            return_json=True):
+            return_json=True, allow_failed_response=False):
         """This method performs a GET request against the ID Plus tenant.
 
         .. versionadded:: 1.0.0
@@ -364,6 +364,10 @@ class PyDPlus(object):
         :param show_full_error: Determines if the full error message should be displayed (defaults to ``True``)
         :type show_full_error: bool
         :param return_json: Determines if the response should be returned in JSON format (defaults to ``True``)
+        :type return_json: bool
+        :param allow_failed_response: Indicates that failed responses should return and should not raise an exception
+                                      (``False`` by default)
+        :type allow_failed_response: bool
         :returns: The API response in JSON format or as a ``requests`` object
         :raises: :py:exc:`errors.exceptions.APIConnectionError`,
                  :py:exc:`errors.exceptions.APIRequestError`,
@@ -372,10 +376,11 @@ class PyDPlus(object):
         """
         self._check_if_connected()
         return api.get(self, endpoint=endpoint, params=params, headers=headers, api_type=api_type, timeout=timeout,
-                       show_full_error=show_full_error, return_json=return_json)
+                       show_full_error=show_full_error, return_json=return_json,
+                       allow_failed_response=allow_failed_response)
 
     def post(self, endpoint, payload, params=None, headers=None, api_type='admin', timeout=30,
-             show_full_error=True, return_json=True):
+             show_full_error=True, return_json=True, allow_failed_response=False):
         """This method performs a POST call with payload against the ID Plus tenant.
 
         .. versionadded:: 1.0.0
@@ -395,6 +400,10 @@ class PyDPlus(object):
         :param show_full_error: Determines if the full error message should be displayed (defaults to ``True``)
         :type show_full_error: bool
         :param return_json: Determines if the response should be returned in JSON format (defaults to ``True``)
+        :type return_json: bool
+        :param allow_failed_response: Indicates that failed responses should return and should not raise an exception
+                                      (``False`` by default)
+        :type allow_failed_response: bool
         :returns: The API response in JSON format or as a ``requests`` object
         :raises: :py:exc:`errors.exceptions.APIConnectionError`,
                  :py:exc:`errors.exceptions.APIMethodError`,
@@ -404,10 +413,11 @@ class PyDPlus(object):
         """
         self._check_if_connected()
         return api.post(self, endpoint=endpoint, payload=payload, params=params, headers=headers, api_type=api_type,
-                        timeout=timeout, show_full_error=show_full_error, return_json=return_json)
+                        timeout=timeout, show_full_error=show_full_error, return_json=return_json,
+                        allow_failed_response=allow_failed_response)
 
     def put(self, endpoint, payload, params=None, headers=None, api_type='admin', timeout=30,
-            show_full_error=True, return_json=True):
+            show_full_error=True, return_json=True, allow_failed_response=False):
         """This method performs a PUT call with payload against the ID Plus tenant.
 
         .. versionadded:: 1.0.0
@@ -427,6 +437,10 @@ class PyDPlus(object):
         :param show_full_error: Determines if the full error message should be displayed (defaults to ``True``)
         :type show_full_error: bool
         :param return_json: Determines if the response should be returned in JSON format (defaults to ``True``)
+        :type return_json: bool
+        :param allow_failed_response: Indicates that failed responses should return and should not raise an exception
+                                      (``False`` by default)
+        :type allow_failed_response: bool
         :returns: The API response in JSON format or as a ``requests`` object
         :raises: :py:exc:`errors.exceptions.APIConnectionError`,
                  :py:exc:`errors.exceptions.APIMethodError`,
@@ -436,7 +450,8 @@ class PyDPlus(object):
         """
         self._check_if_connected()
         return api.put(self, endpoint=endpoint, payload=payload, params=params, headers=headers, api_type=api_type,
-                       timeout=timeout, show_full_error=show_full_error, return_json=return_json)
+                       timeout=timeout, show_full_error=show_full_error, return_json=return_json,
+                       allow_failed_response=allow_failed_response)
     
     class User(object):
         """This class includes user-related methods."""
