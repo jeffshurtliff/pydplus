@@ -4,7 +4,7 @@
 :Synopsis:          Collection of exception classes relating to the pydplus library
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     07 June 2025
+:Modified Date:     10 June 2025
 """
 
 #################
@@ -132,8 +132,6 @@ class MissingRequiredDataError(PyDPlusError):
                 args = (init_msg,)
         elif 'param' in kwargs:
             args = (param_msg.replace('PARAMETER_NAME', kwargs['param']),)
-        else:
-            args = (default_msg,)
         super().__init__(*args)
 
 
