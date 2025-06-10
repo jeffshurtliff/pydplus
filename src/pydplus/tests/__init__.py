@@ -4,6 +4,7 @@
 :Synopsis:       This package includes tests for the pydplus library.
 :Created By:     Jeff Shurtliff
 :Last Modified:  Jeff Shurtliff
-:Modified Date:  06 May 2025
+:Modified Date:  10 Jun 2025
 """
 
+__all__ = ['resources']
