@@ -4,7 +4,7 @@
 :Synopsis:          Defines the basic functions associated with the RSA ID Plus API
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     07 Jun 2025
+:Modified Date:     10 Jun 2025
 """
 
 import requests
@@ -21,7 +21,7 @@ DEFAULT_API_TYPE = 'admin'
 
 
 def get(pydp_object, endpoint, params=None, headers=None, api_type=DEFAULT_API_TYPE, timeout=DEFAULT_TIMEOUT,
-        show_full_error=True, return_json=True):
+        show_full_error=True, return_json=True, allow_failed_response=False):
     """This function performs a GET request against the ID Plus tenant.
 
     .. versionadded:: 1.0.0
@@ -41,6 +41,10 @@ def get(pydp_object, endpoint, params=None, headers=None, api_type=DEFAULT_API_T
     :param show_full_error: Determines if the full error message should be displayed (defaults to ``True``)
     :type show_full_error: bool
     :param return_json: Determines if the response should be returned in JSON format (defaults to ``True``)
+    :type return_json: bool
+    :param allow_failed_response: Indicates that failed responses should return and should not raise an exception
+                                  (``False`` by default)
+    :type allow_failed_response: bool
     :returns: The API response in JSON format or as a ``requests`` object
     :raises: :py:exc:`errors.exceptions.APIRequestError`,
              :py:exc:`errors.exceptions.APIResponseConversionError`,
@@ -62,15 +66,15 @@ def get(pydp_object, endpoint, params=None, headers=None, api_type=DEFAULT_API_T
         timeout=timeout,
         verify=pydp_object.verify_ssl
     )
-    if response.status_code >= 300:
+    if response.status_code >= 300 and not allow_failed_response:
         _raise_status_code_exception(response, 'GET', show_full_error)
     if return_json:
-        response = _convert_response_to_json(response)
+        response = _convert_response_to_json(response, allow_failed_response)
     return response
 
 
 def api_call_with_payload(pydp_object, method, endpoint, payload, params=None, headers=None, api_type=DEFAULT_API_TYPE,
-                          timeout=DEFAULT_TIMEOUT, show_full_error=True, return_json=True):
+                          timeout=DEFAULT_TIMEOUT, show_full_error=True, return_json=True, allow_failed_response=False):
     """This function performs an API call with payload against the ID Plus tenant.
 
     .. versionadded:: 1.0.0
@@ -94,6 +98,10 @@ def api_call_with_payload(pydp_object, method, endpoint, payload, params=None, h
     :param show_full_error: Determines if the full error message should be displayed (defaults to ``True``)
     :type show_full_error: bool
     :param return_json: Determines if the response should be returned in JSON format (defaults to ``True``)
+    :type return_json: bool
+    :param allow_failed_response: Indicates that failed responses should return and should not raise an exception
+                                  (``False`` by default)
+    :type allow_failed_response: bool
     :returns: The API response in JSON format or as a ``requests`` object
     :raises: :py:exc:`errors.exceptions.APIMethodError`,
              :py:exc:`errors.exceptions.APIRequestError`,
@@ -126,15 +134,15 @@ def api_call_with_payload(pydp_object, method, endpoint, payload, params=None, h
         raise errors.exceptions.APIMethodError(error_msg)
 
     # Examine the result
-    if response.status_code >= 300:
+    if response.status_code >= 300 and not allow_failed_response:
         _raise_status_code_exception(response, method, show_full_error)
     if return_json:
-        response = _convert_response_to_json(response)
+        response = _convert_response_to_json(response, allow_failed_response)
     return response
 
 
 def post(pydp_object, endpoint, payload, params=None, headers=None, api_type=DEFAULT_API_TYPE, timeout=DEFAULT_TIMEOUT,
-         show_full_error=True, return_json=True):
+         show_full_error=True, return_json=True, allow_failed_response=False):
     """This function performs a POST call with payload against the ID Plus tenant.
 
     .. versionadded:: 1.0.0
@@ -156,6 +164,10 @@ def post(pydp_object, endpoint, payload, params=None, headers=None, api_type=DEF
     :param show_full_error: Determines if the full error message should be displayed (defaults to ``True``)
     :type show_full_error: bool
     :param return_json: Determines if the response should be returned in JSON format (defaults to ``True``)
+    :type return_json: bool
+    :param allow_failed_response: Indicates that failed responses should return and should not raise an exception
+                                  (``False`` by default)
+    :type allow_failed_response: bool
     :returns: The API response in JSON format or as a ``requests`` object
     :raises: :py:exc:`errors.exceptions.APIMethodError`,
              :py:exc:`errors.exceptions.APIRequestError`,
@@ -164,11 +176,12 @@ def post(pydp_object, endpoint, payload, params=None, headers=None, api_type=DEF
     """
     return api_call_with_payload(pydp_object=pydp_object, method='post', endpoint=endpoint, payload=payload,
                                  params=params, headers=headers, api_type=api_type, timeout=timeout,
-                                 show_full_error=show_full_error, return_json=return_json)
+                                 show_full_error=show_full_error, return_json=return_json,
+                                 allow_failed_response=allow_failed_response)
 
 
 def put(pydp_object, endpoint, payload, params=None, headers=None, api_type=DEFAULT_API_TYPE, timeout=DEFAULT_TIMEOUT,
-        show_full_error=True, return_json=True):
+        show_full_error=True, return_json=True, allow_failed_response=False):
     """This function performs a PUT call with payload against the ID Plus tenant.
 
     .. versionadded:: 1.0.0
@@ -190,6 +203,10 @@ def put(pydp_object, endpoint, payload, params=None, headers=None, api_type=DEFA
     :param show_full_error: Determines if the full error message should be displayed (defaults to ``True``)
     :type show_full_error: bool
     :param return_json: Determines if the response should be returned in JSON format (defaults to ``True``)
+    :type return_json: bool
+    :param allow_failed_response: Indicates that failed responses should return and should not raise an exception
+                                  (``False`` by default)
+    :type allow_failed_response: bool
     :returns: The API response in JSON format or as a ``requests`` object
     :raises: :py:exc:`errors.exceptions.APIMethodError`,
              :py:exc:`errors.exceptions.APIRequestError`,
@@ -198,7 +215,8 @@ def put(pydp_object, endpoint, payload, params=None, headers=None, api_type=DEFA
     """
     return api_call_with_payload(pydp_object=pydp_object, method='put', endpoint=endpoint, payload=payload,
                                  params=params, headers=headers, api_type=api_type, timeout=timeout,
-                                 show_full_error=show_full_error, return_json=return_json)
+                                 show_full_error=show_full_error, return_json=return_json,
+                                 allow_failed_response=allow_failed_response)
 
 
 def _get_headers(_headers, _additional_headers=None, _header_type='default'):
@@ -249,7 +267,7 @@ def _raise_status_code_exception(_response, _method, _show_full_error=True):
     raise errors.exceptions.APIRequestError(_exc_msg)
 
 
-def _convert_response_to_json(_response):
+def _convert_response_to_json(_response, allow_failed_response=False):
     """This function attempts to convert an API response to JSON format and raises an exception if unsuccessful.
 
     .. versionadded:: 1.0.0
@@ -261,5 +279,6 @@ def _convert_response_to_json(_response):
         _error_msg = (f'Failed to convert the API response to JSON format due to the following {_exc_type} '
                       f'exception: {_exc}')
         logger.error(_error_msg)
-        raise errors.exceptions.APIResponseConversionError(_error_msg)
+        if not allow_failed_response:
+            raise errors.exceptions.APIResponseConversionError(_error_msg)
     return _response
