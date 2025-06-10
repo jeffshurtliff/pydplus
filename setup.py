@@ -39,7 +39,7 @@ setuptools.setup(
     version=version,
     author='Jeff Shurtliff',
     author_email='jeff.shurtliff@rsa.com',
-    description='A Python toolset for performing RSA ID Plus API calls',
+    description='A Python toolset for the RSA ID Plus cloud authentication platform',
     long_description=long_description,
     long_description_content_type='text/markdown',
     url='https://github.com/jeffshurtliff/pydplus',

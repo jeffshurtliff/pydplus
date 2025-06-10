@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "pydplus"
 version = "1.0.0b1"
-description = "A Python toolset for performing RSA ID Plus API calls"
+description = "A Python toolset for the RSA ID Plus cloud authentication platform"
 authors = ["Jeff Shurtliff <jeff.shurtliff@rsa.com>"]
 license = "MIT"
 readme = "README.md"
