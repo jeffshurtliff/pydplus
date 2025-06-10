@@ -33,25 +33,24 @@ class MockResponse:
         return self.json_body
 
 
-def mock_success_post(*args, **kwargs):
+def mock_success_response(*args, **kwargs):
     """This function works with the `MockedResponse` class to simulate a successful API response.
 
     .. versionadded:: 1.0.0
     """
     return MockResponse({
-        "id": "54082ac6-4713-6368-2251-df813c41159f"
+        'id': '54082ac6-4713-6368-2251-df813c41159f',
     })
 
 
-def mock_error_post(*args, **kwargs):
+def mock_error_response(*args, **kwargs):
     """This function works with the `MockedResponse` class to simulate a failed API response.
 
     .. versionadded:: 1.0.0
     """
-    # TODO: Update mock response below to mimic general Admin API error response
     return MockResponse({
-        "errors": [],
-        "success": False
+        'code': '404 NOT_FOUND',
+        'description': 'User john.doe@example.com not found',
     })
 
 
