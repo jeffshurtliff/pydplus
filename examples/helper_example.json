@@ -1,6 +1,7 @@
 {
   "base_url": "https://example-company.access.securid.com",
   "connection_type": "legacy",
+  "strict_mode": false,
   "connection": {
     "legacy": {
       "access_id": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
