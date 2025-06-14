@@ -84,7 +84,7 @@ A Python toolset for the RSA ID Plus cloud authentication platform.
         <td style="vertical-align: top;">Pull Requests</td>
         <td>
             <a href="https://github.com/jeffshurtliff/pydplus/pulls">
-                <img style="margin-bottom:5px;" alt="GitHub pull open requests" src="https://img.shields.io/github/issues-pr-raw/jeffshurtliff/pydplus"><br />
+                <img style="margin-bottom:5px;" alt="GitHub open pull requests" src="https://img.shields.io/github/issues-pr-raw/jeffshurtliff/pydplus"><br />
             </a>
             <a href="https://github.com/jeffshurtliff/pydplus/pulls">
                 <img alt="GitHub closed pull requests" src="https://img.shields.io/github/issues-pr-closed-raw/jeffshurtliff/pydplus">
@@ -114,7 +114,15 @@ The change log can be found in the [documentation](https://pydplus.readthedocs.i
 ## Usage
 This section provides basic usage instructions for the package.
 
-_Coming Soon..._
+### Importing the package
+Rather than importing the base package, it is recommended that you import the primary `PyDPlus` class using the 
+syntax below.
+
+```python
+from pydplus import PyDPlus
+```
+
+_To be continued..._
 
 ## Documentation
 The documentation is located here: [https://pydplus.readthedocs.io/en/latest/](https://pydplus.readthedocs.io/en/latest/)
