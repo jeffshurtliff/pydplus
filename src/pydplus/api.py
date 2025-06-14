@@ -4,7 +4,7 @@
 :Synopsis:          Defines the basic functions associated with the RSA ID Plus API
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     10 Jun 2025
+:Modified Date:     14 Jun 2025
 """
 
 import requests
@@ -18,6 +18,7 @@ logger = log_utils.initialize_logging(__name__)
 # Define constants
 DEFAULT_TIMEOUT = 30
 DEFAULT_API_TYPE = 'admin'
+DEFAULT_STRICT_MODE = False
 
 
 def get(pydp_object, endpoint, params=None, headers=None, api_type=DEFAULT_API_TYPE, timeout=DEFAULT_TIMEOUT,
