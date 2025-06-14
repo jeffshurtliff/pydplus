@@ -1,0 +1,7 @@
+{
+  "timestamp": 1749938869908,
+  "status": 403,
+  "error": "Forbidden",
+  "message": "Server failed to process provided access token",
+  "path": "/AdminInterface/restapi/v1/users/cddedcec-4444-5555-6666-06e3f89947c4/userStatus"
+}
