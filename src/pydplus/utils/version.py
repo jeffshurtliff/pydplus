@@ -4,7 +4,7 @@
 :Synopsis:          This module contains the package version information
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     10 Jun 2025
+:Modified Date:     14 Jun 2025
 """
 
 from . import log_utils
