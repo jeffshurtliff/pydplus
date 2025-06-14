@@ -104,3 +104,26 @@ def get_user_id(pydp_object, email=None, user_details=None, search_unsynced=None
         error_msg = 'Failed to retrieve the user ID for the queried user. An empty string will be returned for the ID.'
         logger.error(error_msg)
     return user_details.get('id', '')
+
+
+def _update_user_status(_pydp_object, _user_id, _action, _timeout=api.DEFAULT_TIMEOUT, _show_full_error=True):
+    # Define the API endpoint to call and other API details
+    _endpoint = f'v1/users/{_user_id}/userStatus'
+    _api_type = 'admin'
+
+    # Identify the action to perform and define the payload accordingly
+    _valid_actions = {'enable', 'disable'}
+    if _action.lower() not in _valid_actions:
+        error_msg = f"'{_action}' is not a valid action value when enabling or disabling a user."
+        logger.error(error_msg)
+        raise errors.exceptions.InvalidPayloadValueError(error_msg)
+    _action = 'Enabled' if _action.lower() == 'enable' else 'Disabled'
+    _payload = {
+        'userStatus': _action,
+    }
+
+    # Perform the API call and return the response
+    return api.put(pydp_object=_pydp_object, endpoint=_endpoint, payload=_payload, timeout=_timeout,
+                   show_full_error=_show_full_error)
+
+
