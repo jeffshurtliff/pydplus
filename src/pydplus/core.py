@@ -6,7 +6,7 @@
 :Example:           ``prod = PyDPlus()``
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     07 Jun 2025
+:Modified Date:     14 Jun 2025
 """
 
 import os
@@ -493,6 +493,35 @@ class PyDPlus(object):
             return users_module.get_user_details(self.pydp_object, email=email, search_unsynced=search_unsynced,
                                                  timeout=timeout, show_full_error=show_full_error,
                                                  return_json=return_json, allow_failed_response=allow_failed_response)
+
+        def get_user_id(self, email=None, user_details=None, search_unsynced=None, timeout=api.DEFAULT_TIMEOUT,
+                        show_full_error=True):
+            """This method retrieves the User ID associated with a specific user.
+
+            .. versionadded:: 1.0.0
+
+            :param email: The email address of the user for whom to retrieve details
+            :type email: str, None
+            :param user_details: The user details data from the :py:func:`pydplus.users.get_user_details` function
+            :type user_details: dict, None
+            :param search_unsynced: Indicates if the user search should include unsynchronized users (optional)
+            :type search_unsynced: bool, None
+            :param timeout: The timeout period in seconds (defaults to ``30``)
+            :type timeout: int, str, None
+            :param show_full_error: Determines if the full error message should be displayed (defaults to ``True``)
+            :type show_full_error: bool
+            :returns: The User ID for the given user as a string (e.g. ``54082ac6-4713-6368-2251-df813c41159f``)
+            :raises: :py:exc:`TypeError`,
+                     :py:exc:`errors.exceptions.APIMethodError`,
+                     :py:exc:`errors.exceptions.APIRequestError`,
+                     :py:exc:`errors.exceptions.APIResponseConversionError`,
+                     :py:exc:`errors.exceptions.InvalidFieldError`,
+                     :py:exc:`errors.exceptions.MissingRequiredDataError`
+            """
+            # TODO: Check to ensure connection to the tenant has already been established
+            return users_module.get_user_id(self.pydp_object, email=email, user_details=user_details,
+                                            search_unsynced=search_unsynced, timeout=timeout,
+                                            show_full_error=show_full_error)
 
 
 def compile_connection_info(base_url, private_key, legacy_access_id, oauth_client_id):

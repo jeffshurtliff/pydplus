@@ -4,7 +4,7 @@
 :Synopsis:          Defines the user-related functions associated with the RSA ID Plus API
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     07 Jun 2025
+:Modified Date:     14 Jun 2025
 """
 
 from . import api, errors
@@ -60,3 +60,47 @@ def get_user_details(pydp_object, email, search_unsynced=None, timeout=api.DEFAU
     return api.post(pydp_object=pydp_object, endpoint=endpoint, payload=payload, api_type=api_type, timeout=timeout,
                     show_full_error=show_full_error, return_json=return_json,
                     allow_failed_response=allow_failed_response)
+
+
+def get_user_id(pydp_object, email=None, user_details=None, search_unsynced=None, timeout=api.DEFAULT_TIMEOUT,
+                show_full_error=True):
+    """This function retrieves the User ID associated with a specific user.
+
+    .. versionadded:: 1.0.0
+
+    :param pydp_object: The instantiated pydplus object
+    :type pydp_object: class[pydplus.PyDPlus]
+    :param email: The email address of the user for whom to retrieve details
+    :type email: str, None
+    :param user_details: The user details data from the :py:func:`pydplus.users.get_user_details` function
+    :type user_details: dict, None
+    :param search_unsynced: Indicates if the user search should include unsynchronized users (optional)
+    :type search_unsynced: bool, None
+    :param timeout: The timeout period in seconds (defaults to ``30``)
+    :type timeout: int, str, None
+    :param show_full_error: Determines if the full error message should be displayed (defaults to ``True``)
+    :type show_full_error: bool
+    :returns: The User ID for the given user as a string (e.g. ``54082ac6-4713-6368-2251-df813c41159f``)
+    :raises: :py:exc:`TypeError`,
+             :py:exc:`errors.exceptions.APIMethodError`,
+             :py:exc:`errors.exceptions.APIRequestError`,
+             :py:exc:`errors.exceptions.APIResponseConversionError`,
+             :py:exc:`errors.exceptions.InvalidFieldError`,
+             :py:exc:`errors.exceptions.MissingRequiredDataError`
+    """
+    # Ensure one of the lookup values was provided
+    if not any((email, user_details)):
+        error_msg = 'An email address or user details dictionary must be provided to retrieve a user ID.'
+        logger.error(error_msg)
+        raise errors.exceptions.MissingRequiredDataError(error_msg)
+
+    # Retrieve the user details if not provided
+    if not user_details:
+        user_details = get_user_details(pydp_object=pydp_object, email=email, search_unsynced=search_unsynced,
+                                        timeout=timeout, show_full_error=show_full_error, allow_failed_response=True)
+
+    # Locate and return the user ID if possible
+    if not isinstance(user_details, dict) or 'id' not in user_details:
+        error_msg = 'Failed to retrieve the user ID for the queried user. An empty string will be returned for the ID.'
+        logger.error(error_msg)
+    return user_details.get('id', '')
