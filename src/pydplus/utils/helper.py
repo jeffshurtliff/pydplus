@@ -6,7 +6,7 @@
 :Example:           ``helper_settings = helper.get_settings('/tmp/helper.yml', 'yaml')``
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     21 May 2025
+:Modified Date:     14 Jun 2025
 """
 
 import json
@@ -122,9 +122,6 @@ def get_helper_settings(file_path, file_type='json', defined_settings=None):
     :returns: Dictionary of helper variables
     :raises: :py:exc:`pydplus.errors.exceptions.InvalidHelperFileTypeError`
     """
-    # Initialize the helper_settings dictionary
-    helper_settings = {}
-
     # Convert the defined_settings parameter to an empty dictionary if null
     defined_settings = {} if not defined_settings else defined_settings
 
@@ -135,7 +132,7 @@ def get_helper_settings(file_path, file_type='json', defined_settings=None):
     helper_cfg = import_helper_file(file_path, file_type)
 
     # Populate the top-level fields that do not require further validation
-    top_level_values = ['base_url', 'connection_type', 'ssl_verify']
+    top_level_values = ['base_url', 'connection_type', 'strict_mode', 'ssl_verify']
     helper_settings = _collect_values(top_level_values, helper_cfg, defined_settings)
 
     # Populate the connection information in the helper dictionary
