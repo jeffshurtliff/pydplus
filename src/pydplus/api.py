@@ -4,7 +4,7 @@
 :Synopsis:          Defines the basic functions associated with the RSA ID Plus API
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     14 Jun 2025
+:Modified Date:     16 Jun 2025
 """
 
 import requests
@@ -22,7 +22,7 @@ DEFAULT_STRICT_MODE = False
 
 
 def get(pydp_object, endpoint, params=None, headers=None, api_type=DEFAULT_API_TYPE, timeout=DEFAULT_TIMEOUT,
-        show_full_error=True, return_json=True, allow_failed_response=False):
+        show_full_error=True, return_json=True, allow_failed_response=None):
     """This function performs a GET request against the ID Plus tenant.
 
     .. versionadded:: 1.0.0
@@ -44,8 +44,8 @@ def get(pydp_object, endpoint, params=None, headers=None, api_type=DEFAULT_API_T
     :param return_json: Determines if the response should be returned in JSON format (defaults to ``True``)
     :type return_json: bool
     :param allow_failed_response: Indicates that failed responses should return and should not raise an exception
-                                  (``False`` by default)
-    :type allow_failed_response: bool
+                                  (If not explicitly defined then ``True`` if Strict Mode is disabled)
+    :type allow_failed_response: bool, None
     :returns: The API response in JSON format or as a ``requests`` object
     :raises: :py:exc:`errors.exceptions.APIRequestError`,
              :py:exc:`errors.exceptions.APIResponseConversionError`,
@@ -67,6 +67,9 @@ def get(pydp_object, endpoint, params=None, headers=None, api_type=DEFAULT_API_T
         timeout=timeout,
         verify=pydp_object.verify_ssl
     )
+
+    # Examine the result
+    allow_failed_response = _should_allow_failed_responses(pydp_object, allow_failed_response)
     if response.status_code >= 300 and not allow_failed_response:
         _raise_status_code_exception(response, 'GET', show_full_error)
     if return_json:
@@ -75,7 +78,7 @@ def get(pydp_object, endpoint, params=None, headers=None, api_type=DEFAULT_API_T
 
 
 def api_call_with_payload(pydp_object, method, endpoint, payload, params=None, headers=None, api_type=DEFAULT_API_TYPE,
-                          timeout=DEFAULT_TIMEOUT, show_full_error=True, return_json=True, allow_failed_response=False):
+                          timeout=DEFAULT_TIMEOUT, show_full_error=True, return_json=True, allow_failed_response=None):
     """This function performs an API call with payload against the ID Plus tenant.
 
     .. versionadded:: 1.0.0
@@ -101,8 +104,8 @@ def api_call_with_payload(pydp_object, method, endpoint, payload, params=None, h
     :param return_json: Determines if the response should be returned in JSON format (defaults to ``True``)
     :type return_json: bool
     :param allow_failed_response: Indicates that failed responses should return and should not raise an exception
-                                  (``False`` by default)
-    :type allow_failed_response: bool
+                                  (If not explicitly defined then ``True`` if Strict Mode is disabled)
+    :type allow_failed_response: bool, None
     :returns: The API response in JSON format or as a ``requests`` object
     :raises: :py:exc:`errors.exceptions.APIMethodError`,
              :py:exc:`errors.exceptions.APIRequestError`,
@@ -135,6 +138,7 @@ def api_call_with_payload(pydp_object, method, endpoint, payload, params=None, h
         raise errors.exceptions.APIMethodError(error_msg)
 
     # Examine the result
+    allow_failed_response = _should_allow_failed_responses(pydp_object, allow_failed_response)
     if response.status_code >= 300 and not allow_failed_response:
         _raise_status_code_exception(response, method, show_full_error)
     if return_json:
@@ -143,7 +147,7 @@ def api_call_with_payload(pydp_object, method, endpoint, payload, params=None, h
 
 
 def post(pydp_object, endpoint, payload, params=None, headers=None, api_type=DEFAULT_API_TYPE, timeout=DEFAULT_TIMEOUT,
-         show_full_error=True, return_json=True, allow_failed_response=False):
+         show_full_error=True, return_json=True, allow_failed_response=None):
     """This function performs a POST call with payload against the ID Plus tenant.
 
     .. versionadded:: 1.0.0
@@ -167,8 +171,8 @@ def post(pydp_object, endpoint, payload, params=None, headers=None, api_type=DEF
     :param return_json: Determines if the response should be returned in JSON format (defaults to ``True``)
     :type return_json: bool
     :param allow_failed_response: Indicates that failed responses should return and should not raise an exception
-                                  (``False`` by default)
-    :type allow_failed_response: bool
+                                  (If not explicitly defined then ``True`` if Strict Mode is disabled)
+    :type allow_failed_response: bool, None
     :returns: The API response in JSON format or as a ``requests`` object
     :raises: :py:exc:`errors.exceptions.APIMethodError`,
              :py:exc:`errors.exceptions.APIRequestError`,
@@ -182,7 +186,7 @@ def post(pydp_object, endpoint, payload, params=None, headers=None, api_type=DEF
 
 
 def put(pydp_object, endpoint, payload, params=None, headers=None, api_type=DEFAULT_API_TYPE, timeout=DEFAULT_TIMEOUT,
-        show_full_error=True, return_json=True, allow_failed_response=False):
+        show_full_error=True, return_json=True, allow_failed_response=None):
     """This function performs a PUT call with payload against the ID Plus tenant.
 
     .. versionadded:: 1.0.0
@@ -206,8 +210,8 @@ def put(pydp_object, endpoint, payload, params=None, headers=None, api_type=DEFA
     :param return_json: Determines if the response should be returned in JSON format (defaults to ``True``)
     :type return_json: bool
     :param allow_failed_response: Indicates that failed responses should return and should not raise an exception
-                                  (``False`` by default)
-    :type allow_failed_response: bool
+                                  (If not explicitly defined then ``True`` if Strict Mode is disabled)
+    :type allow_failed_response: bool, None
     :returns: The API response in JSON format or as a ``requests`` object
     :raises: :py:exc:`errors.exceptions.APIMethodError`,
              :py:exc:`errors.exceptions.APIRequestError`,
@@ -218,6 +222,25 @@ def put(pydp_object, endpoint, payload, params=None, headers=None, api_type=DEFA
                                  params=params, headers=headers, api_type=api_type, timeout=timeout,
                                  show_full_error=show_full_error, return_json=return_json,
                                  allow_failed_response=allow_failed_response)
+
+
+def _should_allow_failed_responses(_pydp_object, _allow_failed_response):
+    """This function determines if failed responses are allowed based on the defined value or strict mode setting.
+
+    .. versionadded:: 1.0.0
+    """
+    # Only define the value if not already defined
+    if not isinstance(_allow_failed_response, bool) or _allow_failed_response is None:
+        try:
+            # Define the value based on the strict mode define in the instantiated object
+            _allow_failed_response = False if _pydp_object.strict_mode is True else True
+        except Exception as _exc:
+            # Use the default strict mode value to define the value if an exception is raised
+            _allow_failed_response = False if DEFAULT_STRICT_MODE is True else True
+            _exc_type = type(_exc).__name__
+            _error_msg = f'Using default strict mode due to the following {_exc_type} exception: {_exc}'
+            logger.error(_error_msg)
+    return _allow_failed_response
 
 
 def _get_headers(_headers, _additional_headers=None, _header_type='default'):
