@@ -532,6 +532,7 @@ class PyDPlus(object):
             :param show_full_error: Determines if the full error message should be displayed (defaults to ``True``)
             :type show_full_error: bool
             :returns: The User ID for the given user as a string (e.g. ``54082ac6-4713-6368-2251-df813c41159f``)
+                      or an empty string if the User ID could not be retrieved successfully
             :raises: :py:exc:`TypeError`,
                      :py:exc:`errors.exceptions.APIMethodError`,
                      :py:exc:`errors.exceptions.APIRequestError`,
