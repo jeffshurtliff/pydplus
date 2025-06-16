@@ -153,7 +153,13 @@ def enable_user(pydp_object, user_id, timeout=api.DEFAULT_TIMEOUT, show_full_err
     :param allow_failed_response: Indicates that failed responses should return and should not raise an exception
                                   (If not explicitly defined then ``True`` if Strict Mode is disabled)
     :type allow_failed_response: bool, None
-    :returns: The user details in JSON format or the API response as a ``requests`` object
+    :returns: The API response in JSON format or as a ``requests`` object
+    :raises: :py:exc:`TypeError`,
+             :py:exc:`errors.exceptions.APIMethodError`,
+             :py:exc:`errors.exceptions.APIRequestError`,
+             :py:exc:`errors.exceptions.APIResponseConversionError`,
+             :py:exc:`errors.exceptions.InvalidFieldError`,
+             :py:exc:`errors.exceptions.MissingRequiredDataError`
     """
     return _update_user_status(_pydp_object=pydp_object, _user_id=user_id, _action='enable', _timeout=timeout,
                                _show_full_error=show_full_error, _return_json=return_json,
@@ -179,7 +185,13 @@ def disable_user(pydp_object, user_id, timeout=api.DEFAULT_TIMEOUT, show_full_er
     :param allow_failed_response: Indicates that failed responses should return and should not raise an exception
                                   (If not explicitly defined then ``True`` if Strict Mode is disabled)
     :type allow_failed_response: bool, None
-    :returns: The user details in JSON format or the API response as a ``requests`` object
+    :returns: The API response in JSON format or as a ``requests`` object
+    :raises: :py:exc:`TypeError`,
+             :py:exc:`errors.exceptions.APIMethodError`,
+             :py:exc:`errors.exceptions.APIRequestError`,
+             :py:exc:`errors.exceptions.APIResponseConversionError`,
+             :py:exc:`errors.exceptions.InvalidFieldError`,
+             :py:exc:`errors.exceptions.MissingRequiredDataError`
     """
     return _update_user_status(_pydp_object=pydp_object, _user_id=user_id, _action='disable', _timeout=timeout,
                                _show_full_error=show_full_error, _return_json=return_json,
