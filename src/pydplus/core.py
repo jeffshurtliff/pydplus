@@ -545,6 +545,66 @@ class PyDPlus(object):
                                             search_unsynced=search_unsynced, timeout=timeout,
                                             show_full_error=show_full_error)
 
+        def enable_user(self, user_id, timeout=api.DEFAULT_TIMEOUT, show_full_error=True, return_json=True,
+                        allow_failed_response=None):
+            """This function enables a user that is currently disabled.
+
+            .. versionadded:: 1.0.0
+
+            :param user_id: The ID of an existing user (e.g. ``54082ac6-4713-6368-2251-df813c41159f``)
+            :type user_id: str
+            :param timeout: The timeout period in seconds (defaults to ``30``)
+            :type timeout: int, str, None
+            :param show_full_error: Determines if the full error message should be displayed (defaults to ``True``)
+            :type show_full_error: bool
+            :param return_json: Determines if the response should be returned in JSON format (defaults to ``True``)
+            :type return_json: bool
+            :param allow_failed_response: Indicates that failed responses should return and should not raise an exception
+                                          (If not explicitly defined then ``True`` if Strict Mode is disabled)
+            :type allow_failed_response: bool, None
+            :returns: The API response in JSON format or as a ``requests`` object
+            :raises: :py:exc:`TypeError`,
+                     :py:exc:`errors.exceptions.APIMethodError`,
+                     :py:exc:`errors.exceptions.APIRequestError`,
+                     :py:exc:`errors.exceptions.APIResponseConversionError`,
+                     :py:exc:`errors.exceptions.InvalidFieldError`,
+                     :py:exc:`errors.exceptions.MissingRequiredDataError`
+            """
+            # TODO: Check to ensure connection to the tenant has already been established
+            return users_module.enable_user(self.pydp_object, user_id=user_id, timeout=timeout,
+                                            show_full_error=show_full_error, return_json=return_json,
+                                            allow_failed_response=allow_failed_response)
+
+        def disable_user(self, user_id, timeout=api.DEFAULT_TIMEOUT, show_full_error=True, return_json=True,
+                         allow_failed_response=None):
+            """This function disables a user that is currently enabled.
+
+            .. versionadded:: 1.0.0
+
+            :param user_id: The ID of an existing user (e.g. ``54082ac6-4713-6368-2251-df813c41159f``)
+            :type user_id: str
+            :param timeout: The timeout period in seconds (defaults to ``30``)
+            :type timeout: int, str, None
+            :param show_full_error: Determines if the full error message should be displayed (defaults to ``True``)
+            :type show_full_error: bool
+            :param return_json: Determines if the response should be returned in JSON format (defaults to ``True``)
+            :type return_json: bool
+            :param allow_failed_response: Indicates that failed responses should return and should not raise an exception
+                                          (If not explicitly defined then ``True`` if Strict Mode is disabled)
+            :type allow_failed_response: bool, None
+            :returns: The API response in JSON format or as a ``requests`` object
+            :raises: :py:exc:`TypeError`,
+                     :py:exc:`errors.exceptions.APIMethodError`,
+                     :py:exc:`errors.exceptions.APIRequestError`,
+                     :py:exc:`errors.exceptions.APIResponseConversionError`,
+                     :py:exc:`errors.exceptions.InvalidFieldError`,
+                     :py:exc:`errors.exceptions.MissingRequiredDataError`
+            """
+            # TODO: Check to ensure connection to the tenant has already been established
+            return users_module.disable_user(self.pydp_object, user_id=user_id, timeout=timeout,
+                                             show_full_error=show_full_error, return_json=return_json,
+                                             allow_failed_response=allow_failed_response)
+
 
 def compile_connection_info(base_url, private_key, legacy_access_id, oauth_client_id):
     """This function compiles the connection_info dictionary to use when authenticating to the API.
