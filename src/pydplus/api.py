@@ -90,7 +90,7 @@ def api_call_with_payload(pydp_object, method, endpoint, payload, params=None, h
     :param endpoint: The API endpoint to query
     :type endpoint: str
     :param payload: The payload to leverage in the API call
-    :type payload: dict
+    :type payload: dict, str, None
     :param params: The query parameters (where applicable)
     :type params: dict, None
     :param headers: Specific API headers to use when performing the API call (beyond the base headers)
@@ -122,14 +122,26 @@ def api_call_with_payload(pydp_object, method, endpoint, payload, params=None, h
     # Perform the API call
     full_api_url = _get_full_api_url(pydp_object, endpoint, api_type)
     if isinstance(method, str) and method.lower() == 'post':
-        response = requests.post(full_api_url, json=payload, headers=headers, params=params, timeout=timeout,
-                                 verify=pydp_object.verify_ssl)
+        if isinstance(payload, dict):
+            response = requests.post(full_api_url, json=payload, headers=headers, params=params, timeout=timeout,
+                                     verify=pydp_object.verify_ssl)
+        else:
+            response = requests.post(full_api_url, data=payload, headers=headers, params=params, timeout=timeout,
+                                     verify=pydp_object.verify_ssl)
     elif isinstance(method, str) and method.lower() == 'patch':
-        response = requests.patch(full_api_url, json=payload, headers=headers, params=params, timeout=timeout,
-                                  verify=pydp_object.verify_ssl)
+        if isinstance(payload, dict):
+            response = requests.patch(full_api_url, json=payload, headers=headers, params=params, timeout=timeout,
+                                      verify=pydp_object.verify_ssl)
+        else:
+            response = requests.patch(full_api_url, data=payload, headers=headers, params=params, timeout=timeout,
+                                      verify=pydp_object.verify_ssl)
     elif isinstance(method, str) and method.lower() == 'put':
-        response = requests.put(full_api_url, json=payload, headers=headers, params=params, timeout=timeout,
-                                verify=pydp_object.verify_ssl)
+        if isinstance(payload, dict):
+            response = requests.put(full_api_url, json=payload, headers=headers, params=params, timeout=timeout,
+                                    verify=pydp_object.verify_ssl)
+        else:
+            response = requests.put(full_api_url, data=payload, headers=headers, params=params, timeout=timeout,
+                                    verify=pydp_object.verify_ssl)
     else:
         error_msg = 'A valid API call method (POST or PATCH or PUT) must be defined.'
         if isinstance(method, str) and method.lower() == 'get':
@@ -157,7 +169,7 @@ def post(pydp_object, endpoint, payload, params=None, headers=None, api_type=DEF
     :param endpoint: The API endpoint to query
     :type endpoint: str
     :param payload: The payload to leverage in the API call
-    :type payload: dict
+    :type payload: dict, str, None
     :param params: The query parameters (where applicable)
     :type params: dict, None
     :param headers: Specific API headers to use when performing the API call (beyond the base headers)
@@ -196,7 +208,7 @@ def put(pydp_object, endpoint, payload, params=None, headers=None, api_type=DEFA
     :param endpoint: The API endpoint to query
     :type endpoint: str
     :param payload: The payload to leverage in the API call
-    :type payload: dict
+    :type payload: dict, str, None
     :param params: The query parameters (where applicable)
     :type params: dict, None
     :param headers: Specific API headers to use when performing the API call (beyond the base headers)
