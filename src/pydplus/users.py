@@ -196,3 +196,41 @@ def disable_user(pydp_object, user_id, timeout=api.DEFAULT_TIMEOUT, show_full_er
     return _update_user_status(_pydp_object=pydp_object, _user_id=user_id, _action='disable', _timeout=timeout,
                                _show_full_error=show_full_error, _return_json=return_json,
                                _allow_failed_response=allow_failed_response)
+
+
+def synchronize_user(pydp_object, user_id, timeout=api.DEFAULT_TIMEOUT, show_full_error=True, return_json=True,
+                     allow_failed_response=None):
+    """This function synchronizes the details of a user between an identity source and the Cloud Access Service.
+
+    .. versionadded:: 1.0.0
+
+    :param pydp_object: The instantiated pydplus object
+    :type pydp_object: class[pydplus.PyDPlus]
+    :param user_id: The ID of an existing user (e.g. ``54082ac6-4713-6368-2251-df813c41159f``)
+    :type user_id: str
+    :param timeout: The timeout period in seconds (defaults to ``30``)
+    :type timeout: int, str, None
+    :param show_full_error: Determines if the full error message should be displayed (defaults to ``True``)
+    :type show_full_error: bool
+    :param return_json: Determines if the response should be returned in JSON format (defaults to ``True``)
+    :type return_json: bool
+    :param allow_failed_response: Indicates that failed responses should return and should not raise an exception
+                                  (If not explicitly defined then ``True`` if Strict Mode is disabled)
+    :type allow_failed_response: bool, None
+    :returns: The API response in JSON format or as a ``requests`` object
+    :raises: :py:exc:`TypeError`,
+             :py:exc:`errors.exceptions.APIMethodError`,
+             :py:exc:`errors.exceptions.APIRequestError`,
+             :py:exc:`errors.exceptions.APIResponseConversionError`,
+             :py:exc:`errors.exceptions.InvalidFieldError`,
+             :py:exc:`errors.exceptions.MissingRequiredDataError`
+    """
+    # Define the API endpoint to call and other API details
+    endpoint = f'v1/users/{user_id}/sync'
+    api_type = 'admin'
+    payload = {}
+
+    # Perform the API call and return the response
+    return api.post(pydp_object=pydp_object, endpoint=endpoint, payload=payload, api_type=api_type, timeout=timeout,
+                    show_full_error=show_full_error, return_json=return_json,
+                    allow_failed_response=allow_failed_response)
