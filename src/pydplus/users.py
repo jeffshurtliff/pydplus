@@ -228,7 +228,8 @@ def synchronize_user(pydp_object, user_id, timeout=api.DEFAULT_TIMEOUT, show_ful
     # Define the API endpoint to call and other API details
     endpoint = f'v1/users/{user_id}/sync'
     api_type = 'admin'
-    payload = {}
+    payload = ''
+    # TODO: Test to see if Content-Length header must be explicitly defined
 
     # Perform the API call and return the response
     return api.post(pydp_object=pydp_object, endpoint=endpoint, payload=payload, api_type=api_type, timeout=timeout,
