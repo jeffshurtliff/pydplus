@@ -4,7 +4,7 @@
 :Synopsis:          Defines the user-related functions associated with the RSA ID Plus API
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     14 Jun 2025
+:Modified Date:     16 Jun 2025
 """
 
 from . import api, errors
@@ -15,7 +15,7 @@ logger = log_utils.initialize_logging(__name__)
 
 
 def get_user_details(pydp_object, email, search_unsynced=None, timeout=api.DEFAULT_TIMEOUT, show_full_error=True,
-                     return_json=True, allow_failed_response=False):
+                     return_json=True, allow_failed_response=None):
     """This function retrieves the details for a specific user based on their email address.
 
     .. versionadded:: 1.0.0
@@ -33,8 +33,8 @@ def get_user_details(pydp_object, email, search_unsynced=None, timeout=api.DEFAU
     :param return_json: Determines if the response should be returned in JSON format (defaults to ``True``)
     :type return_json: bool
     :param allow_failed_response: Indicates that failed responses should return and should not raise an exception
-                                  (``False`` by default)
-    :type allow_failed_response: bool
+                                  (If not explicitly defined then ``True`` if Strict Mode is disabled)
+    :type allow_failed_response: bool, None
     :returns: The user details in JSON format or the API response as a ``requests`` object
     :raises: :py:exc:`TypeError`,
              :py:exc:`errors.exceptions.APIMethodError`,
@@ -81,6 +81,7 @@ def get_user_id(pydp_object, email=None, user_details=None, search_unsynced=None
     :param show_full_error: Determines if the full error message should be displayed (defaults to ``True``)
     :type show_full_error: bool
     :returns: The User ID for the given user as a string (e.g. ``54082ac6-4713-6368-2251-df813c41159f``)
+              or an empty string if the User ID could not be retrieved successfully
     :raises: :py:exc:`TypeError`,
              :py:exc:`errors.exceptions.APIMethodError`,
              :py:exc:`errors.exceptions.APIRequestError`,
@@ -106,7 +107,12 @@ def get_user_id(pydp_object, email=None, user_details=None, search_unsynced=None
     return user_details.get('id', '')
 
 
-def _update_user_status(_pydp_object, _user_id, _action, _timeout=api.DEFAULT_TIMEOUT, _show_full_error=True):
+def _update_user_status(_pydp_object, _user_id, _action, _timeout=api.DEFAULT_TIMEOUT, _show_full_error=True,
+                        _return_json=True, _allow_failed_response=None):
+    """This function enables or disables a user by calling the User Status API.
+
+    .. versionadded:: 1.0.0
+    """
     # Define the API endpoint to call and other API details
     _endpoint = f'v1/users/{_user_id}/userStatus'
     _api_type = 'admin'
@@ -124,6 +130,57 @@ def _update_user_status(_pydp_object, _user_id, _action, _timeout=api.DEFAULT_TI
 
     # Perform the API call and return the response
     return api.put(pydp_object=_pydp_object, endpoint=_endpoint, payload=_payload, timeout=_timeout,
-                   show_full_error=_show_full_error)
+                   show_full_error=_show_full_error, return_json=_return_json,
+                   allow_failed_response=_allow_failed_response)
 
 
+def enable_user(pydp_object, user_id, timeout=api.DEFAULT_TIMEOUT, show_full_error=True, return_json=True,
+                allow_failed_response=None):
+    """This function enables a user that is currently disabled.
+
+    .. versionadded:: 1.0.0
+
+    :param pydp_object: The instantiated pydplus object
+    :type pydp_object: class[pydplus.PyDPlus]
+    :param user_id: The ID of an existing user (e.g. ``54082ac6-4713-6368-2251-df813c41159f``)
+    :type user_id: str
+    :param timeout: The timeout period in seconds (defaults to ``30``)
+    :type timeout: int, str, None
+    :param show_full_error: Determines if the full error message should be displayed (defaults to ``True``)
+    :type show_full_error: bool
+    :param return_json: Determines if the response should be returned in JSON format (defaults to ``True``)
+    :type return_json: bool
+    :param allow_failed_response: Indicates that failed responses should return and should not raise an exception
+                                  (If not explicitly defined then ``True`` if Strict Mode is disabled)
+    :type allow_failed_response: bool, None
+    :returns: The user details in JSON format or the API response as a ``requests`` object
+    """
+    return _update_user_status(_pydp_object=pydp_object, _user_id=user_id, _action='enable', _timeout=timeout,
+                               _show_full_error=show_full_error, _return_json=return_json,
+                               _allow_failed_response=allow_failed_response)
+
+
+def disable_user(pydp_object, user_id, timeout=api.DEFAULT_TIMEOUT, show_full_error=True, return_json=True,
+                 allow_failed_response=None):
+    """This function disables a user that is currently enabled.
+
+    .. versionadded:: 1.0.0
+
+    :param pydp_object: The instantiated pydplus object
+    :type pydp_object: class[pydplus.PyDPlus]
+    :param user_id: The ID of an existing user (e.g. ``54082ac6-4713-6368-2251-df813c41159f``)
+    :type user_id: str
+    :param timeout: The timeout period in seconds (defaults to ``30``)
+    :type timeout: int, str, None
+    :param show_full_error: Determines if the full error message should be displayed (defaults to ``True``)
+    :type show_full_error: bool
+    :param return_json: Determines if the response should be returned in JSON format (defaults to ``True``)
+    :type return_json: bool
+    :param allow_failed_response: Indicates that failed responses should return and should not raise an exception
+                                  (If not explicitly defined then ``True`` if Strict Mode is disabled)
+    :type allow_failed_response: bool, None
+    :returns: The user details in JSON format or the API response as a ``requests`` object
+    """
+    return _update_user_status(_pydp_object=pydp_object, _user_id=user_id, _action='disable', _timeout=timeout,
+                               _show_full_error=show_full_error, _return_json=return_json,
+                               _allow_failed_response=allow_failed_response)
