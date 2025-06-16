@@ -3,10 +3,10 @@
 :Module:            pydplus.core
 :Synopsis:          This module performs the core operations of the package
 :Usage:             ``from pydplus import PyDPlus``
-:Example:           ``prod = PyDPlus()``
+:Example:           ``pydp = PyDPlus()``
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     14 Jun 2025
+:Modified Date:     16 Jun 2025
 """
 
 import os
@@ -26,7 +26,7 @@ class PyDPlus(object):
     # Define the function that initializes the object instance (i.e. instantiates the object)
     def __init__(self, connection_info=None, connection_type=None, base_url=None,
                  private_key=None, legacy_access_id=None, oauth_client_id=None, verify_ssl=None, auto_connect=True,
-                 env_variables=None, helper=None):
+                 strict_mode=None, env_variables=None, helper=None):
         """This method instantiates the core Salesforce object.
 
         :param connection_info: Dictionary that defines the connection info to use
@@ -46,11 +46,14 @@ class PyDPlus(object):
         :param auto_connect: Determines if an API connection should be established when the object is instantiated
                              (``True`` by default)
         :type auto_connect: bool
+        :param strict_mode: Determines if failed API responses should result in an exception being raised
+                            (``False`` by default)
+        :type strict_mode: bool
         :param env_variables: Optionally define custom environment variable names to use instead of the default names
         :type env_variables: dict, None
-        :param helper: The file path of a helper file (when applicable)
+        :param helper: Optionally provide the file path for a helper file used to define the object configuration
         :type helper: str, None
-        :returns: The instantiated object
+        :returns: The instantiated PyDPlus object
         :raises: :py:exc:`TypeError`
         """
         # Define the default settings
@@ -58,6 +61,7 @@ class PyDPlus(object):
         self._env_variables = {}
         self.base_headers = {}
         self.connected = False
+        self.strict_mode = None
 
         # Check for a supplied helper file
         if helper:
@@ -90,6 +94,23 @@ class PyDPlus(object):
 
         # Check for any defined environment variables
         self._env_variables = self._get_env_variables()
+
+        # Determine if strict mode is enabled or disabled
+        if strict_mode is not None:
+            if not isinstance(strict_mode, bool):
+                error_msg = 'The value of the strict_mode parameter must be Boolean.'
+                logger.error(error_msg)
+                raise TypeError(error_msg)
+            self.strict_mode = strict_mode
+        elif (self._helper_settings and 'strict_mode' in self._helper_settings
+                and isinstance(self._helper_settings['strict_mode'], bool)
+                and self._helper_settings['strict_mode'] is not None):
+            self.strict_mode = self._helper_settings.get('strict_mode')
+        elif ('strict_mode' in self._env_variables and isinstance(self._env_variables['strict_mode'], bool)
+                and self._env_variables['strict_mode'] is not None):
+            self.strict_mode = self._env_variables.get('strict_mode')
+        else:
+            self.strict_mode = api.DEFAULT_STRICT_MODE
 
         # Define the connection type to use
         if connection_type in auth.VALID_CONNECTION_TYPES:
@@ -346,7 +367,7 @@ class PyDPlus(object):
         return connected, base_headers
 
     def get(self, endpoint, params=None, headers=None, api_type='admin', timeout=30, show_full_error=True,
-            return_json=True, allow_failed_response=False):
+            return_json=True, allow_failed_response=None):
         """This method performs a GET request against the ID Plus tenant.
 
         .. versionadded:: 1.0.0
@@ -366,8 +387,8 @@ class PyDPlus(object):
         :param return_json: Determines if the response should be returned in JSON format (defaults to ``True``)
         :type return_json: bool
         :param allow_failed_response: Indicates that failed responses should return and should not raise an exception
-                                      (``False`` by default)
-        :type allow_failed_response: bool
+                                      (If not explicitly defined then ``True`` if Strict Mode is disabled)
+        :type allow_failed_response: bool, None
         :returns: The API response in JSON format or as a ``requests`` object
         :raises: :py:exc:`errors.exceptions.APIConnectionError`,
                  :py:exc:`errors.exceptions.APIRequestError`,
@@ -380,7 +401,7 @@ class PyDPlus(object):
                        allow_failed_response=allow_failed_response)
 
     def post(self, endpoint, payload, params=None, headers=None, api_type='admin', timeout=30,
-             show_full_error=True, return_json=True, allow_failed_response=False):
+             show_full_error=True, return_json=True, allow_failed_response=None):
         """This method performs a POST call with payload against the ID Plus tenant.
 
         .. versionadded:: 1.0.0
@@ -402,8 +423,8 @@ class PyDPlus(object):
         :param return_json: Determines if the response should be returned in JSON format (defaults to ``True``)
         :type return_json: bool
         :param allow_failed_response: Indicates that failed responses should return and should not raise an exception
-                                      (``False`` by default)
-        :type allow_failed_response: bool
+                                      (If not explicitly defined then ``True`` if Strict Mode is disabled)
+        :type allow_failed_response: bool, None
         :returns: The API response in JSON format or as a ``requests`` object
         :raises: :py:exc:`errors.exceptions.APIConnectionError`,
                  :py:exc:`errors.exceptions.APIMethodError`,
@@ -417,7 +438,7 @@ class PyDPlus(object):
                         allow_failed_response=allow_failed_response)
 
     def put(self, endpoint, payload, params=None, headers=None, api_type='admin', timeout=30,
-            show_full_error=True, return_json=True, allow_failed_response=False):
+            show_full_error=True, return_json=True, allow_failed_response=None):
         """This method performs a PUT call with payload against the ID Plus tenant.
 
         .. versionadded:: 1.0.0
@@ -439,8 +460,8 @@ class PyDPlus(object):
         :param return_json: Determines if the response should be returned in JSON format (defaults to ``True``)
         :type return_json: bool
         :param allow_failed_response: Indicates that failed responses should return and should not raise an exception
-                                      (``False`` by default)
-        :type allow_failed_response: bool
+                                      (If not explicitly defined then ``True`` if Strict Mode is disabled)
+        :type allow_failed_response: bool, None
         :returns: The API response in JSON format or as a ``requests`` object
         :raises: :py:exc:`errors.exceptions.APIConnectionError`,
                  :py:exc:`errors.exceptions.APIMethodError`,
@@ -464,7 +485,7 @@ class PyDPlus(object):
             self.pydp_object = pydp_object
 
         def get_user_details(self, email, search_unsynced=None, timeout=api.DEFAULT_TIMEOUT, show_full_error=True,
-                             return_json=True, allow_failed_response=False):
+                             return_json=True, allow_failed_response=None):
             """This method retrieves the details for a specific user based on their email address.
 
             .. versionadded:: 1.0.0
@@ -479,9 +500,9 @@ class PyDPlus(object):
             :type show_full_error: bool
             :param return_json: Determines if the response should be returned in JSON format (defaults to ``True``)
             :type return_json: bool
-            :param allow_failed_response: Indicates that failed responses should return and should not raise an
-                                          exception (``False`` by default)
-            :type allow_failed_response: bool
+            :param allow_failed_response: Indicates that failed responses should return and should not raise an exception
+                                          (If not explicitly defined then ``True`` if Strict Mode is disabled)
+            :type allow_failed_response: bool, None
             :returns: The user details in JSON format or the API response as a ``requests`` object
             :raises: :py:exc:`TypeError`,
                      :py:exc:`errors.exceptions.APIMethodError`,
