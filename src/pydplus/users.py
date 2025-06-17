@@ -258,3 +258,9 @@ def mark_undeleted(pydp_object, user_id, timeout=api.DEFAULT_TIMEOUT, show_full_
     # TODO: Add docstring for the function
     return _update_mark_deleted(pydp_object, _user_id=user_id, _mark_deleted=False, _timeout=timeout, _show_full_error=show_full_error, _return_json=return_json, _allow_failed_response=allow_failed_response)
 
+
+def _add_remove_high_risk_users(_pydp_object, _users_list, _action, _timeout=api.DEFAULT_TIMEOUT, _show_full_error=True, _return_json=True,
+                    _allow_failed_response=None):
+    # TODO: Finish the function
+    pass
+
