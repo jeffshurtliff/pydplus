@@ -235,3 +235,26 @@ def synchronize_user(pydp_object, user_id, timeout=api.DEFAULT_TIMEOUT, show_ful
     return api.post(pydp_object=pydp_object, endpoint=endpoint, payload=payload, api_type=api_type, timeout=timeout,
                     show_full_error=show_full_error, return_json=return_json,
                     allow_failed_response=allow_failed_response)
+
+
+def _update_mark_deleted(_pydp_object, _user_id, _mark_deleted, _timeout=api.DEFAULT_TIMEOUT, _show_full_error=True, _return_json=True,
+                    _allow_failed_response=None):
+    # TODO: Add docstring for the function
+    # Define the API endpoint to call and other API details
+    _endpoint = 'v1/users/{user_id}/markDeleted'
+    _api_type = 'admin'
+    _payload = {'markDeleted': _mark_deleted}
+    
+    # Perform the API call and return the response
+    return api.put(pydp_object=_pydp_object, endpoint=_endpoint, payload=_payload, api_type=_api_type, timeout=_timeout, show_full_error=_show_full_error, return_json=_return_json, allow_failed_response=_allow_failed_response)
+
+
+def mark_deleted(pydp_object, user_id, timeout=api.DEFAULT_TIMEOUT, show_full_error=True, return_json=True, allow_failed_response=None):
+    # TODO: Add docstring for the function
+    return _update_mark_deleted(pydp_object, _user_id=user_id, _mark_deleted=True, _timeout=timeout, _show_full_error=show_full_error, _return_json=return_json, _allow_failed_response=allow_failed_response)
+
+
+def mark_undeleted(pydp_object, user_id, timeout=api.DEFAULT_TIMEOUT, show_full_error=True, return_json=True, allow_failed_response=None):
+    # TODO: Add docstring for the function
+    return _update_mark_deleted(pydp_object, _user_id=user_id, _mark_deleted=False, _timeout=timeout, _show_full_error=show_full_error, _return_json=return_json, _allow_failed_response=allow_failed_response)
+
