@@ -4,7 +4,7 @@
 :Synopsis:          Defines the user-related functions associated with the RSA ID Plus API
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     16 Jun 2025
+:Modified Date:     17 Jun 2025
 """
 
 from . import api, errors
@@ -244,7 +244,7 @@ def _update_mark_deleted(_pydp_object, _user_id, _mark_deleted, _timeout=api.DEF
     .. versionadded:: 1.0.0
     """
     # Define the API endpoint to call and other API details
-    _endpoint = 'v1/users/{user_id}/markDeleted'
+    _endpoint = f'v1/users/{_user_id}/markDeleted'
     _api_type = 'admin'
     _payload = {'markDeleted': _mark_deleted}
     
