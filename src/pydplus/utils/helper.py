@@ -6,7 +6,7 @@
 :Example:           ``helper_settings = helper.get_settings('/tmp/helper.yml', 'yaml')``
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     14 Jun 2025
+:Modified Date:     14 Jul 2025
 """
 
 import json
@@ -19,6 +19,7 @@ from .core_utils import get_file_type
 
 # Define constants
 DEFAULT_HELPER_FILE_TYPE = 'json'
+DEFAULT_SSL_VERIFY_VALUE = True
 
 # Initialize logging within the module
 logger = log_utils.initialize_logging(__name__)
@@ -71,7 +72,7 @@ def _get_connection_info(_helper_cfg):
     _oauth_keys = ['issuer_url', 'client_id', 'grant_type', 'client_authentication']
     for _section, _key_list in {'legacy': _legacy_keys, 'oauth': _oauth_keys}.items():
         for _key in _key_list:
-            if _key in _helper_cfg['connection'][_section]:
+            if 'connection' in _helper_cfg and _section in _helper_cfg['connection'] and _key in _helper_cfg['connection'][_section]:
                 _connection_info[_section][_key] = _helper_cfg['connection'][_section][_key]
     return _connection_info
 
@@ -101,7 +102,7 @@ def _collect_values(_top_level_keys, _helper_cfg, _helper_dict=None, _ignore_mis
             _helper_dict[_key] = _key_val
         elif _key == 'ssl_verify':
             # Verify SSL certificates by default unless explicitly set to false
-            _helper_dict[_key] = True
+            _helper_dict[_key] = DEFAULT_SSL_VERIFY_VALUE
         else:
             if not _ignore_missing:
                 _helper_dict[_key] = None
