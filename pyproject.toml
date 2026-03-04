@@ -1,23 +1,95 @@
-[tool.poetry]
+# --------------------------------------------------------------------
+# Core Project Configuration
+# --------------------------------------------------------------------
+[project]
 name = "pydplus"
-version = "1.0.0b1"
+version = "1.0.0.dev0"
 description = "A Python toolset for the RSA ID Plus cloud authentication platform"
 authors = ["Jeff Shurtliff <jeff.shurtliff@rsa.com>"]
 license = "MIT"
 readme = "README.md"
+requires-python = ">=3.9,<4.0"
+license = { file = "LICENSE" }
+authors = [
+    { name = "Jeff Shurtliff", email = "jeffshurtliff@gmail.com" }
+]
+maintainers = [
+    { name = "Jeff Shurtliff", email = "jeffshurtliff@gmail.com" }
+]
+keywords = ["rsa-security", "id-plus", "securid", "authentication-manager", "sso", "mfa", "iam", "identity", "authentication"]
 
-[tool.poetry.dependencies]
-python = "^3.9.23"
-urllib3 = ">=2.4.0"
-requests = ">=2.32.3"
-setuptools = ">=65.5.1"
-pyyaml = ">=6.0.2"
-pyjwt = ">=2.10.1"
-cryptography = ">=45.0.3"
+classifiers = [
+    # Project maturity
+    "Development Status :: 5 - Production/Stable",
+
+    # License
+    "License :: OSI Approved :: MIT License",
+    "License :: Freely Distributable",
+
+    # Intended audience and environment
+    "Intended Audience :: Information Technology",
+    "Intended Audience :: System Administrators",
+    "Intended Audience :: Developers",
+    "Environment :: Web Environment",
+    "Operating System :: OS Independent",
+    "Topic :: Internet :: WWW/HTTP",
+    "Topic :: Internet :: WWW/HTTP :: Site Management",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: System :: Systems Administration",
+
+    # Supported Python versions
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+]
+
+dependencies = [
+    "PyYAML>=6.0.3,<7",
+    "requests>=2.32.5",
+    "pyjwt>=2.10.1",
+    "cryptography>=45.0.3",
+    "urllib3>=1.26.19,<3",  # Explicit pin to avoid CVE-2024-37891
+    "idna>=3.7,<4",         # Explicit pin to avoid CVE-2024-3651
+    "certifi>=2024.7.4",    # Explicit pin to mitigate CA removals (e-Tugra, GLOBALTRUST)
+
+    # Backport of tomllib for Python < 3.11
+    "tomli>=2.0.0; python_version < '3.11'",
+]
+
+[project.urls]
+Homepage = "https://github.com/jeffshurtliff/pydplus"
+Repository = "https://github.com/jeffshurtliff/pydplus"
+Documentation = "https://pydplus.readthedocs.io/en/latest/"                     # Change to stable after first release
+# Changelog = "https://pydplus.readthedocs.io/en/latest/CHANGELOG.html"         # Uncomment when docs are ready
+"Issue Tracker" = "https://github.com/jeffshurtliff/pydplus/issues"
+
+# --------------------------------------------------------------------
+# Poetry-specific Configuration
+# --------------------------------------------------------------------
+[tool.poetry]
+packages = [
+    { include = "pydplus", from = "src" }
+]
+
+include = ["LICENSE", "README.md"]
 
 [tool.poetry.group.dev.dependencies]
-pytest = ">=8.3.5"
+pytest = "^7.2"
+pytest-cov = "^7.0.0"
+bandit = { version = "^1.7.8", extras = ["sarif"] }
+Sphinx = "^7.4.7"
+pydata-sphinx-theme = "^0.15.4"
+myst-parser = "^3.0.1"
+sphinx-favicon = "^1.0.1"
+
+[tool.pytest.ini_options]
+testpaths = ["tests/"]
+pythonpath = ["src"]
 
 [build-system]
-requires = ["poetry-core"]
+requires = ["poetry-core>=1.2.0"]
 build-backend = "poetry.core.masonry.api"
