@@ -5,7 +5,6 @@
 name = "pydplus"
 version = "1.0.0.dev0"
 description = "A Python toolset for the RSA ID Plus cloud authentication platform"
-authors = ["Jeff Shurtliff <jeff.shurtliff@rsa.com>"]
 license = "MIT"
 readme = "README.md"
 requires-python = ">=3.9,<4.0"
