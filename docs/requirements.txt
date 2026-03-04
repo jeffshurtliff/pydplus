@@ -1,0 +1,5 @@
+# Documentation build dependencies (for Read the Docs)
+Sphinx>=7.4.7,<8
+pydata-sphinx-theme>=0.15.4
+myst-parser>=3.0.1
+sphinx-favicon>=1.0.1
