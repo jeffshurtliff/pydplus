@@ -6,7 +6,7 @@
 :Example:           ``logger = log_utils.initialize_logging(__name__)``
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     06 May 2025
+:Modified Date:     04 Mar 2026
 """
 
 import os
@@ -34,7 +34,7 @@ def initialize_logging(logger_name=None, log_level=None, formatter=None, debug=N
                        file_log_level=None, log_file=None, overwrite_log_files=None, console_output=None,
                        console_log_level=None, syslog_output=None, syslog_log_level=None, syslog_address=None,
                        syslog_port=None):
-    """This function initializes logging for the pydplus library."""
+    """Initializes logging for the pydplus library."""
     # TODO: Complete the docstring above with parameters
     logger_name, log_levels, formatter = _apply_defaults(logger_name, formatter, debug, log_level, file_log_level,
                                                          console_log_level, syslog_log_level)
@@ -48,18 +48,18 @@ def initialize_logging(logger_name=None, log_level=None, formatter=None, debug=N
 
 
 class LessThanFilter(logging.Filter):
-    """This class allows filters to be set to limit log levels to only less than a specified level.
+    """Allows filters to be set to limit log levels to only less than a specified level.
 
     .. seealso:: `Zoey Greer <https://stackoverflow.com/users/5124424/zoey-greer>`_ is the original author of
                  this class which was provided on `Stack Overflow <https://stackoverflow.com/a/31459386>`_.
     """
     def __init__(self, exclusive_maximum, name=""):
-        """This method instantiates the :py:class:`pydplus.utils.log_utils.LessThanFilter` class object."""
+        """Instantiates the :py:class:`pydplus.utils.log_utils.LessThanFilter` class object."""
         super(LessThanFilter, self).__init__(name)
         self.max_level = exclusive_maximum
 
     def filter(self, record):
-        """This method returns a Boolean integer value indicating whether or not a message should be logged.
+        """Returns a Boolean integer value indicating whether a message should be logged.
 
         .. note:: A non-zero return indicates that the message will be logged.
         """
@@ -67,7 +67,7 @@ class LessThanFilter(logging.Filter):
 
 
 def _apply_defaults(_logger_name, _formatter, _debug, _log_level, _file_level, _console_level, _syslog_level):
-    """This function applies default values to the configuration settings if not explicitly defined.
+    """Applies default values to the configuration settings if not explicitly defined.
 
     :param _logger_name: The name of the logger instance
     :type _logger_name: str, None
@@ -79,8 +79,9 @@ def _apply_defaults(_logger_name, _formatter, _debug, _log_level, _file_level, _
     :type _log_level: str, None
     :returns: The values that will be used for the configuration settings
     """
+    _default_log_level = LOGGING_DEFAULTS.get('log_level')
     _log_levels = {
-        'general': _log_level,
+        'general': _log_level or _default_log_level,
         'file': _file_level,
         'console': _console_level,
         'syslog': _syslog_level,
@@ -90,12 +91,9 @@ def _apply_defaults(_logger_name, _formatter, _debug, _log_level, _file_level, _
         for _log_type in _log_levels:
             _log_levels[_log_type] = 'debug'
     else:
-        if _log_level:
-            for _lvl_type, _lvl_value in _log_levels.items():
-                if _lvl_type != 'general' and _lvl_value is None:
-                    _log_levels[_lvl_type] = _log_level
-        else:
-            _log_level = LOGGING_DEFAULTS.get('log_level')
+        for _lvl_type, _lvl_value in _log_levels.items():
+            if _lvl_value is None:
+                _log_levels[_lvl_type] = _log_levels['general']
     if _formatter and isinstance(_formatter, str):
         _formatter = logging.Formatter(_formatter)
     _formatter = LOGGING_DEFAULTS.get('formatter') if not _formatter else _formatter
@@ -103,7 +101,7 @@ def _apply_defaults(_logger_name, _formatter, _debug, _log_level, _file_level, _
 
 
 def _get_log_levels_from_dict(_log_levels):
-    """This function returns the individual log level values from a dictionary.
+    """Returns the individual log level values from a dictionary.
 
     :param _log_levels: Dictionary containing log levels for different handlers
     :type _log_levels: dict
@@ -117,10 +115,10 @@ def _get_log_levels_from_dict(_log_levels):
 
 
 def _set_logging_level(_logger, _log_level):
-    """This function sets the logging level for a :py:class:`logging.Logger` instance.
+    """Sets the logging level for a :py:class:`logging.Logger` instance.
 
     :param _logger: The :py:class:`logging.Logger` instance
-    :type _logger: Logger
+    :type _logger: class[logging.Logger]
     :param _log_level: The log level as a string (``debug``, ``info``, ``warning``, ``error`` or ``critical``)
     :type _log_level: str
     :returns: The :py:class:`logging.Logger` instance with a logging level set where applicable
@@ -158,10 +156,10 @@ def _add_handlers(_logger, _formatter, _no_output, _file_output, _file_log_level
 
 
 def _add_file_handler(_logger, _log_level, _log_file, _overwrite, _formatter):
-    """This function adds a :py:class:`logging.FileHandler` to the :py:class:`logging.Logger` instance.
+    """Adds a :py:class:`logging.FileHandler` to the :py:class:`logging.Logger` instance.
 
     :param _logger: The :py:class:`logging.Logger` instance
-    :type _logger: Logger
+    :type _logger: class[logging.Logger]
     :param _log_level: The log level to set for the handler
     :type _log_level: str
     :param _log_file: The log file (as a file name or a file path) to which messages should be written
@@ -173,7 +171,7 @@ def _add_file_handler(_logger, _log_level, _log_file, _overwrite, _formatter):
     :param _overwrite: Determines if messages should be appended to the file (default) or overwrite it
     :type _overwrite: bool
     :param _formatter: The :py:class:`logging.Formatter` to apply to messages passed through the handler
-    :type _formatter: Formatter
+    :type _formatter: class[logging.Formatter]
     :returns: The :py:class:`logging.Logger` instance with the added :py:class:`logging.FileHandler`
     """
     # Define the log file to use
@@ -199,14 +197,14 @@ def _add_file_handler(_logger, _log_level, _log_file, _overwrite, _formatter):
 
 
 def _add_stream_handler(_logger, _log_level, _formatter):
-    """This function adds a :py:class:`logging.StreamHandler` to the :py:class:`logging.Logger` instance.
+    """Adds a :py:class:`logging.StreamHandler` to the :py:class:`logging.Logger` instance.
 
     :param _logger: The :py:class:`logging.Logger` instance
-    :type _logger: Logger
+    :type _logger: class[logging.Logger]
     :param _log_level: The log level to set for the handler
     :type _log_level: str
     :param _formatter: The :py:class:`logging.Formatter` to apply to messages passed through the handler
-    :type _formatter: Formatter
+    :type _formatter: class[logging.Formatter]
     :returns: The :py:class:`logging.Logger` instance with the added :py:class:`logging.StreamHandler`
     """
     _log_level = HANDLER_DEFAULTS.get('console_log_level') if not _log_level else _log_level
@@ -222,17 +220,17 @@ def _add_stream_handler(_logger, _log_level, _formatter):
 
 
 def _add_split_stream_handlers(_logger, _log_level, _formatter):
-    """This function splits messages into q ``stdout`` or ``stderr`` handler depending on the log level.
+    """Splits messages into q ``stdout`` or ``stderr`` handler depending on the log level.
 
     .. seealso:: Refer to the documentation for the :py:class:`pydplus.utils.log_utils.LessThanFilter` for
                  more information on how this filtering is implemented and for credit to the original author.
 
     :param _logger: The :py:class:`logging.Logger` instance
-    :type _logger: Logger
+    :type _logger: class[logging.Logger]
     :param _log_level: The log level provided for the stream handler (i.e. console output)
     :type _log_level: str
     :param _formatter: The :py:class:`logging.Formatter` to apply to messages passed through the handlers
-    :type _formatter: Formatter
+    :type _formatter: class[logging.Formatter]
     :returns: The logger instance with the two handlers added
     """
     # Configure and add the STDOUT handler
