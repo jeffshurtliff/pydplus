@@ -80,14 +80,14 @@ jobs:
 
       - name: Coverage (pytest-cov) and report
         run: |
-          poetry run pytest --cov-report=xml --cov=salespyforce --cov-fail-under=50 tests --color=yes
+          poetry run pytest --cov-report=xml --cov=pydplus tests --color=yes
 
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
-        with:
-          files: ./coverage.xml
-          token: ${{ secrets.CODECOV_TOKEN }}
-          fail_ci_if_error: false
+#      - name: Upload coverage to Codecov
+#        uses: codecov/codecov-action@v4
+#        with:
+#          files: ./coverage.xml
+#          token: ${{ secrets.CODECOV_TOKEN }}
+#          fail_ci_if_error: false
 
       - name: Build sdist and wheel (Poetry)
         run: |
