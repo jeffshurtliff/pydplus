@@ -1,12 +1,21 @@
-# Byte-compiled / optimized / DLL files
-__pycache__/
+# Python bytecode and cache files
 *.py[cod]
 *$py.class
+.cache/
+/.ghtopdep_cache/
+.hypothesis
+.mypy_cache/
+.pytest_cache/
+.eslintcache
+.stylelintcache
+/.ruff_cache/
+__pycache__/
 
 # C extensions
+*.c
 *.so
 
-# Distribution / packaging
+# Package distribution and build files
 .Python
 build/
 develop-eggs/
@@ -20,21 +29,34 @@ parts/
 sdist/
 var/
 wheels/
+pip-wheel-metadata/
 share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
 MANIFEST
 
+# PyPI configuration file
+.pypirc
+.aider*
+
 # PyInstaller
-#  Usually these files are written by a python script from a template
-#  before PyInstaller builds the exe, so as to inject date/other infos into it.
+# Usually these files are written by a python script from a template
+# before PyInstaller builds the exe, so as to inject date/other info into it.
 *.manifest
 *.spec
+
+# Log extensions
+*.log
 
 # Installer logs
 pip-log.txt
 pip-delete-this-directory.txt
+
+# Temporary files and folders
+tmp/
+*.tmp
+*.temp
 
 # Unit test / coverage reports
 htmlcov/
@@ -48,93 +70,76 @@ coverage.xml
 *.cover
 *.py,cover
 .hypothesis/
-.pytest_cache/
-cover/
 
 # Translations
 *.mo
 *.pot
 
-# Django stuff:
-*.log
+# Django
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
 
-# Flask stuff:
+# Flask
 instance/
 .webassets-cache
 
-# Scrapy stuff:
+# Scrapy
 .scrapy
 
 # Sphinx documentation
 docs/_build/
+docs_*/_build/
+
+# mkdocs documentation
+/site
 
 # PyBuilder
-.pybuilder/
 target/
 
-# Jupyter Notebook
+# Jupyter notebooks
 .ipynb_checkpoints
+.jupyterlite.doit.db
 
 # IPython
 profile_default/
 ipython_config.py
 
 # pyenv
-#   For a library or package, you might want to ignore these files since the code is
-#   intended to run in multiple environments; otherwise, check them in:
-# .python-version
+.python-version
 
-# pipenv
-#   According to pypa/pipenv#598, it is recommended to include Pipfile.lock in version control.
-#   However, in case of collaboration, if having platform-specific dependencies or dependencies
-#   having no cross-platform support, pipenv may install dependencies that don't work, or not
-#   install all needed dependencies.
-#Pipfile.lock
-
-# UV
-#   Similar to Pipfile.lock, it is generally recommended to include uv.lock in version control.
-#   This is especially recommended for binary packages to ensure reproducibility, and is more
-#   commonly ignored for libraries.
-#uv.lock
-
-# poetry
-#   Similar to Pipfile.lock, it is generally recommended to include poetry.lock in version control.
-#   This is especially recommended for binary packages to ensure reproducibility, and is more
-#   commonly ignored for libraries.
-#   https://python-poetry.org/docs/basic-usage/#commit-your-poetrylock-file-to-version-control
-#poetry.lock
-
-# pdm
-#   Similar to Pipfile.lock, it is generally recommended to include pdm.lock in version control.
-#pdm.lock
-#   pdm stores project-wide configurations in .pdm.toml, but it is recommended to not include it
-#   in version control.
-#   https://pdm.fming.dev/latest/usage/project/#working-with-version-control
-.pdm.toml
-.pdm-python
-.pdm-build/
-
-# PEP 582; used by e.g. github.com/David-OConnor/pyflow and github.com/pdm-project/pdm
-__pypackages__/
-
-# Celery stuff
+# Celery
 celerybeat-schedule
 celerybeat.pid
+
+# Yarn Integrity file
+.yarn-integrity
 
 # SageMath parsed files
 *.sage.py
 
 # Environments
+.envrc
 .env
-.venv
+.env/
 env/
+env3*/
+.venv
+.venv/
 venv/
 ENV/
 env.bak/
 venv.bak/
+
+# PEP 582; used by e.g. github.com/David-OConnor/pyflow
+__pypackages__/
+
+# PyCharm IDE
+.idea/
+
+# VSCode IDE
+.vscode/
+.vscode-test
 
 # Spyder project settings
 .spyderproject
@@ -143,11 +148,7 @@ venv.bak/
 # Rope project settings
 .ropeproject
 
-# mkdocs documentation
-/site
-
 # mypy
-.mypy_cache/
 .dmypy.json
 dmypy.json
 
@@ -157,21 +158,29 @@ dmypy.json
 # pytype static type analyzer
 .pytype/
 
-# Cython debug symbols
-cython_debug/
-
-# PyCharm
-#  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
-#  be found at https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore
-#  and can be added to the global gitignore or merged into this file.  For a more nuclear
-#  option (not recommended) you can uncomment the following to ignore the entire idea folder.
-.idea/
-
-# Ruff stuff:
-.ruff_cache/
-
-# PyPI configuration file
-.pypirc
+# Temporary and working files
+*~
+*$
+*.swp
 
 # Local directory
 local/
+
+# Thumbnails
+._*
+
+# Scratch files
+scratch.txt
+
+# Operating system generated files
+.DS_Store
+.Trash-*
+Desktop.ini
+ehthumbs.db
+Thumbs.db
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
