@@ -31,7 +31,6 @@ classifiers = [
     "Environment :: Web Environment",
     "Operating System :: OS Independent",
     "Topic :: Internet :: WWW/HTTP",
-    "Topic :: Internet :: WWW/HTTP :: Site Management",
     "Topic :: Software Development :: Libraries",
     "Topic :: System :: Systems Administration",
 
