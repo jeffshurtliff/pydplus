@@ -4,7 +4,7 @@
 :Synopsis:          Constants that are utilized throughout the package
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     04 Mar 2026
+:Modified Date:     05 Mar 2026
 """
 
 from __future__ import annotations
@@ -57,6 +57,7 @@ class ExceptionClasses:
     # Exception messages and message segments
     _API_CUSTOM_MSG: str = 'The {type} request failed with the following message:'
     _API_DEFAULT_MSG: str = 'The {type} request did not return a successful response.'
+    _INVALID_HELPER_DEFAULT_MSG: str = "The helper configuration file can only have the 'yml', 'yaml' or 'json' file type."
     _WITH_THE_FOLLOWING_SEGMENT: str = ' with the following'
 
 
@@ -103,12 +104,92 @@ class HelperSettings:
     """
     # Validation criteria
     VALID_HELPER_FILE_TYPES: ClassVar[frozenset[str]] = frozenset({'json', 'yml', 'yaml'})
+    VALID_YAML_TRUE_VALUES: ClassVar[frozenset[str]] = frozenset({'yes', 'true'})
 
-    # Authentication and connection fields
-    # TODO: Add constants here
+    # Root-level helper fields
+    BASE_URL: ClassVar[str] = 'base_url'
+    CONNECTION: ClassVar[str] = 'connection'
+    CONNECTION_TYPE: ClassVar[str] = 'connection_type'
+    SSL_VERIFY: str = 'ssl_verify'
+    STRICT_MODE: ClassVar[str] = 'strict_mode'
+    ENV_VARIABLES: ClassVar[str] = 'env_variables'
+    ROOT_LEVEL_BASIC_FIELDS: ClassVar[frozenset[str]] = frozenset({
+        BASE_URL,
+        CONNECTION_TYPE,
+        STRICT_MODE,
+        SSL_VERIFY,
+    })
+
+    # Authentication/Connection type parent fields
+    LEGACY: ClassVar[str] = 'legacy'
+    OAUTH: ClassVar[str] = 'oauth'
+
+    # Legacy authentication fields
+    LEGACY_ACCESS_ID: ClassVar[str] = 'access_id'
+    LEGACY_PRIVATE_KEY_FILE: ClassVar[str] = 'private_key_file'
+    LEGACY_PRIVATE_KEY_PATH: ClassVar[str] = 'private_key_path'
+    LEGACY_FIELDS: ClassVar[frozenset[str]] = frozenset({
+        LEGACY_ACCESS_ID,
+        LEGACY_PRIVATE_KEY_FILE,
+        LEGACY_PRIVATE_KEY_PATH,
+    })
+
+    # OAuth authentication fields
+    OAUTH_ISSUER_URL: ClassVar[str] = 'issuer_url'
+    OAUTH_CLIENT_ID: ClassVar[str] = 'client_id'
+    OAUTH_GRANT_TYPE: ClassVar[str] = 'grant_type'
+    OAUTH_CLIENT_AUTHENTICATION: ClassVar[str] = 'client_authentication'
+    OAUTH_FIELDS: ClassVar[frozenset[str]] = frozenset({
+        OAUTH_ISSUER_URL,
+        OAUTH_CLIENT_ID,
+        OAUTH_GRANT_TYPE,
+        OAUTH_CLIENT_AUTHENTICATION,
+    })
+
+    # OAuth default values
+    OAUTH_DEFAULT_GRANT_TYPE: ClassVar[str] = 'Client Credentials'
+    OAUTH_DEFAULT_CLIENT_AUTH: ClassVar[str] = 'Private Key JWT'
+
+    # Connection fields
+    CONNECTION_FIELDS: Final[Mapping[str, frozenset[str]]] = MappingProxyType({
+        LEGACY: LEGACY_FIELDS,
+        OAUTH: OAUTH_FIELDS,
+    })
+
+    # Environment variable fields
+    ENV_CONNECTION_TYPE: ClassVar[str] = 'connection_type'
+    ENV_LEGACY_ACCESS_ID: ClassVar[str] = 'legacy_access_id'
+    ENV_LEGACY_KEY_PATH: ClassVar[str] = 'legacy_key_path'
+    ENV_LEGACY_KEY_FILE: ClassVar[str] = 'legacy_key_file'
+    ENV_OAUTH_ISSUER_URL: ClassVar[str] = 'oauth_issuer_url'
+    ENV_OAUTH_CLIENT_ID: ClassVar[str] = 'oauth_client_id'
+    ENV_OAUTH_GRANT_TYPE: ClassVar[str] = 'oauth_grant_type'
+
+    # Environment variable default values
+    ENV_DEFAULT_CONNECTION_TYPE: ClassVar[str] = 'PYDPLUS_CONNECTION_TYPE'
+    ENV_DEFAULT_LEGACY_ACCESS_ID: ClassVar[str] = 'PYDPLUS_LEGACY_ACCESS_ID'
+    ENV_DEFAULT_LEGACY_KEY_PATH: ClassVar[str] = 'PYDPLUS_LEGACY_KEY_PATH'
+    ENV_DEFAULT_LEGACY_KEY_FILE: ClassVar[str] = 'PYDPLUS_LEGACY_KEY_FILE'
+    ENV_DEFAULT_OAUTH_ISSUER_URL: ClassVar[str] = 'PYDPLUS_OAUTH_ISSUER_URL'
+    ENV_DEFAULT_OAUTH_CLIENT_ID: ClassVar[str] = 'PYDPLUS_OAUTH_CLIENT_ID'
+    ENV_DEFAULT_OAUTH_GRANT_TYPE: ClassVar[str] = 'PYDPLUS_OAUTH_GRANT_TYPE'
+
+    # Environment variable default mapping
+    ENV_VARIABLE_DEFAULT_MAPPING: Final[Mapping[str, str]] = MappingProxyType({
+        ENV_CONNECTION_TYPE: ENV_DEFAULT_CONNECTION_TYPE,
+        ENV_LEGACY_ACCESS_ID: ENV_DEFAULT_LEGACY_ACCESS_ID,
+        ENV_LEGACY_KEY_PATH: ENV_DEFAULT_LEGACY_KEY_PATH,
+        ENV_LEGACY_KEY_FILE: ENV_DEFAULT_LEGACY_KEY_FILE,
+        ENV_OAUTH_ISSUER_URL: ENV_DEFAULT_OAUTH_ISSUER_URL,
+        ENV_OAUTH_CLIENT_ID: ENV_DEFAULT_OAUTH_CLIENT_ID,
+        ENV_OAUTH_GRANT_TYPE: ENV_DEFAULT_OAUTH_GRANT_TYPE,
+    })
 
     # Other configuration fields
-    SSL_VERIFY: str = 'ssl_verify'
+    # TODO: Add constants here (if needed)
+
+    # Other default values
+    DEFAULT_SSL_VERIFY_VALUE = True
 
 
 # -----------------------------
