@@ -31,8 +31,13 @@ classifiers = [
     "Environment :: Web Environment",
     "Operating System :: OS Independent",
     "Topic :: Internet :: WWW/HTTP",
+    'Topic :: Communications :: FIDO',
+    'Topic :: Office/Business',
+    'Topic :: Security',
+    'Topic :: Security :: Cryptography',
     "Topic :: Software Development :: Libraries",
     "Topic :: System :: Systems Administration",
+    "Topic :: System :: Systems Administration :: Authentication/Directory",
 
     # Supported Python versions
     "Programming Language :: Python :: 3",
