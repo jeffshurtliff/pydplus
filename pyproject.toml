@@ -18,7 +18,7 @@ keywords = ["rsa-security", "id-plus", "securid", "authentication-manager", "sso
 
 classifiers = [
     # Project maturity
-    "Development Status :: 5 - Production/Stable",
+    "Development Status :: 4 - Beta",
 
     # License
     "License :: OSI Approved :: MIT License",
