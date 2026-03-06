@@ -6,35 +6,29 @@
 :Example:           ``jwt_string = auth.get_legacy_jwt_string(base_url, connection_info)``
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     29 May 2025
+:Modified Date:     06 Mar 2026
 """
 
+from __future__ import annotations
+
 import datetime
+from typing import Optional, Tuple
 
 import jwt
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey
 
 from . import errors
+from . import constants as const
 from .utils import core_utils, log_utils
 
 # Initialize logging
 logger = log_utils.initialize_logging(__name__)
 
-# Define constants
-DEFAULT_CONNECTION_TYPE = 'oauth'
-VALID_CONNECTION_TYPES = {'oauth', 'legacy'}
-EMPTY_CONNECTION_INFO = {'legacy': {}, 'oauth': {}}
-LEGACY_CONNECTION_FIELDS = {'access_id', 'private_key_path', 'private_key_file'}
-OAUTH_CONNECTION_FIELDS = {'issuer_url', 'client_id', 'grant_type', 'client_authentication'}
-STRUCTURED_CONNECTION_FIELDS = {'legacy': LEGACY_CONNECTION_FIELDS, 'oauth': OAUTH_CONNECTION_FIELDS}
-OAUTH_GRANT_TYPE = 'Client Credentials'
-OAUTH_CLIENT_AUTH = 'Private Key JWT'
-LEGACY_KEY_ALGORITHM = 'RS256'
 
-
-def get_legacy_jwt_string(base_url, connection_info):
-    """This function retrieves the JWT string used for Legacy API connections.
+def get_legacy_jwt_string(base_url: str, connection_info: dict) -> str:
+    """Retrieves the JWT string used for Legacy API connections.
 
     :param base_url: The base URL for the Cloud Administration API
     :type base_url: str
@@ -55,15 +49,17 @@ def get_legacy_jwt_string(base_url, connection_info):
     jwt_string = jwt.encode(
         payload=jwt_claims,
         key=private_key,
-        algorithm=LEGACY_KEY_ALGORITHM
+        algorithm=const.AUTH_VALUES.LEGACY_KEY_ALGORITHM,
     )
     return jwt_string
 
 
-def get_legacy_headers(jwt_string=None, base_url=None, connection_info=None):
-    """This function constructs the headers to use in legacy API calls.
-
-    .. versionadded:: 1.0.0
+def get_legacy_headers(
+        jwt_string: Optional[str] = None,
+        base_url: Optional[str] = None,
+        connection_info: Optional[dict] = None,
+) -> dict[str, str]:
+    """Constructs the headers to use in legacy API calls.
 
     :param jwt_string: The constructed JWT string to provide in the Authorization header
     :type jwt_string: str, None
@@ -82,26 +78,33 @@ def get_legacy_headers(jwt_string=None, base_url=None, connection_info=None):
             raise errors.exceptions.MissingRequiredDataError(error_msg)
         jwt_string = get_legacy_jwt_string(base_url, connection_info)
     headers = {
-        "Authorization": f"Bearer {jwt_string}",
-        "Content-Type": "application/json",
+        const.HEADERS.AUTHORIZATION: const.AUTH_SCHEMES.BEARER.format(token=jwt_string),
+        const.HEADERS.CONTENT_TYPE: const.CONTENT_TYPES.JSON,
     }
     return headers
 
 
-def _extract_legacy_connection_info(_connection_info):
-    """This function extracts the needed legacy authentication data from the connection info dictionary.
+def _extract_legacy_connection_info(_connection_info: dict) -> Tuple[str, str]:
+    """Extracts the needed legacy authentication data from the connection info dictionary.
 
-    .. versionadded:: 1.0.0
+    :param _connection_info: The dictionary containing connection info from the client object
+    :type _connection_info: dict
+    :returns: The access ID and private key full path in a tuple
+    :raises: :py:exc:`TypeError`,
+             :py:exc:`pydplus.errors.exceptions.MissingRequiredDataError`
     """
     # Extract the needed data
-    _access_id = _connection_info['legacy'].get('access_id', '')
-    _private_key_dir = _connection_info['legacy'].get('private_key_path', '')
-    _private_key_file = _connection_info['legacy'].get('private_key_file', '')
-    _private_key_full_path = f"{core_utils.ensure_ending_slash(_private_key_dir, 'file')}{_private_key_file}"
+    _access_id = _connection_info[const.CONNECTION_INFO.LEGACY].get(const.CONNECTION_INFO.LEGACY_ACCESS_ID, '')
+    _private_key_dir = _connection_info[const.CONNECTION_INFO.LEGACY].get(const.CONNECTION_INFO.LEGACY_PRIVATE_KEY_PATH, '')
+    _private_key_file = _connection_info[const.CONNECTION_INFO.LEGACY].get(const.CONNECTION_INFO.LEGACY_PRIVATE_KEY_FILE, '')
+    _private_key_full_path = f"{core_utils.ensure_ending_slash(_private_key_dir, const.ARGUMENT_VALUES.FILE)}{_private_key_file}"
 
     # Raise an exception if the data is incomplete
     if not _access_id or not _private_key_file:
-        _missing_var = 'access_id' if not _access_id else 'private_key_file'
+        if not _access_id:
+            _missing_var = const.CONNECTION_INFO.LEGACY_ACCESS_ID
+        else:
+            _missing_var = const.CONNECTION_INFO.LEGACY_PRIVATE_KEY_FILE
         _error_msg = f'The {_missing_var} value is needed to connect to the tenant.'
         logger.error(_error_msg)
         raise errors.exceptions.MissingRequiredDataError(_error_msg)
@@ -110,24 +113,31 @@ def _extract_legacy_connection_info(_connection_info):
     return _access_id, _private_key_full_path
 
 
-def _define_jwt_claims(_access_id, _base_url):
-    """This function defines the JWT claims to use when generating the JWT string.
+def _define_jwt_claims(_access_id: str, _base_url: str) -> dict:
+    """Defines the JWT claims to use when generating the JWT string.
 
-    .. versionadded:: 1.0.0
+    :param _access_id: The access ID used for legacy authentication
+    :type _access_id: str
+    :param _base_url: The base URL for the ID Plus tenant
+    :type _base_url: str
+    :returns: Compiled JWT claims data in a dictionary
     """
     _claims_data = {
-        "sub": _access_id,
-        "iat": datetime.datetime.now(datetime.timezone.utc),     # This code supports Python 3.2+
-        "exp": datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(seconds=3600),
-        "aud": _base_url,
+        const.AUTH_FIELDS.JWT_SUB: _access_id,
+        const.AUTH_FIELDS.JWT_IAT: datetime.datetime.now(datetime.timezone.utc),     # This code supports Python 3.2+
+        const.AUTH_FIELDS.JWT_EXP: datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(seconds=3600),
+        const.AUTH_FIELDS.JWT_AUD: _base_url,
     }
     return _claims_data
 
 
-def _load_private_key(_key_path):
-    """This function loads the private key file for use in generating the JWT string.
+def _load_private_key(_key_path: str) -> RSAPrivateKey:
+    """Loads the private key file for use in generating the JWT string.
 
-    .. versionadded:: 1.0.0
+    :param _key_path: The full path to the private key
+    :type _key_path: str
+    :returns: The loaded private key data
+    :raises: :py:exc:`FileNotFoundError`
     """
     if not core_utils.file_exists(_key_path):
         _error_msg = f"The file '{_key_path}' does not exist and cannot be used for the private key."

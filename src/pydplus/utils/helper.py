@@ -6,7 +6,7 @@
 :Example:           ``helper_settings = helper.get_settings('/tmp/helper.yml', 'yaml')``
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     05 Mar 2026
+:Modified Date:     06 Mar 2026
 """
 
 from __future__ import annotations
@@ -58,8 +58,8 @@ def _convert_yaml_to_bool(_yaml_bool_value: str) -> bool:
 
 def _get_connection_info(_helper_cfg: dict) -> dict[str, dict]:
     """Parses any connection information found in the helper file."""
-    _connection_info = {const.HELPER_SETTINGS.LEGACY: {}, const.HELPER_SETTINGS.OAUTH: {}}
-    for _section, _key_list in const.HELPER_SETTINGS.CONNECTION_FIELDS.items():
+    _connection_info = {const.CONNECTION_INFO.LEGACY: {}, const.CONNECTION_INFO.OAUTH: {}}
+    for _section, _key_list in const.CONNECTION_INFO.CONNECTION_FIELDS.items():
         for _key in _key_list:
             if (const.HELPER_SETTINGS.CONNECTION in _helper_cfg
                     and _section in _helper_cfg[const.HELPER_SETTINGS.CONNECTION]

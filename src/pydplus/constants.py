@@ -4,7 +4,7 @@
 :Synopsis:          Constants that are utilized throughout the package
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     05 Mar 2026
+:Modified Date:     06 Mar 2026
 """
 
 from __future__ import annotations
@@ -128,42 +128,6 @@ class HelperSettings:
         SSL_VERIFY,
     })
 
-    # Authentication/Connection type parent fields
-    LEGACY: ClassVar[str] = 'legacy'
-    OAUTH: ClassVar[str] = 'oauth'
-
-    # Legacy authentication fields
-    LEGACY_ACCESS_ID: ClassVar[str] = 'access_id'
-    LEGACY_PRIVATE_KEY_FILE: ClassVar[str] = 'private_key_file'
-    LEGACY_PRIVATE_KEY_PATH: ClassVar[str] = 'private_key_path'
-    LEGACY_FIELDS: ClassVar[frozenset[str]] = frozenset({
-        LEGACY_ACCESS_ID,
-        LEGACY_PRIVATE_KEY_FILE,
-        LEGACY_PRIVATE_KEY_PATH,
-    })
-
-    # OAuth authentication fields
-    OAUTH_ISSUER_URL: ClassVar[str] = 'issuer_url'
-    OAUTH_CLIENT_ID: ClassVar[str] = 'client_id'
-    OAUTH_GRANT_TYPE: ClassVar[str] = 'grant_type'
-    OAUTH_CLIENT_AUTHENTICATION: ClassVar[str] = 'client_authentication'
-    OAUTH_FIELDS: ClassVar[frozenset[str]] = frozenset({
-        OAUTH_ISSUER_URL,
-        OAUTH_CLIENT_ID,
-        OAUTH_GRANT_TYPE,
-        OAUTH_CLIENT_AUTHENTICATION,
-    })
-
-    # OAuth default values
-    OAUTH_DEFAULT_GRANT_TYPE: ClassVar[str] = 'Client Credentials'
-    OAUTH_DEFAULT_CLIENT_AUTH: ClassVar[str] = 'Private Key JWT'
-
-    # Connection fields
-    CONNECTION_FIELDS: Final[Mapping[str, frozenset[str]]] = MappingProxyType({
-        LEGACY: LEGACY_FIELDS,
-        OAUTH: OAUTH_FIELDS,
-    })
-
     # Environment variable fields
     ENV_CONNECTION_TYPE: ClassVar[str] = 'connection_type'
     ENV_LEGACY_ACCESS_ID: ClassVar[str] = 'legacy_access_id'
@@ -201,6 +165,51 @@ class HelperSettings:
 
 
 # -----------------------------
+# API Connection Information
+# -----------------------------
+@dataclass(frozen=True)
+class ConnectionInfo:
+    """Fields, values, and other constants relating to the ``connection_info``
+    dictionary within the client object and the :py:mod:`pydplus.utils.helper` module.
+    """
+    # Authentication/Connection type parent fields
+    LEGACY: ClassVar[str] = 'legacy'
+    OAUTH: ClassVar[str] = 'oauth'
+
+    # Legacy authentication fields
+    LEGACY_ACCESS_ID: ClassVar[str] = 'access_id'
+    LEGACY_PRIVATE_KEY_FILE: ClassVar[str] = 'private_key_file'
+    LEGACY_PRIVATE_KEY_PATH: ClassVar[str] = 'private_key_path'
+    LEGACY_FIELDS: ClassVar[frozenset[str]] = frozenset({
+        LEGACY_ACCESS_ID,
+        LEGACY_PRIVATE_KEY_FILE,
+        LEGACY_PRIVATE_KEY_PATH,
+    })
+
+    # OAuth authentication fields
+    OAUTH_ISSUER_URL: ClassVar[str] = 'issuer_url'
+    OAUTH_CLIENT_ID: ClassVar[str] = 'client_id'
+    OAUTH_GRANT_TYPE: ClassVar[str] = 'grant_type'
+    OAUTH_CLIENT_AUTHENTICATION: ClassVar[str] = 'client_authentication'
+    OAUTH_FIELDS: ClassVar[frozenset[str]] = frozenset({
+        OAUTH_ISSUER_URL,
+        OAUTH_CLIENT_ID,
+        OAUTH_GRANT_TYPE,
+        OAUTH_CLIENT_AUTHENTICATION,
+    })
+
+    # OAuth default values
+    OAUTH_DEFAULT_GRANT_TYPE: ClassVar[str] = 'Client Credentials'
+    OAUTH_DEFAULT_CLIENT_AUTH: ClassVar[str] = 'Private Key JWT'
+
+    # Connection fields
+    CONNECTION_FIELDS: Final[Mapping[str, frozenset[str]]] = MappingProxyType({
+        LEGACY: LEGACY_FIELDS,
+        OAUTH: OAUTH_FIELDS,
+    })
+
+
+# -----------------------------
 # HTTP / Networking Defaults
 # -----------------------------
 DEFAULT_API_TIMEOUT_SECONDS: Final[int] = 30
@@ -209,6 +218,37 @@ HEADER_TYPE_DEFAULT: Final[str] = 'default'
 VALID_HEADER_TYPES: Final[frozenset[str]] = frozenset({
     HEADER_TYPE_DEFAULT,
 })
+
+
+# -----------------------------
+# API Authentication Fields
+# -----------------------------
+@dataclass(frozen=True)
+class AuthFields:
+    """Fields relating to API authentication."""
+    # Authentication/Connection type parent fields
+    LEGACY: ClassVar[str] = 'legacy'
+    OAUTH: ClassVar[str] = 'oauth'
+
+    # JWT Claims fields
+    JWT_SUB: ClassVar[str] = 'sub'
+    JWT_IAT: ClassVar[str] = 'iat'
+    JWT_EXP: ClassVar[str] = 'exp'
+    JWT_AUD: ClassVar[str] = 'aud'
+
+
+# -----------------------------
+# API Authentication Values
+# -----------------------------
+@dataclass(frozen=True)
+class AuthValues:
+    """Field/Parameter values relating to API authentication."""
+    # Legacy default values
+    LEGACY_KEY_ALGORITHM = 'RS256'
+
+    # OAuth default values
+    OAUTH_DEFAULT_GRANT_TYPE: ClassVar[str] = 'Client Credentials'
+    OAUTH_DEFAULT_CLIENT_AUTH: ClassVar[str] = 'Private Key JWT'
 
 
 # -----------------------------
@@ -402,9 +442,14 @@ CLIENT_SETTINGS: Final[ClientSettings] = ClientSettings()
 # Helper Utility
 HELPER_SETTINGS: Final[HelperSettings] = HelperSettings()
 
+# Connection Information (Client and Helper)
+CONNECTION_INFO: Final[ConnectionInfo] = ConnectionInfo()
+
 # HTTP / API
 API_REQUEST_TYPES: Final[ApiRequestTypes] = ApiRequestTypes()
+AUTH_FIELDS: Final[AuthFields] = AuthFields()
 AUTH_SCHEMES: Final[AuthSchemes] = AuthSchemes()
+AUTH_VALUES: Final[AuthValues] = AuthValues()
 CONTENT_TYPES: Final[ContentTypes] = ContentTypes()
 ENCODING_TYPES: Final[EncodingTypes] = EncodingTypes()
 HEADERS: Final[Headers] = Headers()
