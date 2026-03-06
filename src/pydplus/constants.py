@@ -32,33 +32,44 @@ _DEFAULT_WARNING_CATEGORY: Final[type[Warning]] = UserWarning
 
 
 # -----------------------------
+# Common Argument Values
+# -----------------------------
+@dataclass(frozen=True)
+class ArgumentValues:
+    """Common argument values leveraged throughout the package."""
+    FILE: ClassVar[str] = 'file'
+    URL: ClassVar[str] = 'url'
+
+
+# -----------------------------
 # Exception Classes
 # -----------------------------
 @dataclass(frozen=True)
 class ExceptionClasses:
     """Constants utilized by the exception classes in the :py:mod:`pydplus.errors.exceptions` module."""
     # Keyword arguments
-    _DATA: str = 'data'
-    _FEATURE: str = 'feature'
-    _FIELD: str = 'field'
-    _FILE: str = 'file'
-    _IDENTIFIER: str = 'identifier'
-    _INIT: str = 'init'
-    _INITIALIZE: str = 'initialize'
-    _MESSAGE: str = 'message'
-    _OBJECT: str = 'object'
-    _PARAM: str = 'param'
-    _REQUEST_TYPE: str = 'request_type'
-    _STATUS_CODE: str = 'status_code'
-    _URL: str = 'url'
-    _VAL: str = 'val'
-    _VALUE: str = 'value'
+    _DATA: ClassVar[str] = 'data'
+    _FEATURE: ClassVar[str] = 'feature'
+    _FIELD: ClassVar[str] = 'field'
+    _FILE: ClassVar[str] = 'file'
+    _IDENTIFIER: ClassVar[str] = 'identifier'
+    _INIT: ClassVar[str] = 'init'
+    _INITIALIZE: ClassVar[str] = 'initialize'
+    _MESSAGE: ClassVar[str] = 'message'
+    _OBJECT: ClassVar[str] = 'object'
+    _PARAM: ClassVar[str] = 'param'
+    _REQUEST_TYPE: ClassVar[str] = 'request_type'
+    _STATUS_CODE: ClassVar[str] = 'status_code'
+    _URL: ClassVar[str] = 'url'
+    _VAL: ClassVar[str] = 'val'
+    _VALUE: ClassVar[str] = 'value'
 
     # Exception messages and message segments
-    _API_CUSTOM_MSG: str = 'The {type} request failed with the following message:'
-    _API_DEFAULT_MSG: str = 'The {type} request did not return a successful response.'
-    _INVALID_HELPER_DEFAULT_MSG: str = "The helper configuration file can only have the 'yml', 'yaml' or 'json' file type."
-    _WITH_THE_FOLLOWING_SEGMENT: str = ' with the following'
+    _API_CUSTOM_MSG: ClassVar[str] = 'The {type} request failed with the following message:'
+    _API_DEFAULT_MSG: ClassVar[str] = 'The {type} request did not return a successful response.'
+    _CANNOT_LOCATE_FILE: ClassVar[str] = 'Unable to locate the following file: {file_path}'
+    _INVALID_HELPER_DEFAULT_MSG: ClassVar[str] = "The helper configuration file can only have the 'yml', 'yaml' or 'json' file type."
+    _WITH_THE_FOLLOWING_SEGMENT: ClassVar[str] = ' with the following'
 
 
 # -----------------------------
@@ -66,21 +77,18 @@ class ExceptionClasses:
 # -----------------------------
 @dataclass(frozen=True)
 class FileExtensions:
-    """Common file extensions leveraged throughout the package.
-
-    .. versionadded:: 1.5.0
-    """
+    """Common file extensions leveraged throughout the package."""
     # Without delimiter
-    JPEG: str = 'jpeg'
-    JSON: str = 'json'
-    YAML: str = 'yaml'
-    YML: str = 'yml'
+    JPEG: ClassVar[str] = 'jpeg'
+    JSON: ClassVar[str] = 'json'
+    YAML: ClassVar[str] = 'yaml'
+    YML: ClassVar[str] = 'yml'
 
     # With delimiter
-    DOT_JPEG: str = f'.{JPEG}'
-    DOT_JSON: str = f'.{JSON}'
-    DOT_YAML: str = f'.{YAML}'
-    DOT_YML: str = f'.{YML}'
+    DOT_JPEG: ClassVar[str] = f'.{JPEG}'
+    DOT_JSON: ClassVar[str] = f'.{JSON}'
+    DOT_YAML: ClassVar[str] = f'.{YAML}'
+    DOT_YML: ClassVar[str] = f'.{YML}'
 
 
 # -------------------------------
@@ -380,6 +388,7 @@ class LogMessages:
 # Exported namespaces
 # -----------------------------
 # Common (Public)
+ARGUMENT_VALUES: Final[ArgumentValues] = ArgumentValues()
 FILE_EXTENSIONS: Final[FileExtensions] = FileExtensions()
 URLS: Final[Urls] = Urls()
 
