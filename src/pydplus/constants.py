@@ -212,11 +212,24 @@ class ConnectionInfo:
 # -----------------------------
 # HTTP / Networking Defaults
 # -----------------------------
+# API types
+ADMIN_API_TYPE: Final[str] = 'admin'
+AUTH_API_TYPE = Final[str] = 'auth'
+
+
+# Default values
 DEFAULT_API_TIMEOUT_SECONDS: Final[int] = 30
 DEFAULT_API_MAX_RETRIES: Final[int] = 3
-HEADER_TYPE_DEFAULT: Final[str] = 'default'
+DEFAULT_API_TYPE: Final[str] = ADMIN_API_TYPE
+DEFAULT_STRICT_MODE: Final[bool] = False
+DEFAULT_HEADER_TYPE: Final[str] = 'default'
+
+# Validation criteria
+VALID_API_TYPES:  Final[frozenset[str]] = frozenset({
+
+})
 VALID_HEADER_TYPES: Final[frozenset[str]] = frozenset({
-    HEADER_TYPE_DEFAULT,
+    DEFAULT_HEADER_TYPE,
 })
 
 
