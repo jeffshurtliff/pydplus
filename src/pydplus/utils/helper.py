@@ -6,7 +6,7 @@
 :Example:           ``helper_settings = helper.get_settings('/tmp/helper.yml', 'yaml')``
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     06 Mar 2026
+:Modified Date:     07 Mar 2026
 """
 
 from __future__ import annotations
@@ -94,7 +94,7 @@ def _collect_values(
             if _key_val in const.YAML_BOOLEAN_MAPPING:
                 _key_val = const.YAML_BOOLEAN_MAPPING.get(_key_val)
             _helper_dict[_key] = _key_val
-        elif _key == const.HELPER_SETTINGS.SSL_VERIFY:
+        elif _key == const.HELPER_SETTINGS.VERIFY_SSL:
             # Verify SSL certificates by default unless explicitly set to false
             _helper_dict[_key] = True
         else:
