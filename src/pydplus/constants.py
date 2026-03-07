@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import Final, ClassVar, Mapping, Union
+from typing import Any, Final, ClassVar, Mapping, Union
 
 
 # --------------------------------------
@@ -108,7 +108,9 @@ class ClientSettings:
     """Fields, values, and other constants relating to the :py:class:`pydplus.PyDPlus`
     client configuration settings.
     """
-    # TODO: Add constants for the client object
+    # Connection types
+    CONNECTION_TYPE_LEGACY: ClassVar[str] = 'legacy'
+    CONNECTION_TYPE_OAUTH: ClassVar[str] = 'oauth'
 
 
 # -------------------------------
@@ -127,14 +129,14 @@ class HelperSettings:
     BASE_URL: ClassVar[str] = 'base_url'
     CONNECTION: ClassVar[str] = 'connection'
     CONNECTION_TYPE: ClassVar[str] = 'connection_type'
-    SSL_VERIFY: str = 'ssl_verify'
     STRICT_MODE: ClassVar[str] = 'strict_mode'
+    VERIFY_SSL: str = 'verify_ssl'
     ENV_VARIABLES: ClassVar[str] = 'env_variables'
     ROOT_LEVEL_BASIC_FIELDS: ClassVar[frozenset[str]] = frozenset({
         BASE_URL,
         CONNECTION_TYPE,
         STRICT_MODE,
-        SSL_VERIFY,
+        VERIFY_SSL,
     })
 
     # Environment variable fields
@@ -145,6 +147,7 @@ class HelperSettings:
     ENV_OAUTH_ISSUER_URL: ClassVar[str] = 'oauth_issuer_url'
     ENV_OAUTH_CLIENT_ID: ClassVar[str] = 'oauth_client_id'
     ENV_OAUTH_GRANT_TYPE: ClassVar[str] = 'oauth_grant_type'
+    ENV_VERIFY_SSL: ClassVar[str] = 'verify_ssl'
 
     # Environment variable default values
     ENV_DEFAULT_CONNECTION_TYPE: ClassVar[str] = 'PYDPLUS_CONNECTION_TYPE'
@@ -154,9 +157,10 @@ class HelperSettings:
     ENV_DEFAULT_OAUTH_ISSUER_URL: ClassVar[str] = 'PYDPLUS_OAUTH_ISSUER_URL'
     ENV_DEFAULT_OAUTH_CLIENT_ID: ClassVar[str] = 'PYDPLUS_OAUTH_CLIENT_ID'
     ENV_DEFAULT_OAUTH_GRANT_TYPE: ClassVar[str] = 'PYDPLUS_OAUTH_GRANT_TYPE'
+    ENV_DEFAULT_VERIFY_SSL: ClassVar[str] = 'PYDPLUS_VERIFY_SSL'
 
     # Environment variable default mapping
-    ENV_VARIABLE_DEFAULT_MAPPING: Final[Mapping[str, str]] = MappingProxyType({
+    ENV_VARIABLE_DEFAULT_MAPPING: ClassVar[Mapping[str, str]] = MappingProxyType({
         ENV_CONNECTION_TYPE: ENV_DEFAULT_CONNECTION_TYPE,
         ENV_LEGACY_ACCESS_ID: ENV_DEFAULT_LEGACY_ACCESS_ID,
         ENV_LEGACY_KEY_PATH: ENV_DEFAULT_LEGACY_KEY_PATH,
@@ -164,13 +168,24 @@ class HelperSettings:
         ENV_OAUTH_ISSUER_URL: ENV_DEFAULT_OAUTH_ISSUER_URL,
         ENV_OAUTH_CLIENT_ID: ENV_DEFAULT_OAUTH_CLIENT_ID,
         ENV_OAUTH_GRANT_TYPE: ENV_DEFAULT_OAUTH_GRANT_TYPE,
+        ENV_VERIFY_SSL: ENV_DEFAULT_VERIFY_SSL,
     })
 
-    # Other configuration fields
-    # TODO: Add constants here (if needed)
+    # Environment variable to connection field mappings
+    ENV_LEGACY_CONNECTION_MAPPING: ClassVar[Mapping[str, str]] = MappingProxyType({
+        'access_id': ENV_LEGACY_ACCESS_ID,
+        'private_key_path': ENV_LEGACY_KEY_PATH,
+        'private_key_file': ENV_LEGACY_KEY_FILE,
+    })
+    ENV_OAUTH_CONNECTION_MAPPING: ClassVar[Mapping[str, str]] = MappingProxyType({
+        'issuer_url': ENV_OAUTH_ISSUER_URL,
+        'client_id': ENV_OAUTH_CLIENT_ID,
+        'grant_type': ENV_OAUTH_GRANT_TYPE,
+    })
 
     # Other default values
-    DEFAULT_SSL_VERIFY_VALUE = True
+    DEFAULT_HELPER_FILE_TYPE = 'json'
+    DEFAULT_VERIFY_SSL_VALUE = True
 
 
 # -----------------------------
@@ -184,6 +199,11 @@ class ConnectionInfo:
     # Authentication/Connection type parent fields
     LEGACY: ClassVar[str] = 'legacy'
     OAUTH: ClassVar[str] = 'oauth'
+    VALID_CONNECTION_TYPES: ClassVar[frozenset[str]] = frozenset({
+        LEGACY,
+        OAUTH,
+    })
+    DEFAULT_CONNECTION_TYPE: ClassVar[str] = OAUTH
 
     # Legacy authentication fields
     LEGACY_ACCESS_ID: ClassVar[str] = 'access_id'
@@ -212,7 +232,11 @@ class ConnectionInfo:
     OAUTH_DEFAULT_CLIENT_AUTH: ClassVar[str] = 'Private Key JWT'
 
     # Connection fields
-    CONNECTION_FIELDS: Final[Mapping[str, frozenset[str]]] = MappingProxyType({
+    EMPTY_CONNECTION_INFO: ClassVar[Mapping[str, Mapping[str, Any]]] = MappingProxyType({
+        LEGACY: MappingProxyType({}),
+        OAUTH: MappingProxyType({}),
+    })
+    CONNECTION_FIELDS: ClassVar[Mapping[str, frozenset[str]]] = MappingProxyType({
         LEGACY: LEGACY_FIELDS,
         OAUTH: OAUTH_FIELDS,
     })
@@ -225,7 +249,6 @@ class ConnectionInfo:
 ADMIN_API_TYPE: Final[str] = 'admin'
 AUTH_API_TYPE = Final[str] = 'auth'
 
-
 # Default values
 DEFAULT_API_TIMEOUT_SECONDS: Final[int] = 30
 DEFAULT_API_MAX_RETRIES: Final[int] = 3
@@ -234,8 +257,9 @@ DEFAULT_STRICT_MODE: Final[bool] = False
 DEFAULT_HEADER_TYPE: Final[str] = 'default'
 
 # Validation criteria
-VALID_API_TYPES:  Final[frozenset[str]] = frozenset({
-
+VALID_API_TYPES: Final[frozenset[str]] = frozenset({
+    ADMIN_API_TYPE,
+    AUTH_API_TYPE,
 })
 VALID_HEADER_TYPES: Final[frozenset[str]] = frozenset({
     DEFAULT_HEADER_TYPE,
@@ -379,7 +403,8 @@ class Languages:
 @dataclass(frozen=True)
 class Urls:
     """Common URLs leveraged throughout the package."""
-    # TODO: Add constants to this class
+    # General URLs
+    OAUTH: ClassVar[str] = '{base_url}/oauth'                                                       # Vars: base_url
 
 
 # -------------------------------
@@ -395,7 +420,7 @@ class RestPaths:
     values such as ``user_id``, ``timeout``, and so forth.
     """
     # General REST paths
-    # TODO: Add constants here
+    # TODO: Add constants here as needed
 
     # Users endpoint paths
     # TODO: Update the base URL to end in a slash for consistency

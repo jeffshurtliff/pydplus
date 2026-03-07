@@ -6,57 +6,70 @@
 :Example:           ``pydp = PyDPlus()``
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     16 Jun 2025
+:Modified Date:     07 Mar 2026
 """
 
 import os
-import copy
+from typing import Any, Optional, Union, Tuple
+from collections.abc import Mapping
 
 from . import auth, api, errors
+from . import constants as const
 from . import users as users_module
 from .utils import core_utils, log_utils
-from .utils.helper import get_helper_settings, DEFAULT_HELPER_FILE_TYPE
+from .utils.helper import get_helper_settings
 
 # Initialize logging
 logger = log_utils.initialize_logging(__name__)
 
 
 class PyDPlus(object):
-    """This is the class for the core object leveraged in this module."""
-    # Define the function that initializes the object instance (i.e. instantiates the object)
-    def __init__(self, connection_info=None, connection_type=None, base_url=None,
-                 private_key=None, legacy_access_id=None, oauth_client_id=None, verify_ssl=None, auto_connect=True,
-                 strict_mode=None, env_variables=None, helper=None):
-        """This method instantiates the core Salesforce object.
+    """Class for the core client object.
 
-        :param connection_info: Dictionary that defines the connection info to use
-        :type connection_info: dict, None
-        :param connection_type: Determines whether to leverage a(n) ``oauth`` (default) or ``legacy`` connection
-        :type connection_type: str, None
-        :param base_url: The base URL to leverage when performing API calls
-        :type base_url: str, None
-        :param private_key: The file path to the private key used for API authentication (OAuth or Legacy)
-        :type private_key: str, None
-        :param legacy_access_id: The Access ID associated with the Legacy API connection
-        :type legacy_access_id: str, None
-        :param oauth_client_id: The Client ID associated with the OAuth API connection
-        :type oauth_client_id: str, None
-        :param verify_ssl: Determines if SSL connections should be verified (``True`` by default)
-        :type verify_ssl: bool, None
-        :param auto_connect: Determines if an API connection should be established when the object is instantiated
-                             (``True`` by default)
-        :type auto_connect: bool
-        :param strict_mode: Determines if failed API responses should result in an exception being raised
-                            (``False`` by default)
-        :type strict_mode: bool
-        :param env_variables: Optionally define custom environment variable names to use instead of the default names
-        :type env_variables: dict, None
-        :param helper: Optionally provide the file path for a helper file used to define the object configuration
-        :type helper: str, None
-        :returns: The instantiated PyDPlus object
-        :raises: :py:exc:`TypeError`
-        """
-        # Define the default settings
+    :param connection_info: Dictionary that defines the connection info to use
+    :type connection_info: dict, None
+    :param connection_type: Determines whether to leverage a(n) ``oauth`` (default) or ``legacy`` connection
+    :type connection_type: str, None
+    :param base_url: The base URL to leverage when performing API calls
+    :type base_url: str, None
+    :param private_key: The file path to the private key used for API authentication (OAuth or Legacy)
+    :type private_key: str, None
+    :param legacy_access_id: The Access ID associated with the Legacy API connection
+    :type legacy_access_id: str, None
+    :param oauth_client_id: The Client ID associated with the OAuth API connection
+    :type oauth_client_id: str, None
+    :param verify_ssl: Determines if SSL connections should be verified (``True`` by default)
+    :type verify_ssl: bool, None
+    :param auto_connect: Determines if an API connection should be established when the object is instantiated
+                         (``True`` by default)
+    :type auto_connect: bool
+    :param strict_mode: Determines if failed API responses should result in an exception being raised
+                        (``False`` by default)
+    :type strict_mode: bool, None
+    :param env_variables: Optionally define custom environment variable names to use instead of the default names
+    :type env_variables: dict, None
+    :param helper: Optionally provide the file path for a helper file used to define the object configuration
+    :type helper: str, tuple, list, set, dict, None
+    :returns: The instantiated PyDPlus object
+    :raises: :py:exc:`TypeError`
+    """
+    # Define the function that initializes the object instance (i.e. instantiates the object)
+    def __init__(
+            self,
+            connection_info: Optional[dict] = None,
+            connection_type: Optional[str] = None,
+            base_url: Optional[str] = None,
+            private_key: Optional[str] = None,
+            legacy_access_id: Optional[str] = None,
+            oauth_client_id: Optional[str] = None,
+            verify_ssl: Optional[bool] = None,
+            auto_connect: bool = True,
+            strict_mode: Optional[bool] = None,
+            env_variables: Optional[dict] = None,
+            helper: Union[Optional[str], Optional[tuple], Optional[list], Optional[set], Optional[dict]] = None,
+    ):
+        """Instantiate the core client object."""
+        # Define the initial settings
         self._helper_settings = {}
         self._env_variables = {}
         self.base_headers = {}
@@ -69,7 +82,7 @@ class PyDPlus(object):
             if any((isinstance(helper, tuple), isinstance(helper, list), isinstance(helper, set))):
                 helper_file_path, helper_file_type = helper
             elif isinstance(helper, str):
-                helper_file_path, helper_file_type = (helper, DEFAULT_HELPER_FILE_TYPE)
+                helper_file_path, helper_file_type = (helper, const.HELPER_SETTINGS.DEFAULT_HELPER_FILE_TYPE)
             elif isinstance(helper, dict):
                 helper_file_path, helper_file_type = helper.values()
             else:
@@ -87,8 +100,10 @@ class PyDPlus(object):
                 logger.error("The 'env_variables' parameter must be a dictionary and will be ignored.")
             else:
                 self._env_variable_names = self._get_env_variable_names(env_variables)
-        elif 'env_variables' in self._helper_settings:
-            self._env_variable_names = self._get_env_variable_names(self._helper_settings.get('env_variables', {}))
+        elif const.HELPER_SETTINGS.ENV_VARIABLES in self._helper_settings:
+            self._env_variable_names = self._get_env_variable_names(
+                self._helper_settings.get(const.HELPER_SETTINGS.ENV_VARIABLES, {})
+            )
         else:
             self._env_variable_names = self._get_env_variable_names()
 
@@ -102,53 +117,61 @@ class PyDPlus(object):
                 logger.error(error_msg)
                 raise TypeError(error_msg)
             self.strict_mode = strict_mode
-        elif (self._helper_settings and 'strict_mode' in self._helper_settings
-                and isinstance(self._helper_settings['strict_mode'], bool)
-                and self._helper_settings['strict_mode'] is not None):
-            self.strict_mode = self._helper_settings.get('strict_mode')
-        elif ('strict_mode' in self._env_variables and isinstance(self._env_variables['strict_mode'], bool)
-                and self._env_variables['strict_mode'] is not None):
-            self.strict_mode = self._env_variables.get('strict_mode')
+        elif (self._helper_settings and const.HELPER_SETTINGS.STRICT_MODE in self._helper_settings
+                and isinstance(self._helper_settings[const.HELPER_SETTINGS.STRICT_MODE], bool)
+                and self._helper_settings[const.HELPER_SETTINGS.STRICT_MODE] is not None):
+            self.strict_mode = self._helper_settings.get(const.HELPER_SETTINGS.STRICT_MODE)
+        elif (const.HELPER_SETTINGS.STRICT_MODE in self._env_variables
+              and isinstance(self._env_variables[const.HELPER_SETTINGS.STRICT_MODE], bool)
+              and self._env_variables[const.HELPER_SETTINGS.STRICT_MODE] is not None):
+            self.strict_mode = self._env_variables.get(const.HELPER_SETTINGS.STRICT_MODE)
         else:
-            self.strict_mode = api.DEFAULT_STRICT_MODE
+            self.strict_mode = const.DEFAULT_STRICT_MODE
 
         # Define the connection type to use
-        if connection_type in auth.VALID_CONNECTION_TYPES:
+        if connection_type in const.CONNECTION_INFO.VALID_CONNECTION_TYPES:
             self.connection_type = connection_type
-        elif (self._helper_settings and 'connection_type' in self._helper_settings
-                and self._helper_settings['connection_type'] is not None):
-            if self._helper_settings.get('connection_type') in auth.VALID_CONNECTION_TYPES:
-                self.connection_type = self._helper_settings.get('connection_type')
+        elif (self._helper_settings and const.HELPER_SETTINGS.CONNECTION_TYPE in self._helper_settings
+                and self._helper_settings[const.HELPER_SETTINGS.CONNECTION_TYPE] is not None):
+            if self._helper_settings.get(const.HELPER_SETTINGS.CONNECTION_TYPE) in const.CONNECTION_INFO.VALID_CONNECTION_TYPES:
+                self.connection_type = self._helper_settings.get(const.HELPER_SETTINGS.CONNECTION_TYPE)
             else:
-                logger.error('The connection_type value in the helper settings in invalid and will be ignored.')
-                self.connection_type = auth.DEFAULT_CONNECTION_TYPE
-        elif 'connection_type' in self._env_variables and self._env_variables['connection_type'] is not None:
-            if self._env_variables.get('connection_type') in auth.VALID_CONNECTION_TYPES:
-                self.connection_type = self._env_variables.get('connection_type')
+                error_msg = 'The connection_type value in the helper settings in invalid and will be ignored.'
+                expected_types = ','.join(const.CONNECTION_INFO.VALID_CONNECTION_TYPES)
+                error_msg += (f"(Expected: {expected_types}; "
+                              f"Provided: {self._helper_settings.get(const.HELPER_SETTINGS.CONNECTION_TYPE)})")
+                logger.error(error_msg)
+                self.connection_type = const.CONNECTION_INFO.DEFAULT_CONNECTION_TYPE
+        elif (const.HELPER_SETTINGS.CONNECTION_TYPE in self._env_variables
+              and self._env_variables[const.HELPER_SETTINGS.CONNECTION_TYPE] is not None):
+            if self._env_variables.get(const.HELPER_SETTINGS.CONNECTION_TYPE) in const.CONNECTION_INFO.VALID_CONNECTION_TYPES:
+                self.connection_type = self._env_variables.get(const.HELPER_SETTINGS.CONNECTION_TYPE)
             else:
-                logger.error('The connection_type environment variable in invalid and will be ignored.')
-                self.connection_type = auth.DEFAULT_CONNECTION_TYPE
+                error_msg = 'The connection_type environment variable in invalid and the default connection type will be used.'
+                logger.error(error_msg)
+                self.connection_type = const.CONNECTION_INFO.DEFAULT_CONNECTION_TYPE
         else:
-            self.connection_type = auth.DEFAULT_CONNECTION_TYPE
+            self.connection_type = const.CONNECTION_INFO.DEFAULT_CONNECTION_TYPE
 
         # Define the verify_ssl value
         if verify_ssl is not None and isinstance(verify_ssl, bool):
             self.verify_ssl = verify_ssl
-        elif self._helper_settings and 'verify_ssl' in self._helper_settings:
-            self.verify_ssl = self._helper_settings.get('verify_ssl', True)
-        elif self._env_variables and 'verify_ssl' in self._env_variables:
-            self.verify_ssl = self._env_variables.get('verify_ssl', True)
+        elif self._helper_settings and const.HELPER_SETTINGS.VERIFY_SSL in self._helper_settings:
+            self.verify_ssl = self._helper_settings.get(const.HELPER_SETTINGS.VERIFY_SSL, True)
+        elif self._env_variables and const.HELPER_SETTINGS.VERIFY_SSL in self._env_variables:
+            self.verify_ssl = self._env_variables.get(const.HELPER_SETTINGS.VERIFY_SSL, True)
         else:
             self.verify_ssl = True
 
         # Attempt to define the base URL value
         if base_url:
             self.base_url = core_utils.get_base_url(base_url)
-        elif (self._helper_settings and 'base_url' in self._helper_settings
-                and self._helper_settings.get('base_url') is not None):
-            self.base_url = core_utils.get_base_url(self._helper_settings.get('base_url'))
-        elif 'base_url' in self._env_variables and self._env_variables.get('base_url') is not None:
-            self.base_url = core_utils.get_base_url(self._env_variables.get('base_url'))
+        elif (self._helper_settings and const.HELPER_SETTINGS.BASE_URL in self._helper_settings
+                and self._helper_settings.get(const.HELPER_SETTINGS.BASE_URL) is not None):
+            self.base_url = core_utils.get_base_url(self._helper_settings.get(const.HELPER_SETTINGS.BASE_URL))
+        elif (const.HELPER_SETTINGS.BASE_URL in self._env_variables
+              and self._env_variables.get(const.HELPER_SETTINGS.BASE_URL) is not None):
+            self.base_url = core_utils.get_base_url(self._env_variables.get(const.HELPER_SETTINGS.BASE_URL))
         else:
             self.base_url = None
 
@@ -159,16 +182,23 @@ class PyDPlus(object):
             raise errors.exceptions.MissingRequiredDataError(error_msg)
 
         # Define the Admin API base URL to use in API calls
+        # TODO: Ensure the ending slash (or lack thereof) is consistent and use const.URLS for URL paths
         self.admin_base_url = f'{core_utils.ensure_ending_slash(self.base_url)}AdminInterface/restapi'
 
         # Define the Authentication API base URL to use in API calls
         # Refer to https://community.securid.com/s/article/RSA-SecurID-Authentication-API-Developer-s-Guide pg 15
+        # TODO: Ensure the ending slash (or lack thereof) is consistent and use const.URLS for URL paths
         self.auth_base_url = f'{core_utils.ensure_ending_slash(self.base_url)}mfa/v1_1/authn'
 
         # Check for provided connection info and define the class object attribute
         if not connection_info:
             # Check for individual parameters defined in object instantiation
-            connection_info = compile_connection_info(base_url, private_key, legacy_access_id, oauth_client_id)
+            connection_info = compile_connection_info(
+                base_url=base_url,
+                private_key=private_key,
+                legacy_access_id=legacy_access_id,
+                oauth_client_id=oauth_client_id,
+            )
 
             # Check for defined helper settings
             if self._helper_settings:
@@ -193,152 +223,123 @@ class PyDPlus(object):
         self.users = self._import_user_class()
 
     def _import_user_class(self):
-        """This method allows the :py:class:`pydplus.core.PyDPlus.User` class to be utilized in the core object."""
+        """Allow the :py:class:`pydplus.core.PyDPlus.User` class to be utilized within the core object."""
         return PyDPlus.User(self)
 
     @staticmethod
-    def _get_env_variable_names(_custom_dict=None):
-        """This function returns the environment variable names to use when checking the OS for environment variables.
-
-        .. versionadded:: 1.0.0
-        """
+    def _get_env_variable_names(_custom_dict: Optional[Mapping[str, str]] = None) -> dict:
+        """Return the environment variable names to use when checking the OS for environment variables."""
         # Define the dictionary with the default environment variable names
-        _env_variable_names = {
-            'connection_type': 'PYDPLUS_CONNECTION_TYPE',
-            'legacy_access_id': 'PYDPLUS_LEGACY_ACCESS_ID',
-            'legacy_key_path': 'PYDPLUS_LEGACY_KEY_PATH',
-            'legacy_key_file': 'PYDPLUS_LEGACY_KEY_FILE',
-            'oauth_issuer_url': 'PYDPLUS_OAUTH_ISSUER_URL',
-            'oauth_client_id': 'PYDPLUS_OAUTH_CLIENT_ID',
-            'oauth_grant_type': 'PYDPLUS_OAUTH_GRANT_TYPE',
-            'verify_ssl': 'PYDPLUS_VERIFY_SSL',
-        }
+        _env_variable_names = dict(const.HELPER_SETTINGS.ENV_VARIABLE_DEFAULT_MAPPING)
 
         # Update the dictionary to use any defined custom names instead of the default names
         _custom_dict = {} if _custom_dict is None else _custom_dict
-        if not isinstance(_custom_dict, dict):
-            raise TypeError('Unable to parse custom environment variable names because variable is not a dictionary.')
+        if not isinstance(_custom_dict, Mapping):
+            _error_msg = 'Unable to parse custom environment variable names because variable is not a dictionary.'
+            logger.error(_error_msg)
+            raise TypeError(_error_msg)
         if _custom_dict:
             for _name_key, _name_value in _custom_dict.items():
                 if _name_key in _env_variable_names:
-                    _env_variable_names.update({_name_key: _name_value})
+                    _env_variable_names[_name_key] = _name_value
 
         # Return the finalized dictionary with the mapped environment variable names
         return _env_variable_names
 
     def _get_env_variables(self):
-        """This function retrieves any defined environment variables to use with the instantiated core object.
-
-        .. versionadded:: 1.0.0
-        """
+        """Retrieve any defined environment variables to use with the instantiated core object."""
         _env_variables = {}
         for _config_name, _var_name in self._env_variable_names.items():
             _var_value = os.getenv(_var_name)                               # Returns None if not found
             _env_variables.update({_config_name: _var_value})
         return _env_variables
 
-    def _parse_helper_connection_info(self):
-        """This method parses the helper content to populate the connection info.
-
-        .. versionadded:: 1.0.0
-        """
-        _helper_connection_info = copy.deepcopy(auth.EMPTY_CONNECTION_INFO)
-        for _section, _key_list in auth.STRUCTURED_CONNECTION_FIELDS.items():
-            for _key in _key_list:
-                if _key in self._helper_settings['connection'][_section]:
-                    _helper_connection_info[_section][_key] = self._helper_settings['connection'][_section][_key]
-                else:
-                    _helper_connection_info[_section][_key] = None
+    def _parse_helper_connection_info(self) -> dict[str, dict[str, Any]]:
+        """Parse the helper content to populate the connection info."""
+        _helper_connection = self._helper_settings.get(const.HELPER_SETTINGS.CONNECTION, {})
+        _helper_connection_info: dict[str, dict[str, Any]] = {}
+        for _section, _key_list in const.CONNECTION_INFO.CONNECTION_FIELDS.items():
+            _section_data = _helper_connection.get(_section, {})
+            _helper_connection_info[_section] = {
+                _key: _section_data.get(_key)
+                for _key in _key_list
+            }
         return _helper_connection_info
 
-    def _parse_env_connection_info(self):
-        """This function parses the environment variable definitions to populate the connection info dictionary.
+    def _parse_env_connection_info(self) -> dict[str, dict[str, Any]]:
+        """Parse environment variable definitions into the connection info dictionary."""
+        _env_connection_info: dict[str, dict[str, Any]] = {}
 
-        .. versionadded:: 1.0.0
-        """
-        _env_connection_info = copy.deepcopy(auth.EMPTY_CONNECTION_INFO)
-        _legacy_mapping = {
-            'access_id': 'legacy_access_id',
-            'private_key_path': 'legacy_key_path',
-            'private_key_file': 'legacy_key_file',
-        }
-        _oauth_mapping = {
-            'issuer_url': 'oauth_issuer_url',
-            'client_id': 'oauth_client_id',
-            'grant_type': 'oauth_grant_type',
-        }
+        for _section, _field_mapping in (
+                (const.CONNECTION_INFO.LEGACY, const.HELPER_SETTINGS.ENV_LEGACY_CONNECTION_MAPPING),
+                (const.CONNECTION_INFO.OAUTH, const.HELPER_SETTINGS.ENV_OAUTH_CONNECTION_MAPPING),
+        ):
+            _env_connection_info[_section] = {
+                _connection_field: self._env_variables.get(_env_variable_field)
+                for _connection_field, _env_variable_field in _field_mapping.items()
+            }
 
-        # Populate the legacy API connection values where defined
-        for _legacy_key in _legacy_mapping:
-            _env_connection_info['legacy'][_legacy_key] = self._env_variables.get(_legacy_mapping.get(_legacy_key), None)
-
-        # Populate the OAuth connection values where defined
-        for _oauth_key in _oauth_mapping:
-            _env_connection_info['oauth'][_oauth_key] = self._env_variables.get(_oauth_mapping.get(_oauth_key), None)
-
-        # Return the populated connection information
         return _env_connection_info
 
     @staticmethod
-    def _merge_connection_variables(_defined_info=None, _supplemental_info=None):
-        """This function merges the connection variables explicitly passed as parameters with the values defined
-           in the helper settings or environmental variables.
+    def _merge_connection_variables(
+            _defined_info: Optional[Mapping[str, Mapping[str, Any]]] = None,
+            _supplemental_info: Optional[Mapping[str, Mapping[str, Any]]] = None,
+    ) -> dict[str, dict[str, Any]]:
+        """Merge explicit connection values with supplemental helper or environment values."""
+        _merged_connection_info: dict[str, dict[str, Any]] = {}
 
-        .. versionadded:: 1.0.0
-        """
-        _merged_connection_info = copy.deepcopy(auth.EMPTY_CONNECTION_INFO)
-        for _section, _key_list in auth.STRUCTURED_CONNECTION_FIELDS.items():
-            for _key in _key_list:
-                # Leverage the defined value first if it is not None or missing
-                if (_defined_info and _section in _defined_info and _key in _defined_info[_section]
-                        and _defined_info[_section][_key] is not None):
-                    _merged_connection_info[_section][_key] = _defined_info[_section][_key]
-                # Leverage the supplemental settings when the key was not explicitly defined in parameters
-                elif (_supplemental_info and _section in _supplemental_info and _key in _supplemental_info[_section]
-                        and _supplemental_info[_section][_key] is not None):
-                    _merged_connection_info[_section][_key] = _supplemental_info[_section][_key]
-                # Define the key as None if no defined or helper value exists
-                else:
-                    _merged_connection_info[_section][_key] = None
+        for _section, _key_list in const.CONNECTION_INFO.CONNECTION_FIELDS.items():
+            _defined_section = _defined_info.get(_section, {}) if _defined_info else {}
+            _supplemental_section = _supplemental_info.get(_section, {}) if _supplemental_info else {}
+
+            _merged_connection_info[_section] = {
+                _key: (
+                    _defined_section[_key]
+                    if _key in _defined_section and _defined_section[_key] is not None
+                    else _supplemental_section.get(_key)
+                )
+                for _key in _key_list
+            }
+
         return _merged_connection_info
 
     def _populate_missing_connection_details(self, _partial_connection_info):
-        """This function adds missing field values the connection info dictionary as needed.
+        """Add missing field values the connection info dictionary as needed."""
+        # Define variables for the dictionary keys/fields
+        issuer_url_key = const.CONNECTION_INFO.OAUTH_ISSUER_URL
+        oauth_key = const.CONNECTION_INFO.OAUTH
+        grant_type_key = const.CONNECTION_INFO.OAUTH_GRANT_TYPE
+        client_auth_key = const.CONNECTION_INFO.OAUTH_CLIENT_AUTHENTICATION
 
-        .. versionadded:: 1.0.0
-        """
         # Populate the Issuer URL value for OAuth connections if not defined
-        if (('issuer_url' not in _partial_connection_info['oauth'] or
-                not _partial_connection_info['oauth']['issuer_url']) and self.base_url is not None):
-            _partial_connection_info['oauth']['issuer_url'] = f'{self.base_url}/oauth'
+        if ((issuer_url_key not in _partial_connection_info[oauth_key]
+             or not _partial_connection_info[oauth_key][issuer_url_key])
+                and self.base_url is not None):
+            _partial_connection_info[oauth_key][issuer_url_key] = const.URLS.OAUTH.format(base_url=self.base_url)
 
         # Populate the Grant Type value for OAuth connections if not defined
-        if 'grant_type' not in _partial_connection_info['oauth'] or not _partial_connection_info['oauth']['grant_type']:
-            _partial_connection_info['oauth']['grant_type'] = auth.OAUTH_GRANT_TYPE
+        if (grant_type_key not in _partial_connection_info[oauth_key]
+                or not _partial_connection_info[oauth_key][grant_type_key]):
+            _partial_connection_info[oauth_key][grant_type_key] = const.CONNECTION_INFO.OAUTH_DEFAULT_GRANT_TYPE
 
         # Populate the Client Authentication value for OAuth connections if not defined
-        dict_key = 'client_authentication'
-        if (dict_key not in _partial_connection_info['oauth'][dict_key] or
-                not _partial_connection_info['oauth'][dict_key]):
-            _partial_connection_info['oauth'][dict_key] = auth.OAUTH_CLIENT_AUTH
+        if (client_auth_key not in _partial_connection_info[oauth_key][client_auth_key]
+                or not _partial_connection_info[oauth_key][client_auth_key]):
+            _partial_connection_info[oauth_key][client_auth_key] = const.CONNECTION_INFO.OAUTH_DEFAULT_CLIENT_AUTH
 
         # Return the updated connection info dictionary
         return _partial_connection_info
 
     def _check_if_connected(self):
-        """This function checks to see if the object is connected to the tenant and raises an exception if not.
-
-        .. versionadded:: 1.0.0
-        """
+        """Check to see if the object is connected to the tenant and raises an exception if not."""
         if not self.connected:
             error_msg = 'Must be connected to the tenant before performing an API call. Call the connect() method.'
             logger.error(error_msg)
             raise errors.exceptions.APIConnectionError(error_msg)
 
-    def connect(self):
-        """This function connects to the RSA ID Plus tenant using the Legacy API or OAuth method.
-
-        .. versionadded:: 1.0.0
+    def connect(self) -> Tuple[bool, dict[str, str]]:
+        """Connect to the RSA ID Plus tenant using the Legacy API or OAuth method.
 
         :returns: Boolean value indicating if connection was established and dictionary with base API headers
         :raises: :py:exc:`errors.exceptions.APIConnectionError`,
@@ -346,8 +347,10 @@ class PyDPlus(object):
         """
         base_headers = None
         connected = self.connected
-        if not connected:
-            if self.connection_type == 'legacy':
+        if connected:
+            logger.debug('The client is already connected to the RSA ID Plus tenant.')
+        else:
+            if self.connection_type == const.CLIENT_SETTINGS.CONNECTION_TYPE_LEGACY:
                 # Connect to the tenant using the legacy API method
                 try:
                     base_headers = auth.get_legacy_headers(
@@ -360,17 +363,24 @@ class PyDPlus(object):
                     error_msg = f'Failed to connect using Legacy API due to the following {exc_type} exception: {exc}'
                     logger.error(error_msg)
                     raise errors.exceptions.APIConnectionError(error_msg)
-            elif self.connection_type == 'oauth':
+            elif self.connection_type == const.CLIENT_SETTINGS.CONNECTION_TYPE_OAUTH:
                 # Connect to the tenant using the OAuth method
-                # TODO: Define the base headers using OAuth instead of raising the exception below
+                # TODO: Define the base headers using OAuth and establish connection instead of raising an exception
                 raise errors.exceptions.FeatureNotConfiguredError('OAuth connections are not currently supported')
         return connected, base_headers
 
-    def get(self, endpoint, params=None, headers=None, api_type='admin', timeout=30, show_full_error=True,
-            return_json=True, allow_failed_response=None):
-        """This method performs a GET request against the ID Plus tenant.
-
-        .. versionadded:: 1.0.0
+    def get(
+            self,
+            endpoint: str,
+            params: Optional[dict] = None,
+            headers: Optional[dict] = None,
+            api_type: str = const.ADMIN_API_TYPE,
+            timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
+            show_full_error: bool = True,
+            return_json: bool = True,
+            allow_failed_response: Optional[bool] = None,
+    ):
+        """Perform a GET request against the ID Plus tenant.
 
         :param endpoint: The API endpoint to query
         :type endpoint: str
@@ -381,7 +391,7 @@ class PyDPlus(object):
         :param api_type: Indicates if the ``admin`` (default) or ``auth`` API will be leveraged.
         :type api_type: str
         :param timeout: The timeout period in seconds (defaults to ``30``)
-        :type timeout: int, str, None
+        :type timeout: int
         :param show_full_error: Determines if the full error message should be displayed (defaults to ``True``)
         :type show_full_error: bool
         :param return_json: Determines if the response should be returned in JSON format (defaults to ``True``)
@@ -400,11 +410,19 @@ class PyDPlus(object):
                        show_full_error=show_full_error, return_json=return_json,
                        allow_failed_response=allow_failed_response)
 
-    def post(self, endpoint, payload, params=None, headers=None, api_type='admin', timeout=30,
-             show_full_error=True, return_json=True, allow_failed_response=None):
-        """This method performs a POST call with payload against the ID Plus tenant.
-
-        .. versionadded:: 1.0.0
+    def patch(
+            self,
+            endpoint: str,
+            payload: dict,
+            params: Optional[dict] = None,
+            headers: Optional[dict] = None,
+            api_type: str = const.ADMIN_API_TYPE,
+            timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
+            show_full_error: bool = True,
+            return_json: bool = True,
+            allow_failed_response: Optional[bool] = None,
+    ):
+        """Perform a PATCH call with payload against the ID Plus tenant.
 
         :param endpoint: The API endpoint to query
         :type endpoint: str
@@ -417,7 +435,52 @@ class PyDPlus(object):
         :param api_type: Indicates if the ``admin`` (default) or ``auth`` API will be leveraged.
         :type api_type: str
         :param timeout: The timeout period in seconds (defaults to ``30``)
-        :type timeout: int, str, None
+        :type timeout: int
+        :param show_full_error: Determines if the full error message should be displayed (defaults to ``True``)
+        :type show_full_error: bool
+        :param return_json: Determines if the response should be returned in JSON format (defaults to ``True``)
+        :type return_json: bool
+        :param allow_failed_response: Indicates that failed responses should return and should not raise an exception
+                                      (If not explicitly defined then ``True`` if Strict Mode is disabled)
+        :type allow_failed_response: bool, None
+        :returns: The API response in JSON format or as a ``requests`` object
+        :raises: :py:exc:`errors.exceptions.APIConnectionError`,
+                 :py:exc:`errors.exceptions.APIMethodError`,
+                 :py:exc:`errors.exceptions.APIRequestError`,
+                 :py:exc:`errors.exceptions.APIResponseConversionError`,
+                 :py:exc:`errors.exceptions.InvalidFieldError`
+        """
+        self._check_if_connected()
+        return api.patch(self, endpoint=endpoint, payload=payload, params=params, headers=headers, api_type=api_type,
+                         timeout=timeout, show_full_error=show_full_error, return_json=return_json,
+                         allow_failed_response=allow_failed_response)
+
+    def post(
+            self,
+            endpoint: str,
+            payload: dict,
+            params: Optional[dict] = None,
+            headers: Optional[dict] = None,
+            api_type: str = const.ADMIN_API_TYPE,
+            timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
+            show_full_error: bool = True,
+            return_json: bool = True,
+            allow_failed_response: Optional[bool] = None,
+    ):
+        """Perform a POST call with payload against the ID Plus tenant.
+
+        :param endpoint: The API endpoint to query
+        :type endpoint: str
+        :param payload: The payload to leverage in the API call
+        :type payload: dict
+        :param params: The query parameters (where applicable)
+        :type params: dict, None
+        :param headers: Specific API headers to use when performing the API call (beyond the base headers)
+        :type headers: dict, None
+        :param api_type: Indicates if the ``admin`` (default) or ``auth`` API will be leveraged.
+        :type api_type: str
+        :param timeout: The timeout period in seconds (defaults to ``30``)
+        :type timeout: int
         :param show_full_error: Determines if the full error message should be displayed (defaults to ``True``)
         :type show_full_error: bool
         :param return_json: Determines if the response should be returned in JSON format (defaults to ``True``)
@@ -437,11 +500,19 @@ class PyDPlus(object):
                         timeout=timeout, show_full_error=show_full_error, return_json=return_json,
                         allow_failed_response=allow_failed_response)
 
-    def put(self, endpoint, payload, params=None, headers=None, api_type='admin', timeout=30,
-            show_full_error=True, return_json=True, allow_failed_response=None):
-        """This method performs a PUT call with payload against the ID Plus tenant.
-
-        .. versionadded:: 1.0.0
+    def put(
+            self,
+            endpoint: str,
+            payload: dict,
+            params: Optional[dict] = None,
+            headers: Optional[dict] = None,
+            api_type: str = const.ADMIN_API_TYPE,
+            timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
+            show_full_error: bool = True,
+            return_json: bool = True,
+            allow_failed_response: Optional[bool] = None,
+    ):
+        """Perform a PUT call with payload against the ID Plus tenant.
 
         :param endpoint: The API endpoint to query
         :type endpoint: str
@@ -454,7 +525,7 @@ class PyDPlus(object):
         :param api_type: Indicates if the ``admin`` (default) or ``auth`` API will be leveraged.
         :type api_type: str
         :param timeout: The timeout period in seconds (defaults to ``30``)
-        :type timeout: int, str, None
+        :type timeout: int
         :param show_full_error: Determines if the full error message should be displayed (defaults to ``True``)
         :type show_full_error: bool
         :param return_json: Determines if the response should be returned in JSON format (defaults to ``True``)
@@ -475,27 +546,32 @@ class PyDPlus(object):
                        allow_failed_response=allow_failed_response)
     
     class User(object):
-        """This class includes user-related methods."""
+        """Class containing user-related methods."""
         def __init__(self, pydp_object):
-            """This method initializes the :py:class:`pydplus.core.PyDPlus.User` inner class object.
+            """Initialize the :py:class:`pydplus.core.PyDPlus.User` inner class object.
 
             :param pydp_object: The core :py:class:`pydplus.PyDPlus` object
             :type pydp_object: class[pydplus.PyDPlus]
             """
             self.pydp_object = pydp_object
 
-        def get_user_details(self, email, search_unsynced=None, timeout=api.DEFAULT_TIMEOUT, show_full_error=True,
-                             return_json=True, allow_failed_response=None):
-            """This method retrieves the details for a specific user based on their email address.
-
-            .. versionadded:: 1.0.0
+        def get_user_details(
+                self,
+                email: str,
+                search_unsynced: Optional[bool] = None,
+                timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
+                show_full_error: bool = True,
+                return_json: bool = True,
+                allow_failed_response: Optional[bool] = None,
+        ):
+            """Retrieve the details for a specific user based on their email address.
 
             :param email: The email address of the user for whom to retrieve details
             :type email: str
             :param search_unsynced: Indicates if the user search should include unsynchronized users (optional)
             :type search_unsynced: bool, None
             :param timeout: The timeout period in seconds (defaults to ``30``)
-            :type timeout: int, str, None
+            :type timeout: int
             :param show_full_error: Determines if the full error message should be displayed (defaults to ``True``)
             :type show_full_error: bool
             :param return_json: Determines if the response should be returned in JSON format (defaults to ``True``)
@@ -515,11 +591,15 @@ class PyDPlus(object):
                                                  timeout=timeout, show_full_error=show_full_error,
                                                  return_json=return_json, allow_failed_response=allow_failed_response)
 
-        def get_user_id(self, email=None, user_details=None, search_unsynced=None, timeout=api.DEFAULT_TIMEOUT,
-                        show_full_error=True):
-            """This method retrieves the User ID associated with a specific user.
-
-            .. versionadded:: 1.0.0
+        def get_user_id(
+                self,
+                email: Optional[str] = None,
+                user_details: Optional[dict] = None,
+                search_unsynced: Optional[bool] = None,
+                timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
+                show_full_error: bool = True,
+        ) -> str:
+            """Retrieve the User ID associated with a specific user.
 
             :param email: The email address of the user for whom to retrieve details
             :type email: str, None
@@ -545,16 +625,20 @@ class PyDPlus(object):
                                             search_unsynced=search_unsynced, timeout=timeout,
                                             show_full_error=show_full_error)
 
-        def enable_user(self, user_id, timeout=api.DEFAULT_TIMEOUT, show_full_error=True, return_json=True,
-                        allow_failed_response=None):
-            """This method enables a user that is currently disabled.
-
-            .. versionadded:: 1.0.0
+        def enable_user(
+                self,
+                user_id: str,
+                timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
+                show_full_error: bool = True,
+                return_json: bool = True,
+                allow_failed_response: Optional[bool] = None,
+        ):
+            """Enable a user that is currently disabled.
 
             :param user_id: The ID of an existing user (e.g. ``54082ac6-4713-6368-2251-df813c41159f``)
             :type user_id: str
             :param timeout: The timeout period in seconds (defaults to ``30``)
-            :type timeout: int, str, None
+            :type timeout: int
             :param show_full_error: Determines if the full error message should be displayed (defaults to ``True``)
             :type show_full_error: bool
             :param return_json: Determines if the response should be returned in JSON format (defaults to ``True``)
@@ -575,16 +659,20 @@ class PyDPlus(object):
                                             show_full_error=show_full_error, return_json=return_json,
                                             allow_failed_response=allow_failed_response)
 
-        def disable_user(self, user_id, timeout=api.DEFAULT_TIMEOUT, show_full_error=True, return_json=True,
-                         allow_failed_response=None):
-            """This method disables a user that is currently enabled.
-
-            .. versionadded:: 1.0.0
+        def disable_user(
+                self,
+                user_id: str,
+                timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
+                show_full_error: bool = True,
+                return_json: bool = True,
+                allow_failed_response: Optional[bool] = None,
+        ):
+            """Disable a user that is currently enabled.
 
             :param user_id: The ID of an existing user (e.g. ``54082ac6-4713-6368-2251-df813c41159f``)
             :type user_id: str
             :param timeout: The timeout period in seconds (defaults to ``30``)
-            :type timeout: int, str, None
+            :type timeout: int
             :param show_full_error: Determines if the full error message should be displayed (defaults to ``True``)
             :type show_full_error: bool
             :param return_json: Determines if the response should be returned in JSON format (defaults to ``True``)
@@ -605,16 +693,20 @@ class PyDPlus(object):
                                              show_full_error=show_full_error, return_json=return_json,
                                              allow_failed_response=allow_failed_response)
 
-        def synchronize_user(self, user_id, timeout=api.DEFAULT_TIMEOUT, show_full_error=True, return_json=True,
-                             allow_failed_response=None):
-            """This method synchronizes the details of a user between an identity source and the Cloud Access Service.
-
-            .. versionadded:: 1.0.0
+        def synchronize_user(
+                self,
+                user_id: str,
+                timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
+                show_full_error: bool = True,
+                return_json: bool = True,
+                allow_failed_response: Optional[bool] = None,
+        ):
+            """Synchronize the details of a user between an identity source and the Cloud Access Service.
 
             :param user_id: The ID of an existing user (e.g. ``54082ac6-4713-6368-2251-df813c41159f``)
             :type user_id: str
             :param timeout: The timeout period in seconds (defaults to ``30``)
-            :type timeout: int, str, None
+            :type timeout: int
             :param show_full_error: Determines if the full error message should be displayed (defaults to ``True``)
             :type show_full_error: bool
             :param return_json: Determines if the response should be returned in JSON format (defaults to ``True``)
@@ -635,16 +727,20 @@ class PyDPlus(object):
                                                  show_full_error=show_full_error, return_json=return_json,
                                                  allow_failed_response=allow_failed_response)
 
-        def mark_deleted(self, user_id, timeout=api.DEFAULT_TIMEOUT, show_full_error=True, return_json=True,
-                         allow_failed_response=None):
-            """This method marks a specific user to be deleted during the next automated bulk deletion process.
-
-            .. versionadded:: 1.0.0
+        def mark_deleted(
+                self,
+                user_id: str,
+                timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
+                show_full_error: bool = True,
+                return_json: bool = True,
+                allow_failed_response: Optional[bool] = None,
+        ):
+            """Mark a specific user to be deleted during the next automated bulk deletion process.
 
             :param user_id: The ID of an existing user (e.g. ``54082ac6-4713-6368-2251-df813c41159f``)
             :type user_id: str
             :param timeout: The timeout period in seconds (defaults to ``30``)
-            :type timeout: int, str, None
+            :type timeout: int
             :param show_full_error: Determines if the full error message should be displayed (defaults to ``True``)
             :type show_full_error: bool
             :param return_json: Determines if the response should be returned in JSON format (defaults to ``True``)
@@ -665,11 +761,15 @@ class PyDPlus(object):
                                              show_full_error=show_full_error, return_json=return_json,
                                              allow_failed_response=allow_failed_response)
 
-        def unmark_deleted(self, user_id, timeout=api.DEFAULT_TIMEOUT, show_full_error=True, return_json=True,
-                           allow_failed_response=None):
-            """This function unmarks a specific user that was flagged to be deleted.
-
-            .. versionadded:: 1.0.0
+        def unmark_deleted(
+                self,
+                user_id: str,
+                timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
+                show_full_error: bool = True,
+                return_json: bool = True,
+                allow_failed_response: Optional[bool] = None,
+        ):
+            """Unmark a specific user that was flagged to be deleted.
 
             :param user_id: The ID of an existing user (e.g. ``54082ac6-4713-6368-2251-df813c41159f``)
             :type user_id: str
@@ -696,10 +796,13 @@ class PyDPlus(object):
                                                allow_failed_response=allow_failed_response)
 
 
-def compile_connection_info(base_url, private_key, legacy_access_id, oauth_client_id):
-    """This function compiles the connection_info dictionary to use when authenticating to the API.
-
-    .. versionadded:: 1.0.0
+def compile_connection_info(
+        base_url: Optional[str],
+        private_key: Optional[str],
+        legacy_access_id: Optional[str],
+        oauth_client_id: Optional[str],
+) -> dict:
+    """Compile the connection_info dictionary to use when authenticating to the API.
 
     :param base_url: The base URL to leverage when performing API calls
     :type base_url: str, None
@@ -716,18 +819,18 @@ def compile_connection_info(base_url, private_key, legacy_access_id, oauth_clien
     if private_key and isinstance(private_key, str):
         private_key_path, private_key_file = core_utils.split_file_path(private_key)
     base_url = core_utils.get_base_url(base_url) if base_url else base_url
-    issuer_url = f'{base_url}/oauth' if base_url else None
+    issuer_url = const.URLS.OAUTH.format(base_url=base_url) if base_url else None
     connection_info = {
-        'legacy': {
-            'access_id': legacy_access_id,
-            'private_key_path': private_key_path,
-            'private_key_file': private_key_file,
+        const.CONNECTION_INFO.LEGACY: {
+            const.CONNECTION_INFO.LEGACY_ACCESS_ID: legacy_access_id,
+            const.CONNECTION_INFO.LEGACY_PRIVATE_KEY_PATH: private_key_path,
+            const.CONNECTION_INFO.LEGACY_PRIVATE_KEY_FILE: private_key_file,
         },
-        'oauth': {
-            'issuer_url': issuer_url,
-            'client_id': oauth_client_id,
-            'grant_type': auth.OAUTH_GRANT_TYPE,
-            'client_authentication': auth.OAUTH_CLIENT_AUTH,
+        const.CONNECTION_INFO.OAUTH: {
+            const.CONNECTION_INFO.OAUTH_ISSUER_URL: issuer_url,
+            const.CONNECTION_INFO.OAUTH_CLIENT_ID: oauth_client_id,
+            const.CONNECTION_INFO.OAUTH_GRANT_TYPE: const.CONNECTION_INFO.OAUTH_DEFAULT_GRANT_TYPE,
+            const.CONNECTION_INFO.OAUTH_CLIENT_AUTHENTICATION: const.CONNECTION_INFO.OAUTH_DEFAULT_CLIENT_AUTH,
         }
     }
     return connection_info
