@@ -6,7 +6,7 @@
 :Example:           ``encoded_string = core_utils.encode_url(decoded_string)``
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     05 Mar 2026
+:Modified Date:     07 Mar 2026
 """
 
 from __future__ import annotations
@@ -67,6 +67,17 @@ def ensure_ending_slash(path: str, path_type: str = const.ARGUMENT_VALUES.URL) -
     elif path and path_type.lower() == const.ARGUMENT_VALUES.FILE:
         path = f'{path}{os.sep}' if not path.endswith(os.sep) else path
     return path
+
+
+def remove_ending_slash(path: str) -> str:
+    """Removes a trailing slash at the end of a URL or endpoint when present.
+
+    :param path: The URL or path
+    :type path: str
+    :returns: The path string without a trailing slash
+    :raises: :py:exc:`TypeError`
+    """
+    return path[:-1] if path.endswith('/') else path
 
 
 def file_exists(file_path):
