@@ -4,7 +4,7 @@
 :Synopsis:          Defines the basic functions associated with the RSA ID Plus API
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     06 Mar 2026
+:Modified Date:     07 Mar 2026
 """
 
 from __future__ import annotations
@@ -45,7 +45,7 @@ def get(
     :param api_type: Indicates if the ``admin`` (default) or ``auth`` API will be leveraged.
     :type api_type: str
     :param timeout: The timeout period in seconds (defaults to ``30``)
-    :type timeout: int, str, None
+    :type timeout: int
     :param show_full_error: Determines if the full error message should be displayed (defaults to ``True``)
     :type show_full_error: bool
     :param return_json: Determines if the response should be returned in JSON format (defaults to ``True``)
@@ -114,7 +114,7 @@ def api_call_with_payload(
     :param api_type: Indicates if the ``admin`` (default) or ``auth`` API will be leveraged.
     :type api_type: str
     :param timeout: The timeout period in seconds (defaults to ``30``)
-    :type timeout: int, str, None
+    :type timeout: int
     :param show_full_error: Determines if the full error message should be displayed (defaults to ``True``)
     :type show_full_error: bool
     :param return_json: Determines if the response should be returned in JSON format (defaults to ``True``)
@@ -216,7 +216,7 @@ def post(
     :param api_type: Indicates if the ``admin`` (default) or ``auth`` API will be leveraged.
     :type api_type: str
     :param timeout: The timeout period in seconds (defaults to ``30``)
-    :type timeout: int, str, None
+    :type timeout: int
     :param show_full_error: Determines if the full error message should be displayed (defaults to ``True``)
     :type show_full_error: bool
     :param return_json: Determines if the response should be returned in JSON format (defaults to ``True``)
@@ -263,7 +263,7 @@ def patch(
     :param api_type: Indicates if the ``admin`` (default) or ``auth`` API will be leveraged.
     :type api_type: str
     :param timeout: The timeout period in seconds (defaults to ``30``)
-    :type timeout: int, str, None
+    :type timeout: int
     :param show_full_error: Determines if the full error message should be displayed (defaults to ``True``)
     :type show_full_error: bool
     :param return_json: Determines if the response should be returned in JSON format (defaults to ``True``)
@@ -310,7 +310,7 @@ def put(
     :param api_type: Indicates if the ``admin`` (default) or ``auth`` API will be leveraged.
     :type api_type: str
     :param timeout: The timeout period in seconds (defaults to ``30``)
-    :type timeout: int, str, None
+    :type timeout: int
     :param show_full_error: Determines if the full error message should be displayed (defaults to ``True``)
     :type show_full_error: bool
     :param return_json: Determines if the response should be returned in JSON format (defaults to ``True``)
