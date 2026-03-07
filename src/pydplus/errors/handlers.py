@@ -4,18 +4,19 @@
 :Synopsis:          Functions that handle various error situations within the namespace
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     05 Mar 2026
+:Modified Date:     07 Mar 2026
 """
 
 from __future__ import annotations
 
 import warnings
+from typing import Type
 
 from .. import constants as const
 
 
 def get_exception_type(exc) -> str:
-    """Returns the exception type (e.g. ``RuntimeError``, ``TypeError``, etc.) for a given exception.
+    """Return the exception type (e.g. ``RuntimeError``, ``TypeError``, etc.) for a given exception.
 
     :returns: The exception type as a string
     """
@@ -25,10 +26,10 @@ def get_exception_type(exc) -> str:
 def display_warning(
     message: str,
     *,
-    category: type[Warning] = const._DEFAULT_WARNING_CATEGORY,
+    category: Type[Warning] = const._DEFAULT_WARNING_CATEGORY,
     stacklevel: int = 2,
 ) -> None:
-    """Emits a warning that points to the caller by default.
+    """Emit a warning that points to the caller by default.
 
     :param message: Warning message to emit
     :type message: str

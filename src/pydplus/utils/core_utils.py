@@ -15,7 +15,7 @@ import os
 import random
 import string
 import urllib.parse
-from typing import Optional
+from typing import Tuple
 
 from . import log_utils
 from .. import errors
@@ -26,7 +26,7 @@ logger = log_utils.initialize_logging(__name__)
 
 
 def url_encode(raw_string: str) -> str:
-    """Encodes a string for use in URLs.
+    """Encode a string for use in URLs.
 
     :param raw_string: The raw string to be encoded
     :type raw_string: str
@@ -37,7 +37,7 @@ def url_encode(raw_string: str) -> str:
 
 
 def url_decode(encoded_string: str) -> str:
-    """Decodes a url-encoded string.
+    """Decode a url-encoded string.
 
     :param encoded_string: The url-encoded string
     :type encoded_string: str
@@ -48,7 +48,7 @@ def url_decode(encoded_string: str) -> str:
 
 
 def ensure_ending_slash(path: str, path_type: str = const.ARGUMENT_VALUES.URL) -> str:
-    """Ensures that a URL ends with a forward slash (``/``) or backslash (``\\``).
+    """Ensure that a URL ends with a forward slash (``/``) or backslash (``\\``).
 
     :param path: The path (URL or file path) to check and potentially add an ending slash
     :type path: str
@@ -70,7 +70,7 @@ def ensure_ending_slash(path: str, path_type: str = const.ARGUMENT_VALUES.URL) -
 
 
 def remove_ending_slash(path: str) -> str:
-    """Removes a trailing slash at the end of a URL or endpoint when present.
+    """Remove a trailing slash at the end of a URL or endpoint when present.
 
     :param path: The URL or path
     :type path: str
@@ -80,8 +80,8 @@ def remove_ending_slash(path: str) -> str:
     return path[:-1] if path.endswith('/') else path
 
 
-def file_exists(file_path):
-    """Checks to see if a file exists at a given file path.
+def file_exists(file_path: str) -> bool:
+    """Check to see if a file exists at a given file path.
 
     :param file_path: The full path to the file
     :type file_path: str
@@ -92,7 +92,7 @@ def file_exists(file_path):
 
 
 def get_file_type(file_path: str) -> str:
-    """Attempts to identify if a given file path is for a YAML or JSON file.
+    """Attempt to identify if a given file path is for a YAML or JSON file.
 
     :param file_path: The full path to the file
     :type file_path: str
@@ -128,8 +128,8 @@ def get_file_type(file_path: str) -> str:
     return file_type
 
 
-def split_file_path(full_path: str) -> tuple[str, str]:
-    """Splits a full file path into separate variables for file path and file name.
+def split_file_path(full_path: str) -> Tuple[str, str]:
+    """Split a full file path into separate variables for file path and file name.
 
     :param full_path: The full path to the file including the file name
     :type full_path: str
@@ -144,7 +144,7 @@ def split_file_path(full_path: str) -> tuple[str, str]:
 
 
 def get_base_url(url: str, include_scheme: bool = True) -> str:
-    """Parses a URL to return only the base URL with or without the scheme.
+    """Parse a URL to return only the base URL with or without the scheme.
 
     :param url: The URL to parse
     :type url: str
@@ -160,7 +160,7 @@ def get_base_url(url: str, include_scheme: bool = True) -> str:
 
 
 def get_random_string(length: int = 32, prefix_string: str = '') -> str:
-    """Returns a random alphanumeric string.
+    """Return a random alphanumeric string.
 
     :param length: The length of the string (``32`` by default)
     :type length: int

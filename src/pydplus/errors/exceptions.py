@@ -4,7 +4,7 @@
 :Synopsis:          Collection of exception classes relating to the pydplus library
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     05 Mar 2026
+:Modified Date:     07 Mar 2026
 """
 
 from __future__ import annotations
@@ -378,7 +378,7 @@ def _construct_api_custom_message(
         _message: Optional[str] = None,
         _status_code: Union[Optional[str], Optional[int]] = None
 ) -> str:
-    """Constructions the exception message for an API-related exception class.
+    """Construct the exception message for an API-related exception class.
 
     :param _request_type: The associated API request type (``GET``, ``PATCH``, ``POST``, ``PUT``, or ``DELETE``)
     :type _request_type: str

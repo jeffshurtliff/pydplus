@@ -9,7 +9,7 @@
 
 from __future__ import annotations
 
-from typing import Optional, Union
+from typing import Optional
 
 from . import api, errors
 from . import constants as const
@@ -28,7 +28,7 @@ def get_user_details(
         return_json: bool = True,
         allow_failed_response: Optional[bool] = None,
 ):
-    """Retrieves the details for a specific user based on their email address.
+    """Retrieve the details for a specific user based on their email address.
 
     :param pydp_object: The instantiated pydplus object
     :type pydp_object: class[pydplus.PyDPlus]
@@ -78,7 +78,7 @@ def get_user_id(
         timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
         show_full_error: bool = True,
 ) -> str:
-    """Retrieves the User ID associated with a specific user.
+    """Retrieve the User ID associated with a specific user.
 
     :param pydp_object: The instantiated pydplus object
     :type pydp_object: class[pydplus.PyDPlus]
@@ -128,7 +128,7 @@ def _update_user_status(
         _return_json: bool = True,
         _allow_failed_response: Optional[bool] = None,
 ):
-    """Enables or disables a user by calling the User Status API.
+    """Enabl or disable a user by calling the User Status API.
 
     :param _pydp_object: The instantiated pydplus object
     :type _pydp_object: class[pydplus.PyDPlus]
@@ -184,7 +184,7 @@ def enable_user(
         return_json: bool = True,
         allow_failed_response: Optional[bool] = None,
 ):
-    """Enables a user that is currently disabled.
+    """Enable a user that is currently disabled.
 
     :param pydp_object: The instantiated pydplus object
     :type pydp_object: class[pydplus.PyDPlus]
@@ -220,7 +220,7 @@ def disable_user(
         return_json: bool = True,
         allow_failed_response: Optional[bool] = None,
 ):
-    """Disables a user that is currently enabled.
+    """Disable a user that is currently enabled.
 
     :param pydp_object: The instantiated pydplus object
     :type pydp_object: class[pydplus.PyDPlus]
@@ -256,7 +256,7 @@ def synchronize_user(
         return_json: bool = True,
         allow_failed_response: Optional[bool] = None,
 ):
-    """Synchronizes the details of a user between an identity source and the Cloud Access Service.
+    """Synchronize the details of a user between an identity source and the Cloud Access Service.
 
     :param pydp_object: The instantiated pydplus object
     :type pydp_object: class[pydplus.PyDPlus]
@@ -299,7 +299,7 @@ def _update_mark_deleted(
         _return_json: bool = True,
         _allow_failed_response: Optional[bool] = None,
 ):
-    """Marks (or unmarks) a specific user as deleted."""
+    """Mark (or unmark) a specific user as deleted."""
     # Define the API endpoint to call and other API details
     _endpoint = const.REST_PATHS.USER_MARK_DELETED.format(user_id=_user_id)
     _payload = {const.QUERY_PARAMS.MARK_DELETED: _mark_deleted}
@@ -318,7 +318,7 @@ def mark_deleted(
         return_json: bool = True,
         allow_failed_response: Optional[bool] = None,
 ):
-    """Marks a specific user to be deleted during the next automated bulk deletion process.
+    """Mark a specific user to be deleted during the next automated bulk deletion process.
 
     :param pydp_object: The instantiated pydplus object
     :type pydp_object: class[pydplus.PyDPlus]
@@ -354,7 +354,7 @@ def unmark_deleted(
         return_json: bool = True,
         allow_failed_response: Optional[bool] = None,
 ):
-    """Unmarks a specific user that was flagged to be deleted.
+    """Unmark a specific user that was flagged to be deleted.
 
     :param pydp_object: The instantiated pydplus object
     :type pydp_object: class[pydplus.PyDPlus]

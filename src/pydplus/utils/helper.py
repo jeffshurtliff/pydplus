@@ -26,7 +26,7 @@ logger = log_utils.initialize_logging(__name__)
 
 
 def import_helper_file(file_path: str, file_type: str) -> dict:
-    """Imports a YAML (.yml, .yaml) or JSON (.json) helper config file.
+    """Import a YAML (.yml, .yaml) or JSON (.json) helper config file.
 
     :param file_path: The file path to the YAML file
     :type file_path: str
@@ -49,7 +49,7 @@ def import_helper_file(file_path: str, file_type: str) -> dict:
 
 
 def _convert_yaml_to_bool(_yaml_bool_value: str) -> bool:
-    """Converts the 'yes' and 'no' YAML values to traditional Boolean values."""
+    """Convert the 'yes' and 'no' YAML values to traditional Boolean values."""
     if _yaml_bool_value.lower() in const.HELPER_SETTINGS.VALID_YAML_TRUE_VALUES:
         return True
     else:
@@ -57,7 +57,7 @@ def _convert_yaml_to_bool(_yaml_bool_value: str) -> bool:
 
 
 def _get_connection_info(_helper_cfg: dict) -> dict[str, dict]:
-    """Parses any connection information found in the helper file."""
+    """Parse any connection information found in the helper file."""
     _connection_info = {const.CONNECTION_INFO.LEGACY: {}, const.CONNECTION_INFO.OAUTH: {}}
     for _section, _key_list in const.CONNECTION_INFO.CONNECTION_FIELDS.items():
         for _key in _key_list:
@@ -74,7 +74,7 @@ def _collect_values(
         _helper_dict: Optional[dict] = None,
         _ignore_missing: bool = False,
 ) -> dict:
-    """Loops through a list of top-level keys to collect their corresponding values.
+    """Loop through a list of top-level keys to collect their corresponding values.
 
     :param _top_level_keys: One or more top-level keys that might be found in the helper config file
     :type _top_level_keys: list, tuple, set, frozenset, str
@@ -108,7 +108,7 @@ def get_helper_settings(
         file_type: str = const.FILE_EXTENSIONS.JSON,
         defined_settings: Optional[dict] = None,
 ) -> dict[str, Union[str, bool, dict]]:
-    """Returns a dictionary of the defined helper settings.
+    """Return a dictionary of the defined helper settings.
 
     :param file_path: The file path to the helper configuration file
     :type file_path: str

@@ -6,8 +6,10 @@
 :Example:           ``logger = log_utils.initialize_logging(__name__)``
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     04 Mar 2026
+:Modified Date:     07 Mar 2026
 """
+
+from __future__ import annotations
 
 import os
 import sys
@@ -15,6 +17,9 @@ import logging
 import logging.handlers
 from pathlib import Path
 
+from .. import constants as const
+
+# TODO: Centralize the constants within the constants module
 LOGGING_DEFAULTS = {
     'logger_name': __name__,
     'log_level': 'info',
@@ -34,7 +39,7 @@ def initialize_logging(logger_name=None, log_level=None, formatter=None, debug=N
                        file_log_level=None, log_file=None, overwrite_log_files=None, console_output=None,
                        console_log_level=None, syslog_output=None, syslog_log_level=None, syslog_address=None,
                        syslog_port=None):
-    """Initializes logging for the pydplus library."""
+    """Initialize logging for the pydplus library."""
     # TODO: Complete the docstring above with parameters
     logger_name, log_levels, formatter = _apply_defaults(logger_name, formatter, debug, log_level, file_log_level,
                                                          console_log_level, syslog_log_level)
@@ -48,7 +53,7 @@ def initialize_logging(logger_name=None, log_level=None, formatter=None, debug=N
 
 
 class LessThanFilter(logging.Filter):
-    """Allows filters to be set to limit log levels to only less than a specified level.
+    """Allow filters to be set to limit log levels to only less than a specified level.
 
     .. seealso:: `Zoey Greer <https://stackoverflow.com/users/5124424/zoey-greer>`_ is the original author of
                  this class which was provided on `Stack Overflow <https://stackoverflow.com/a/31459386>`_.
@@ -59,7 +64,7 @@ class LessThanFilter(logging.Filter):
         self.max_level = exclusive_maximum
 
     def filter(self, record):
-        """Returns a Boolean integer value indicating whether a message should be logged.
+        """Return a Boolean integer value indicating whether a message should be logged.
 
         .. note:: A non-zero return indicates that the message will be logged.
         """
@@ -67,7 +72,7 @@ class LessThanFilter(logging.Filter):
 
 
 def _apply_defaults(_logger_name, _formatter, _debug, _log_level, _file_level, _console_level, _syslog_level):
-    """Applies default values to the configuration settings if not explicitly defined.
+    """Apply default values to the configuration settings if not explicitly defined.
 
     :param _logger_name: The name of the logger instance
     :type _logger_name: str, None
@@ -101,7 +106,7 @@ def _apply_defaults(_logger_name, _formatter, _debug, _log_level, _file_level, _
 
 
 def _get_log_levels_from_dict(_log_levels):
-    """Returns the individual log level values from a dictionary.
+    """Return the individual log level values from a dictionary.
 
     :param _log_levels: Dictionary containing log levels for different handlers
     :type _log_levels: dict
@@ -115,7 +120,7 @@ def _get_log_levels_from_dict(_log_levels):
 
 
 def _set_logging_level(_logger, _log_level):
-    """Sets the logging level for a :py:class:`logging.Logger` instance.
+    """Set the logging level for a :py:class:`logging.Logger` instance.
 
     :param _logger: The :py:class:`logging.Logger` instance
     :type _logger: class[logging.Logger]
@@ -156,7 +161,7 @@ def _add_handlers(_logger, _formatter, _no_output, _file_output, _file_log_level
 
 
 def _add_file_handler(_logger, _log_level, _log_file, _overwrite, _formatter):
-    """Adds a :py:class:`logging.FileHandler` to the :py:class:`logging.Logger` instance.
+    """Add a :py:class:`logging.FileHandler` to the :py:class:`logging.Logger` instance.
 
     :param _logger: The :py:class:`logging.Logger` instance
     :type _logger: class[logging.Logger]
@@ -197,7 +202,7 @@ def _add_file_handler(_logger, _log_level, _log_file, _overwrite, _formatter):
 
 
 def _add_stream_handler(_logger, _log_level, _formatter):
-    """Adds a :py:class:`logging.StreamHandler` to the :py:class:`logging.Logger` instance.
+    """Add a :py:class:`logging.StreamHandler` to the :py:class:`logging.Logger` instance.
 
     :param _logger: The :py:class:`logging.Logger` instance
     :type _logger: class[logging.Logger]
@@ -220,7 +225,7 @@ def _add_stream_handler(_logger, _log_level, _formatter):
 
 
 def _add_split_stream_handlers(_logger, _log_level, _formatter):
-    """Splits messages into q ``stdout`` or ``stderr`` handler depending on the log level.
+    """Split messages into q ``stdout`` or ``stderr`` handler depending on the log level.
 
     .. seealso:: Refer to the documentation for the :py:class:`pydplus.utils.log_utils.LessThanFilter` for
                  more information on how this filtering is implemented and for credit to the original author.

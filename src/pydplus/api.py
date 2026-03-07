@@ -32,7 +32,7 @@ def get(
         return_json: bool = True,
         allow_failed_response: Optional[bool] = None,
 ):
-    """Performs a GET request against the ID Plus tenant.
+    """Perform a GET request against the ID Plus tenant.
 
     :param pydp_object: The instantiated pydplus object
     :type pydp_object: class[pydplus.PyDPlus]
@@ -97,7 +97,7 @@ def api_call_with_payload(
         return_json: bool = True,
         allow_failed_response: Optional[bool] = None,
 ):
-    """Performs an API call with payload against the ID Plus tenant.
+    """Perform an API call with payload against the ID Plus tenant.
 
     :param pydp_object: The instantiated pydplus object
     :type pydp_object: class[pydplus.PyDPlus]
@@ -130,7 +130,7 @@ def api_call_with_payload(
              :py:exc:`errors.exceptions.InvalidFieldError`
     """
     def _raise_exception_for_payload():
-        """Raises a :py:exc:`TypeError` exception when the payload is an invalid data type."""
+        """Raise a :py:exc:`TypeError` exception when the payload is an invalid data type."""
         _error_msg = f'The API payload must be a dictionary or string (provided: {type(payload)})'
         logger.error(_error_msg)
         raise TypeError(_error_msg)
@@ -201,7 +201,7 @@ def post(
         return_json: bool = True,
         allow_failed_response: Optional[bool] = None,
 ):
-    """Performs a POST call with payload against the ID Plus tenant.
+    """Perform a POST call with payload against the ID Plus tenant.
 
     :param pydp_object: The instantiated pydplus object
     :type pydp_object: class[pydplus.PyDPlus]
@@ -248,7 +248,7 @@ def patch(
         return_json: bool = True,
         allow_failed_response: Optional[bool] = None,
 ):
-    """Performs a PATCH call with payload against the ID Plus tenant.
+    """Perform a PATCH call with payload against the ID Plus tenant.
 
     :param pydp_object: The instantiated pydplus object
     :type pydp_object: class[pydplus.PyDPlus]
@@ -295,7 +295,7 @@ def put(
         return_json: bool = True,
         allow_failed_response: Optional[bool] = None,
 ):
-    """Performs a PUT call with payload against the ID Plus tenant.
+    """Perform a PUT call with payload against the ID Plus tenant.
 
     :param pydp_object: The instantiated pydplus object
     :type pydp_object: class[pydplus.PyDPlus]
@@ -331,7 +331,7 @@ def put(
 
 
 def _should_allow_failed_responses(_pydp_object, _allow_failed_response: Optional[bool]) -> bool:
-    """Determines if failed responses are allowed based on the defined value or strict mode setting."""
+    """Determine if failed responses are allowed based on the defined value or strict mode setting."""
     # Only define the value if not already defined
     if not isinstance(_allow_failed_response, bool) or _allow_failed_response is None:
         try:
@@ -351,7 +351,7 @@ def _get_headers(
         _additional_headers: Optional[dict] = None,
         _header_type: str = const.DEFAULT_HEADER_TYPE,
 ) -> dict:
-    """Returns the appropriate HTTP headers to use for different types of API calls."""
+    """Return the appropriate HTTP headers to use for different types of API calls."""
     _additional_headers = {} if _additional_headers is None else _additional_headers
     # TODO: Define additional headers as needed based on header type
     _headers.update(_additional_headers)
@@ -359,7 +359,7 @@ def _get_headers(
 
 
 def _get_full_api_url(_pydp_object, _endpoint: str, _api_type: str = const.DEFAULT_API_TYPE) -> str:
-    """Constructs the full API URL to use in an API call based on the API type.
+    """Construct the full API URL to use in an API call based on the API type.
 
     :param _pydp_object: The instantiated pydplus object
     :type _pydp_object: class[pydplus.PyDPlus]
@@ -392,7 +392,7 @@ def _get_full_api_url(_pydp_object, _endpoint: str, _api_type: str = const.DEFAU
 
 
 def _raise_status_code_exception(_response, _method: str, _show_full_error: bool = True) -> None:
-    """Raises an exception when a non-OK status code is returned for an API call.
+    """Raise an exception when a non-OK status code is returned for an API call.
 
     :param _response: The API response
     :param _method: The API request type (``GET``, ``POST``, ``PATCH``, ``PUT``, or ``DELETE``)
@@ -410,7 +410,7 @@ def _raise_status_code_exception(_response, _method: str, _show_full_error: bool
 
 
 def _convert_response_to_json(_response, _allow_failed_response: bool = False):
-    """Attempts to convert an API response to JSON format and raises an exception if unsuccessful.
+    """Attempt to convert an API response to JSON format and raises an exception if unsuccessful.
 
     :param _response: The API response
     :param _allow_failed_response: Determines if failed responses are accepted (``False`` by default) or if an

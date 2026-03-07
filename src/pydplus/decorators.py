@@ -4,7 +4,7 @@
 :Synopsis:          Decorators that can be used to include additional functionality with functions and methods
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     04 Mar 2026
+:Modified Date:     07 Mar 2026
 """
 
 from __future__ import annotations
@@ -25,7 +25,7 @@ def deprecated(
     category: Type[Warning] = DeprecationWarning,
     stacklevel: int = 2,
 ) -> Callable[[F], F]:
-    """Marks a callable as deprecated and emits a warning at runtime.
+    """Mark a callable as deprecated and emits a warning at runtime.
 
     :param since: Version when deprecation started
     :type since: str

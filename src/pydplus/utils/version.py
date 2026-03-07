@@ -4,7 +4,7 @@
 :Synopsis:          This module contains the package version information
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     04 Mar 2026
+:Modified Date:     07 Mar 2026
 """
 
 from __future__ import annotations
@@ -24,7 +24,7 @@ logger = log_utils.initialize_logging(__name__)
 
 
 def get_full_version() -> str:
-    """Returns the current full version of the ``pydplus`` package.
+    """Return the current full version of the ``pydplus`` package.
 
     The package version is retrieved from the installed package metadata, which is
     populated from the ``version`` field in ``pyproject.toml``.
@@ -41,7 +41,7 @@ def get_full_version() -> str:
 
 
 def get_major_minor_version(full_version: Optional[str] = None) -> str:
-    """Returns the current major.minor (i.e., X.Y) version of the package.
+    """Return the current major.minor (i.e., X.Y) version of the package.
 
     :param full_version: The full package version (e.g. X.Y.Z)
     :type full_version: str, None
@@ -56,7 +56,7 @@ def get_major_minor_version(full_version: Optional[str] = None) -> str:
 
 
 def get_version_from_pyproject(pyproject_path: Optional[str] = None) -> str:
-    """Retrieves the current version from the pyproject.toml file.
+    """Retrieve the current version from the pyproject.toml file.
 
     :param pyproject_path: The path to the pyproject.toml file (optional)
     :type pyproject_path: str, None

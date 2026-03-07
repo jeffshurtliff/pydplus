@@ -6,7 +6,7 @@
 :Example:           ``jwt_string = auth.get_legacy_jwt_string(base_url, connection_info)``
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     06 Mar 2026
+:Modified Date:     07 Mar 2026
 """
 
 from __future__ import annotations
@@ -28,7 +28,7 @@ logger = log_utils.initialize_logging(__name__)
 
 
 def get_legacy_jwt_string(base_url: str, connection_info: dict) -> str:
-    """Retrieves the JWT string used for Legacy API connections.
+    """Retrieve the JWT string used for Legacy API connections.
 
     :param base_url: The base URL for the Cloud Administration API
     :type base_url: str
@@ -59,7 +59,7 @@ def get_legacy_headers(
         base_url: Optional[str] = None,
         connection_info: Optional[dict] = None,
 ) -> dict[str, str]:
-    """Constructs the headers to use in legacy API calls.
+    """Construct the headers to use in legacy API calls.
 
     :param jwt_string: The constructed JWT string to provide in the Authorization header
     :type jwt_string: str, None
@@ -85,7 +85,7 @@ def get_legacy_headers(
 
 
 def _extract_legacy_connection_info(_connection_info: dict) -> Tuple[str, str]:
-    """Extracts the needed legacy authentication data from the connection info dictionary.
+    """Extract the needed legacy authentication data from the connection info dictionary.
 
     :param _connection_info: The dictionary containing connection info from the client object
     :type _connection_info: dict
@@ -114,7 +114,7 @@ def _extract_legacy_connection_info(_connection_info: dict) -> Tuple[str, str]:
 
 
 def _define_jwt_claims(_access_id: str, _base_url: str) -> dict:
-    """Defines the JWT claims to use when generating the JWT string.
+    """Define the JWT claims to use when generating the JWT string.
 
     :param _access_id: The access ID used for legacy authentication
     :type _access_id: str
@@ -132,7 +132,7 @@ def _define_jwt_claims(_access_id: str, _base_url: str) -> dict:
 
 
 def _load_private_key(_key_path: str) -> RSAPrivateKey:
-    """Loads the private key file for use in generating the JWT string.
+    """Load the private key file for use in generating the JWT string.
 
     :param _key_path: The full path to the private key
     :type _key_path: str
