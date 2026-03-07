@@ -4,21 +4,31 @@
 :Synopsis:          Defines the user-related functions associated with the RSA ID Plus API
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     17 Jun 2025
+:Modified Date:     07 Mar 2026
 """
 
+from __future__ import annotations
+
+from typing import Optional, Union
+
 from . import api, errors
+from . import constants as const
 from .utils import log_utils
 
 # Initialize logging
 logger = log_utils.initialize_logging(__name__)
 
 
-def get_user_details(pydp_object, email, search_unsynced=None, timeout=api.DEFAULT_TIMEOUT, show_full_error=True,
-                     return_json=True, allow_failed_response=None):
-    """This function retrieves the details for a specific user based on their email address.
-
-    .. versionadded:: 1.0.0
+def get_user_details(
+        pydp_object,
+        email: str,
+        search_unsynced: Optional[bool] = None,
+        timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
+        show_full_error: bool = True,
+        return_json: bool = True,
+        allow_failed_response: Optional[bool] = None,
+):
+    """Retrieves the details for a specific user based on their email address.
 
     :param pydp_object: The instantiated pydplus object
     :type pydp_object: class[pydplus.PyDPlus]
@@ -27,7 +37,7 @@ def get_user_details(pydp_object, email, search_unsynced=None, timeout=api.DEFAU
     :param search_unsynced: Indicates if the user search should include unsynchronized users (optional)
     :type search_unsynced: bool, None
     :param timeout: The timeout period in seconds (defaults to ``30``)
-    :type timeout: int, str, None
+    :type timeout: int
     :param show_full_error: Determines if the full error message should be displayed (defaults to ``True``)
     :type show_full_error: bool
     :param return_json: Determines if the response should be returned in JSON format (defaults to ``True``)
@@ -42,31 +52,33 @@ def get_user_details(pydp_object, email, search_unsynced=None, timeout=api.DEFAU
              :py:exc:`errors.exceptions.APIResponseConversionError`,
              :py:exc:`errors.exceptions.InvalidFieldError`
     """
-    # Define the API endpoint to call and other API details
-    endpoint = 'v1/users/lookup'
-    api_type = 'admin'
-
     # Define the payload
     payload = {
-        'email': email,
+        const.QUERY_PARAMS.EMAIL: email,
     }
     if search_unsynced is not None:
         if not isinstance(search_unsynced, bool):
-            raise TypeError('The value of the search_unsynced parameter must be Boolean.')
+            error_msg = f'The value of the search_unsynced parameter must be Boolean. (Provided: {type(search_unsynced)})'
+            logger.error(error_msg)
+            raise TypeError(error_msg)
         # noinspection PyTypeChecker
-        payload['searchUnsynched'] = search_unsynced
+        payload[const.QUERY_PARAMS.SEARCH_UNSYNCED] = search_unsynced
 
     # Perform the API call and return the response in JSON format
-    return api.post(pydp_object=pydp_object, endpoint=endpoint, payload=payload, api_type=api_type, timeout=timeout,
-                    show_full_error=show_full_error, return_json=return_json,
-                    allow_failed_response=allow_failed_response)
+    return api.post(pydp_object=pydp_object, endpoint=const.REST_PATHS.USERS_LOOKUP, payload=payload,
+                    api_type=const.ADMIN_API_TYPE, timeout=timeout, show_full_error=show_full_error,
+                    return_json=return_json, allow_failed_response=allow_failed_response)
 
 
-def get_user_id(pydp_object, email=None, user_details=None, search_unsynced=None, timeout=api.DEFAULT_TIMEOUT,
-                show_full_error=True):
-    """This function retrieves the User ID associated with a specific user.
-
-    .. versionadded:: 1.0.0
+def get_user_id(
+        pydp_object,
+        email: str = None,
+        user_details: Optional[dict] = None,
+        search_unsynced: Optional[bool] = None,
+        timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
+        show_full_error: bool = True,
+) -> str:
+    """Retrieves the User ID associated with a specific user.
 
     :param pydp_object: The instantiated pydplus object
     :type pydp_object: class[pydplus.PyDPlus]
@@ -77,7 +89,7 @@ def get_user_id(pydp_object, email=None, user_details=None, search_unsynced=None
     :param search_unsynced: Indicates if the user search should include unsynchronized users (optional)
     :type search_unsynced: bool, None
     :param timeout: The timeout period in seconds (defaults to ``30``)
-    :type timeout: int, str, None
+    :type timeout: int
     :param show_full_error: Determines if the full error message should be displayed (defaults to ``True``)
     :type show_full_error: bool
     :returns: The User ID for the given user as a string (e.g. ``54082ac6-4713-6368-2251-df813c41159f``)
@@ -101,171 +113,219 @@ def get_user_id(pydp_object, email=None, user_details=None, search_unsynced=None
                                         timeout=timeout, show_full_error=show_full_error, allow_failed_response=True)
 
     # Locate and return the user ID if possible
-    if not isinstance(user_details, dict) or 'id' not in user_details:
+    if not user_details or not isinstance(user_details, dict) or const.RESPONSE_KEYS.ID not in user_details:
         error_msg = 'Failed to retrieve the user ID for the queried user. An empty string will be returned for the ID.'
         logger.error(error_msg)
-    return user_details.get('id', '')
+    return user_details.get(const.RESPONSE_KEYS.ID, '')
 
 
-def _update_user_status(_pydp_object, _user_id, _action, _timeout=api.DEFAULT_TIMEOUT, _show_full_error=True,
-                        _return_json=True, _allow_failed_response=None):
-    """This function enables or disables a user by calling the User Status API.
+def _update_user_status(
+        _pydp_object,
+        _user_id: str,
+        _action: str,
+        _timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
+        _show_full_error: bool = True,
+        _return_json: bool = True,
+        _allow_failed_response: Optional[bool] = None,
+):
+    """Enables or disables a user by calling the User Status API.
 
-    .. versionadded:: 1.0.0
+    :param _pydp_object: The instantiated pydplus object
+    :type _pydp_object: class[pydplus.PyDPlus]
+    :param _user_id: The ID of an existing user (e.g. ``54082ac6-4713-6368-2251-df813c41159f``)
+    :type _user_id: str
+    :param _action: The action to be performed (Accepted values: ``enable``, ``disable``)
+    :type _action: str
+    :param _timeout: The timeout period in seconds (defaults to ``30``)
+    :type _timeout: int
+    :param _show_full_error: Determines if the full error message should be displayed (defaults to ``True``)
+    :type _show_full_error: bool
+    :param _return_json: Determines if the response should be returned in JSON format (defaults to ``True``)
+    :type _return_json: bool
+    :param _allow_failed_response: Indicates that failed responses should return and should not raise an exception
+                                  (If not explicitly defined then ``True`` if Strict Mode is disabled)
+    :type _allow_failed_response: bool, None
+    :returns: The API response in JSON format or as a ``requests`` object
+    :raises: :py:exc:`TypeError`,
+             :py:exc:`errors.exceptions.APIMethodError`,
+             :py:exc:`errors.exceptions.APIRequestError`,
+             :py:exc:`errors.exceptions.APIResponseConversionError`,
+             :py:exc:`errors.exceptions.InvalidFieldError`,
+             :py:exc:`errors.exceptions.MissingRequiredDataError`
     """
     # Define the API endpoint to call and other API details
-    _endpoint = f'v1/users/{_user_id}/userStatus'
-    _api_type = 'admin'
+    _endpoint = const.REST_PATHS.USER_STATUS.format(user_id=_user_id)
 
     # Identify the action to perform and define the payload accordingly
-    _valid_actions = {'enable', 'disable'}
-    if _action.lower() not in _valid_actions:
-        error_msg = f"'{_action}' is not a valid action value when enabling or disabling a user."
-        logger.error(error_msg)
-        raise errors.exceptions.InvalidPayloadValueError(error_msg)
-    _action = 'Enabled' if _action.lower() == 'enable' else 'Disabled'
+    if _action.lower() not in const.ARGUMENT_VALUES.VALID_USER_STATUS_ACTIONS:
+        _error_msg = f"'{_action}' is not a valid action value when enabling or disabling a user. "
+        _error_msg += f"(Expected: '{const.ARGUMENT_VALUES.ENABLE}', '{const.ARGUMENT_VALUES.DISABLE}')"
+        logger.error(_error_msg)
+        raise errors.exceptions.InvalidPayloadValueError(_error_msg)
+    if _action.lower() == const.ARGUMENT_VALUES.ENABLE:
+        _action = const.PAYLOAD_VALUES.ENABLED
+    else:
+        _action = const.PAYLOAD_VALUES.DISABLED
     _payload = {
-        'userStatus': _action,
+        const.QUERY_PARAMS.USER_STATUS: _action,
     }
 
     # Perform the API call and return the response
-    return api.put(pydp_object=_pydp_object, endpoint=_endpoint, payload=_payload, timeout=_timeout,
-                   show_full_error=_show_full_error, return_json=_return_json,
-                   allow_failed_response=_allow_failed_response)
-
-
-def enable_user(pydp_object, user_id, timeout=api.DEFAULT_TIMEOUT, show_full_error=True, return_json=True,
-                allow_failed_response=None):
-    """This function enables a user that is currently disabled.
-
-    .. versionadded:: 1.0.0
-
-    :param pydp_object: The instantiated pydplus object
-    :type pydp_object: class[pydplus.PyDPlus]
-    :param user_id: The ID of an existing user (e.g. ``54082ac6-4713-6368-2251-df813c41159f``)
-    :type user_id: str
-    :param timeout: The timeout period in seconds (defaults to ``30``)
-    :type timeout: int, str, None
-    :param show_full_error: Determines if the full error message should be displayed (defaults to ``True``)
-    :type show_full_error: bool
-    :param return_json: Determines if the response should be returned in JSON format (defaults to ``True``)
-    :type return_json: bool
-    :param allow_failed_response: Indicates that failed responses should return and should not raise an exception
-                                  (If not explicitly defined then ``True`` if Strict Mode is disabled)
-    :type allow_failed_response: bool, None
-    :returns: The API response in JSON format or as a ``requests`` object
-    :raises: :py:exc:`TypeError`,
-             :py:exc:`errors.exceptions.APIMethodError`,
-             :py:exc:`errors.exceptions.APIRequestError`,
-             :py:exc:`errors.exceptions.APIResponseConversionError`,
-             :py:exc:`errors.exceptions.InvalidFieldError`,
-             :py:exc:`errors.exceptions.MissingRequiredDataError`
-    """
-    return _update_user_status(_pydp_object=pydp_object, _user_id=user_id, _action='enable', _timeout=timeout,
-                               _show_full_error=show_full_error, _return_json=return_json,
-                               _allow_failed_response=allow_failed_response)
-
-
-def disable_user(pydp_object, user_id, timeout=api.DEFAULT_TIMEOUT, show_full_error=True, return_json=True,
-                 allow_failed_response=None):
-    """This function disables a user that is currently enabled.
-
-    .. versionadded:: 1.0.0
-
-    :param pydp_object: The instantiated pydplus object
-    :type pydp_object: class[pydplus.PyDPlus]
-    :param user_id: The ID of an existing user (e.g. ``54082ac6-4713-6368-2251-df813c41159f``)
-    :type user_id: str
-    :param timeout: The timeout period in seconds (defaults to ``30``)
-    :type timeout: int, str, None
-    :param show_full_error: Determines if the full error message should be displayed (defaults to ``True``)
-    :type show_full_error: bool
-    :param return_json: Determines if the response should be returned in JSON format (defaults to ``True``)
-    :type return_json: bool
-    :param allow_failed_response: Indicates that failed responses should return and should not raise an exception
-                                  (If not explicitly defined then ``True`` if Strict Mode is disabled)
-    :type allow_failed_response: bool, None
-    :returns: The API response in JSON format or as a ``requests`` object
-    :raises: :py:exc:`TypeError`,
-             :py:exc:`errors.exceptions.APIMethodError`,
-             :py:exc:`errors.exceptions.APIRequestError`,
-             :py:exc:`errors.exceptions.APIResponseConversionError`,
-             :py:exc:`errors.exceptions.InvalidFieldError`,
-             :py:exc:`errors.exceptions.MissingRequiredDataError`
-    """
-    return _update_user_status(_pydp_object=pydp_object, _user_id=user_id, _action='disable', _timeout=timeout,
-                               _show_full_error=show_full_error, _return_json=return_json,
-                               _allow_failed_response=allow_failed_response)
-
-
-def synchronize_user(pydp_object, user_id, timeout=api.DEFAULT_TIMEOUT, show_full_error=True, return_json=True,
-                     allow_failed_response=None):
-    """This function synchronizes the details of a user between an identity source and the Cloud Access Service.
-
-    .. versionadded:: 1.0.0
-
-    :param pydp_object: The instantiated pydplus object
-    :type pydp_object: class[pydplus.PyDPlus]
-    :param user_id: The ID of an existing user (e.g. ``54082ac6-4713-6368-2251-df813c41159f``)
-    :type user_id: str
-    :param timeout: The timeout period in seconds (defaults to ``30``)
-    :type timeout: int, str, None
-    :param show_full_error: Determines if the full error message should be displayed (defaults to ``True``)
-    :type show_full_error: bool
-    :param return_json: Determines if the response should be returned in JSON format (defaults to ``True``)
-    :type return_json: bool
-    :param allow_failed_response: Indicates that failed responses should return and should not raise an exception
-                                  (If not explicitly defined then ``True`` if Strict Mode is disabled)
-    :type allow_failed_response: bool, None
-    :returns: The API response in JSON format or as a ``requests`` object
-    :raises: :py:exc:`TypeError`,
-             :py:exc:`errors.exceptions.APIMethodError`,
-             :py:exc:`errors.exceptions.APIRequestError`,
-             :py:exc:`errors.exceptions.APIResponseConversionError`,
-             :py:exc:`errors.exceptions.InvalidFieldError`,
-             :py:exc:`errors.exceptions.MissingRequiredDataError`
-    """
-    # Define the API endpoint to call and other API details
-    endpoint = f'v1/users/{user_id}/sync'
-    api_type = 'admin'
-    payload = ''
-    # TODO: Test to see if Content-Length header must be explicitly defined
-
-    # Perform the API call and return the response
-    return api.post(pydp_object=pydp_object, endpoint=endpoint, payload=payload, api_type=api_type, timeout=timeout,
-                    show_full_error=show_full_error, return_json=return_json,
-                    allow_failed_response=allow_failed_response)
-
-
-def _update_mark_deleted(_pydp_object, _user_id, _mark_deleted, _timeout=api.DEFAULT_TIMEOUT, _show_full_error=True,
-                         _return_json=True, _allow_failed_response=None):
-    """This function marks (or unmarks) a specific user as deleted.
-
-    .. versionadded:: 1.0.0
-    """
-    # Define the API endpoint to call and other API details
-    _endpoint = f'v1/users/{_user_id}/markDeleted'
-    _api_type = 'admin'
-    _payload = {'markDeleted': _mark_deleted}
-    
-    # Perform the API call and return the response
-    return api.put(pydp_object=_pydp_object, endpoint=_endpoint, payload=_payload, api_type=_api_type,
+    return api.put(pydp_object=_pydp_object, endpoint=_endpoint, payload=_payload, api_type=const.ADMIN_API_TYPE,
                    timeout=_timeout, show_full_error=_show_full_error, return_json=_return_json,
                    allow_failed_response=_allow_failed_response)
 
 
-def mark_deleted(pydp_object, user_id, timeout=api.DEFAULT_TIMEOUT, show_full_error=True, return_json=True,
-                 allow_failed_response=None):
-    """This function marks a specific user to be deleted during the next automated bulk deletion process.
-
-    .. versionadded:: 1.0.0
+def enable_user(
+        pydp_object,
+        user_id: str,
+        timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
+        show_full_error: bool = True,
+        return_json: bool = True,
+        allow_failed_response: Optional[bool] = None,
+):
+    """Enables a user that is currently disabled.
 
     :param pydp_object: The instantiated pydplus object
     :type pydp_object: class[pydplus.PyDPlus]
     :param user_id: The ID of an existing user (e.g. ``54082ac6-4713-6368-2251-df813c41159f``)
     :type user_id: str
     :param timeout: The timeout period in seconds (defaults to ``30``)
-    :type timeout: int, str, None
+    :type timeout: int
+    :param show_full_error: Determines if the full error message should be displayed (defaults to ``True``)
+    :type show_full_error: bool
+    :param return_json: Determines if the response should be returned in JSON format (defaults to ``True``)
+    :type return_json: bool
+    :param allow_failed_response: Indicates that failed responses should return and should not raise an exception
+                                  (If not explicitly defined then ``True`` if Strict Mode is disabled)
+    :type allow_failed_response: bool, None
+    :returns: The API response in JSON format or as a ``requests`` object
+    :raises: :py:exc:`TypeError`,
+             :py:exc:`errors.exceptions.APIMethodError`,
+             :py:exc:`errors.exceptions.APIRequestError`,
+             :py:exc:`errors.exceptions.APIResponseConversionError`,
+             :py:exc:`errors.exceptions.InvalidFieldError`,
+             :py:exc:`errors.exceptions.MissingRequiredDataError`
+    """
+    return _update_user_status(_pydp_object=pydp_object, _user_id=user_id, _action=const.ARGUMENT_VALUES.ENABLE,
+                               _timeout=timeout, _show_full_error=show_full_error, _return_json=return_json,
+                               _allow_failed_response=allow_failed_response)
+
+
+def disable_user(
+        pydp_object,
+        user_id: str,
+        timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
+        show_full_error: bool = True,
+        return_json: bool = True,
+        allow_failed_response: Optional[bool] = None,
+):
+    """Disables a user that is currently enabled.
+
+    :param pydp_object: The instantiated pydplus object
+    :type pydp_object: class[pydplus.PyDPlus]
+    :param user_id: The ID of an existing user (e.g. ``54082ac6-4713-6368-2251-df813c41159f``)
+    :type user_id: str
+    :param timeout: The timeout period in seconds (defaults to ``30``)
+    :type timeout: int
+    :param show_full_error: Determines if the full error message should be displayed (defaults to ``True``)
+    :type show_full_error: bool
+    :param return_json: Determines if the response should be returned in JSON format (defaults to ``True``)
+    :type return_json: bool
+    :param allow_failed_response: Indicates that failed responses should return and should not raise an exception
+                                  (If not explicitly defined then ``True`` if Strict Mode is disabled)
+    :type allow_failed_response: bool, None
+    :returns: The API response in JSON format or as a ``requests`` object
+    :raises: :py:exc:`TypeError`,
+             :py:exc:`errors.exceptions.APIMethodError`,
+             :py:exc:`errors.exceptions.APIRequestError`,
+             :py:exc:`errors.exceptions.APIResponseConversionError`,
+             :py:exc:`errors.exceptions.InvalidFieldError`,
+             :py:exc:`errors.exceptions.MissingRequiredDataError`
+    """
+    return _update_user_status(_pydp_object=pydp_object, _user_id=user_id, _action=const.ARGUMENT_VALUES.DISABLE,
+                               _timeout=timeout, _show_full_error=show_full_error, _return_json=return_json,
+                               _allow_failed_response=allow_failed_response)
+
+
+def synchronize_user(
+        pydp_object,
+        user_id: str,
+        timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
+        show_full_error: bool = True,
+        return_json: bool = True,
+        allow_failed_response: Optional[bool] = None,
+):
+    """Synchronizes the details of a user between an identity source and the Cloud Access Service.
+
+    :param pydp_object: The instantiated pydplus object
+    :type pydp_object: class[pydplus.PyDPlus]
+    :param user_id: The ID of an existing user (e.g. ``54082ac6-4713-6368-2251-df813c41159f``)
+    :type user_id: str
+    :param timeout: The timeout period in seconds (defaults to ``30``)
+    :type timeout: int
+    :param show_full_error: Determines if the full error message should be displayed (defaults to ``True``)
+    :type show_full_error: bool
+    :param return_json: Determines if the response should be returned in JSON format (defaults to ``True``)
+    :type return_json: bool
+    :param allow_failed_response: Indicates that failed responses should return and should not raise an exception
+                                  (If not explicitly defined then ``True`` if Strict Mode is disabled)
+    :type allow_failed_response: bool, None
+    :returns: The API response in JSON format or as a ``requests`` object
+    :raises: :py:exc:`TypeError`,
+             :py:exc:`errors.exceptions.APIMethodError`,
+             :py:exc:`errors.exceptions.APIRequestError`,
+             :py:exc:`errors.exceptions.APIResponseConversionError`,
+             :py:exc:`errors.exceptions.InvalidFieldError`,
+             :py:exc:`errors.exceptions.MissingRequiredDataError`
+    """
+    # Define the API endpoint to call and other API details
+    endpoint = const.REST_PATHS.USER_SYNC.format(user_id=user_id)
+    payload = ''
+    # TODO: Test to see if Content-Length header must be explicitly defined
+
+    # Perform the API call and return the response
+    return api.post(pydp_object=pydp_object, endpoint=endpoint, payload=payload, api_type=const.ADMIN_API_TYPE,
+                    timeout=timeout, show_full_error=show_full_error, return_json=return_json,
+                    allow_failed_response=allow_failed_response)
+
+
+def _update_mark_deleted(
+        _pydp_object,
+        _user_id: str,
+        _mark_deleted: bool,
+        _timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
+        _show_full_error: bool = True,
+        _return_json: bool = True,
+        _allow_failed_response: Optional[bool] = None,
+):
+    """Marks (or unmarks) a specific user as deleted."""
+    # Define the API endpoint to call and other API details
+    _endpoint = const.REST_PATHS.USER_MARK_DELETED.format(user_id=_user_id)
+    _payload = {const.QUERY_PARAMS.MARK_DELETED: _mark_deleted}
+    
+    # Perform the API call and return the response
+    return api.put(pydp_object=_pydp_object, endpoint=_endpoint, payload=_payload, api_type=const.ADMIN_API_TYPE,
+                   timeout=_timeout, show_full_error=_show_full_error, return_json=_return_json,
+                   allow_failed_response=_allow_failed_response)
+
+
+def mark_deleted(
+        pydp_object,
+        user_id: str,
+        timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
+        show_full_error: bool = True,
+        return_json: bool = True,
+        allow_failed_response: Optional[bool] = None,
+):
+    """Marks a specific user to be deleted during the next automated bulk deletion process.
+
+    :param pydp_object: The instantiated pydplus object
+    :type pydp_object: class[pydplus.PyDPlus]
+    :param user_id: The ID of an existing user (e.g. ``54082ac6-4713-6368-2251-df813c41159f``)
+    :type user_id: str
+    :param timeout: The timeout period in seconds (defaults to ``30``)
+    :type timeout: int
     :param show_full_error: Determines if the full error message should be displayed (defaults to ``True``)
     :type show_full_error: bool
     :param return_json: Determines if the response should be returned in JSON format (defaults to ``True``)
@@ -286,18 +346,22 @@ def mark_deleted(pydp_object, user_id, timeout=api.DEFAULT_TIMEOUT, show_full_er
                                 _allow_failed_response=allow_failed_response)
 
 
-def unmark_deleted(pydp_object, user_id, timeout=api.DEFAULT_TIMEOUT, show_full_error=True, return_json=True,
-                   allow_failed_response=None):
-    """This function unmarks a specific user that was flagged to be deleted.
-
-    .. versionadded:: 1.0.0
+def unmark_deleted(
+        pydp_object,
+        user_id: str,
+        timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
+        show_full_error: bool = True,
+        return_json: bool = True,
+        allow_failed_response: Optional[bool] = None,
+):
+    """Unmarks a specific user that was flagged to be deleted.
 
     :param pydp_object: The instantiated pydplus object
     :type pydp_object: class[pydplus.PyDPlus]
     :param user_id: The ID of an existing user (e.g. ``54082ac6-4713-6368-2251-df813c41159f``)
     :type user_id: str
     :param timeout: The timeout period in seconds (defaults to ``30``)
-    :type timeout: int, str, None
+    :type timeout: int
     :param show_full_error: Determines if the full error message should be displayed (defaults to ``True``)
     :type show_full_error: bool
     :param return_json: Determines if the response should be returned in JSON format (defaults to ``True``)
@@ -318,8 +382,7 @@ def unmark_deleted(pydp_object, user_id, timeout=api.DEFAULT_TIMEOUT, show_full_
                                 _allow_failed_response=allow_failed_response)
 
 
-def _add_remove_high_risk_users(_pydp_object, _users_list, _action, _timeout=api.DEFAULT_TIMEOUT,
-                                _show_full_error=True, _return_json=True, _allow_failed_response=None):
-    # TODO: Finish the function
-    pass
-
+# def _add_remove_high_risk_users(_pydp_object, _users_list, _action, _timeout=const.DEFAULT_API_TIMEOUT_SECONDS,
+#                                 _show_full_error=True, _return_json=True, _allow_failed_response=None):
+#     # TODO: Finish the function
+#     pass

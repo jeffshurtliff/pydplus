@@ -4,7 +4,7 @@
 :Synopsis:          Constants that are utilized throughout the package
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     06 Mar 2026
+:Modified Date:     07 Mar 2026
 """
 
 from __future__ import annotations
@@ -37,8 +37,17 @@ _DEFAULT_WARNING_CATEGORY: Final[type[Warning]] = UserWarning
 @dataclass(frozen=True)
 class ArgumentValues:
     """Common argument values leveraged throughout the package."""
+    # Common values
     FILE: ClassVar[str] = 'file'
     URL: ClassVar[str] = 'url'
+
+    # User status actions
+    ENABLE: ClassVar[str] = 'enable'
+    DISABLE: ClassVar[str] = 'disable'
+    VALID_USER_STATUS_ACTIONS: ClassVar[frozenset[str]] = frozenset({
+        ENABLE,
+        DISABLE,
+    })
 
 
 # -----------------------------
@@ -374,7 +383,7 @@ class Urls:
 
 
 # -------------------------------
-# Salesforce REST API Endpoints
+# REST API endpoint paths
 # -------------------------------
 @dataclass(frozen=True)
 class RestPaths:
@@ -387,6 +396,15 @@ class RestPaths:
     """
     # General REST paths
     # TODO: Add constants here
+
+    # Users endpoint paths
+    # TODO: Update the base URL to end in a slash for consistency
+    USERS: ClassVar[str] = 'v1/users'
+    USERS_LOOKUP: ClassVar[str] = USERS + '/lookup'
+    USER_BY_ID: ClassVar[str] = USERS + '/{user_id}'                                            # Vars: user_id
+    USER_MARK_DELETED: ClassVar[str] = USER_BY_ID + '/markDeleted'                              # Vars: user_id
+    USER_STATUS: ClassVar[str] = USER_BY_ID + '/userStatus'                                     # Vars: user_id
+    USER_SYNC: ClassVar[str] = USERS + '/sync'                                                  # Vars: user_id
 
 
 # --------------------------------------
@@ -404,6 +422,10 @@ class QueryParams:
     # Common parameter names
     Q: ClassVar[str] = 'q'
     BODY: ClassVar[str] = 'body'
+    EMAIL: ClassVar[str] = 'email'
+    MARK_DELETED: ClassVar[str] = 'markDeleted'
+    SEARCH_UNSYNCED: ClassVar[str] = 'searchUnsynched'
+    USER_STATUS: ClassVar[str] = 'userStatus'
 
 
 # -----------------------------
@@ -412,7 +434,9 @@ class QueryParams:
 @dataclass(frozen=True)
 class PayloadValues:
     """Standard and common payload values used in RSA ID Plus REST API requests."""
-    # TODO: Populate with constants
+    # User status
+    ENABLED: ClassVar[str] = 'Enabled'
+    DISABLED: ClassVar[str] = 'Disabled'
 
 
 # -----------------------------
@@ -421,7 +445,8 @@ class PayloadValues:
 @dataclass(frozen=True)
 class ResponseKeys:
     """Standard and common keys / fields for RSA ID Plus REST API responses."""
-    # TODO: Add constants here
+    # Common keys / fields
+    ID: ClassVar[str] = 'id'
 
 
 # -----------------------------
