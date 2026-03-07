@@ -9,6 +9,8 @@
 :Modified Date:     07 Mar 2026
 """
 
+from __future__ import annotations
+
 import os
 from typing import Any, Optional, Union, Tuple
 from collections.abc import Mapping
