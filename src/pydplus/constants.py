@@ -4,7 +4,7 @@
 :Synopsis:          Constants that are utilized throughout the package
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     07 Mar 2026
+:Modified Date:     09 Mar 2026
 """
 
 from __future__ import annotations
@@ -247,7 +247,7 @@ class ConnectionInfo:
 # -----------------------------
 # API types
 ADMIN_API_TYPE: Final[str] = 'admin'
-AUTH_API_TYPE = Final[str] = 'auth'
+AUTH_API_TYPE: Final[str] = 'auth'
 
 # Default values
 DEFAULT_API_TIMEOUT_SECONDS: Final[int] = 30
