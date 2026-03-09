@@ -1,17 +1,18 @@
 # -*- coding: utf-8 -*-
 """
-:Module:            pydplus.tests.resources
-:Synopsis:          Frequently used resources for performing unit testing
-:Usage:             ``from pydplus.tests import resources``
-:Example:           TBD
+:Module:            tests.resources
+:Synopsis:          Resources for performing unit testing with pytest
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     10 Jun 2025
+:Modified Date:     09 Mar 2026
 """
+
+from __future__ import annotations
 
 import os
 import sys
 import importlib
+from typing import Optional
 
 import pytest
 
@@ -21,10 +22,7 @@ HELPER_FILE_NAME = 'helper_dev.yml'
 
 
 class MockResponse:
-    """This class simulates an API response for testing purposes.
-
-    .. versionadded:: 1.0.0
-    """
+    """Simulate an API response for testing purposes."""
     def __init__(self, json_body, status_code=200):
         self.json_body = json_body
         self.status_code = status_code
@@ -34,20 +32,14 @@ class MockResponse:
 
 
 def mock_success_response(*args, **kwargs):
-    """This function works with the `MockedResponse` class to simulate a successful API response.
-
-    .. versionadded:: 1.0.0
-    """
+    """Work with the `MockedResponse` class to simulate a successful API response."""
     return MockResponse({
         'id': '54082ac6-4713-6368-2251-df813c41159f',
     })
 
 
 def mock_error_response(*args, **kwargs):
-    """This function works with the `MockedResponse` class to simulate a failed API response.
-
-    .. versionadded:: 1.0.0
-    """
+    """Work with the `MockedResponse` class to simulate a failed API response."""
     return MockResponse({
         'code': '404 NOT_FOUND',
         'description': 'User john.doe@example.com not found',
@@ -55,17 +47,12 @@ def mock_error_response(*args, **kwargs):
 
 
 def set_package_path():
-    """This function adds the high-level pydplus directory to the sys.path list.
-
-    .. versionadded:: 1.0.0
-    """
+    """Add the high-level pydplus directory to the sys.path list."""
     sys.path.insert(0, os.path.abspath('../..'))
 
 
 def import_modules(*modules):
-    """This function imports and returns one or more modules to utilize in a unit test.
-
-    .. versionadded:: 1.0.0
+    """Import and return one or more modules to utilize in a unit test.
 
     :param modules: One or more module paths (absolute) in string format
     :returns: The imported module(s) as an individual object or a tuple of objects
@@ -77,27 +64,19 @@ def import_modules(*modules):
     return imported_modules if len(imported_modules) > 1 else imported_modules[0]
 
 
-def secrets_helper_exists():
-    """This function checks to see if the unencrypted helper file exists for GitHub Actions.
-
-    .. versionadded:: 1.0.0
-    """
+def secrets_helper_exists() -> bool:
+    """Check to see if the unencrypted helper file exists for GitHub Actions."""
     helper_path = f'{os.environ.get("HOME")}/secrets/{HELPER_FILE_NAME}'
     return os.path.isfile(helper_path)
 
 
-def local_helper_exists():
-    """This function checks to see if a helper file is present in the ``local/`` directory.
-
-    .. versionadded:: 1.0.0
-    """
+def local_helper_exists() -> bool:
+    """Check to see if a helper file is present in the ``local/`` directory."""
     return os.path.exists(f'local/{HELPER_FILE_NAME}')
 
 
-def get_core_object(init_method=None, **kwargs):
-    """This function instantiates and returns the core object using a local helper file.
-
-    .. versionadded:: 1.0.0
+def get_core_object(init_method: Optional[str] = None, **kwargs):
+    """Instantiate and return the core object using a local helper file.
 
     :param init_method: The method to use when instantiating the object (e.g. ``helper``, ``param`` (default), ``env``)
     :type init_method: str, None
@@ -140,9 +119,7 @@ def get_core_object(init_method=None, **kwargs):
 
 
 def instantiate_with_secrets_helper():
-    """This function instantiates the PyDPlus object using the unencrypted helper file intended for GitHub Actions.
-
-    .. versionadded:: 1.0.0
+    """Instantiate the PyDPlus object using the unencrypted helper file intended for GitHub Actions.
 
     :returns: The instantiated :py:class:`pydplus.core.PyDPlus` object
     :raises: :py:exc:`FileNotFoundError`
@@ -156,9 +133,7 @@ def instantiate_with_secrets_helper():
 
 
 def instantiate_with_local_helper():
-    """This function instantiates the PyDPlus object using a local helper file for unit testing.
-
-    .. versionadded:: 1.0.0
+    """Instantiate the PyDPlus object using a local helper file for unit testing.
 
     :returns: The instantiated :py:class:`pydplus.core.PyDPlus` object
     :raises: :py:exc:`FileNotFoundError`
@@ -201,5 +176,5 @@ def instantiate_with_parameters(**kwargs):
         legacy_access_id=kwargs.get('legacy_access_id', None),
         oauth_client_id=kwargs.get('oauth_client_id', None),
         verify_ssl=kwargs.get('verify_ssl', None),
-        auto_connect=kwargs.get('auto_connect', None)
+        auto_connect=kwargs.get('auto_connect', None),
     )
