@@ -1,5 +1,11 @@
 /* Style the logo in the site header (desktop and mobile) */
 .navbar-brand img { height: 36px; width: auto; }
 @media (max-width: 576px) {
-  .navbar-brand img { height: 28px; }
+    .navbar-brand img { height: 28px; }
+}
+
+/* Style the logo on the home page */
+.pydplus-c-landing-page-logo {
+    background-color: transparent;
+    max-height: 320px;
 }
