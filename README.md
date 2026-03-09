@@ -5,7 +5,7 @@ A Python toolset for the RSA ID Plus cloud authentication platform.
     <tr>
         <td>Latest Stable Release</td>
         <td>
-            <a href='https://pypi.org/project/pydplus/'>
+            <a href="https://pypi.org/project/pydplus/">
                 <img alt="PyPI" src="https://img.shields.io/pypi/v/pydplus">
             </a>
         </td>
@@ -13,7 +13,7 @@ A Python toolset for the RSA ID Plus cloud authentication platform.
     <tr>
         <td>Latest Beta/RC Release</td>
         <td>
-            <a href='https://pypi.org/project/pydplus/#history'>
+            <a href="https://pypi.org/project/pydplus/#history">
                 <img alt="PyPI" src="https://img.shields.io/badge/pypi-1.0.0b1-blue">
             </a>
         </td>
@@ -30,7 +30,7 @@ A Python toolset for the RSA ID Plus cloud authentication platform.
     <tr>
         <td>Supported Versions</td>
         <td>
-            <a href='https://pypi.org/project/pydplus/'>
+            <a href="https://pypi.org/project/pydplus/">
                 <img alt="PyPI - Python Version" src="https://img.shields.io/pypi/pyversions/pydplus">
             </a>
         </td>
@@ -48,8 +48,8 @@ A Python toolset for the RSA ID Plus cloud authentication platform.
     <tr>
         <td>Documentation</td>
         <td>
-            <a href='https://pydplus.readthedocs.io/en/latest/?badge=latest'>
-                <img src='https://readthedocs.org/projects/pydplus/badge/?version=latest' alt='Documentation Status' />
+            <a href="https://pydplus.readthedocs.io/en/latest/?badge=latest">
+                <img src="https://readthedocs.org/projects/pydplus/badge/?version=latest" alt="Documentation Status" />
             </a>
         </td>
     </tr>
@@ -105,7 +105,7 @@ You may also clone the repository and install from source using below.
 ```sh
 git clone git://github.com/jeffshurtliff/pydplus.git
 cd pydplus/
-python setup.py install
+python poetry install
 ```
 
 ## Change Log
