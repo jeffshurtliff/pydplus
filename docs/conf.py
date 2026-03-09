@@ -35,13 +35,12 @@ version = src.pydplus.utils.version.get_major_minor_version()
 release = src.pydplus.utils.version.get_full_version()
 
 # The documentation title used throughout this configuration file.
-SALESPYFORCE_DOC_TITLE = 'PyDPlus Documentation'
+PYDPLUS_DOC_TITLE = 'PyDPlus Documentation'
 
 
 # -- General configuration ---------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
-#
 needs_sphinx = '7.4.7'
 
 # Add any Sphinx extension module names here, as strings. They can be
@@ -123,8 +122,8 @@ html_theme = 'pydata_sphinx_theme'
 # Theme options are theme-specific and customize the look and feel of a theme.
 html_theme_options = {
     'logo': {
-        'image_light': 'pydplus-logo-v1-tightcrop-72pxh.png',
-        'image_dark': 'pydplus-logo-v1-tightcrop-72pxh.png',
+        'image_light': 'pydplus-logo-navbar.svg',
+        'image_dark': 'pydplus-logo-navbar-dark.svg',
         'alt_text': 'PyDPlus',
     },
     # 'github_url': 'https://github.com/jeffshurtliff/pydplus',
@@ -210,7 +209,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'pydplus.tex', SALESPYFORCE_DOC_TITLE,
+    (master_doc, 'pydplus.tex', PYDPLUS_DOC_TITLE,
      'Jeff Shurtliff', 'manual'),
 ]
 
@@ -220,7 +219,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'pydplus', SALESPYFORCE_DOC_TITLE,
+    (master_doc, 'pydplus', PYDPLUS_DOC_TITLE,
      [author], 1)
 ]
 
@@ -231,8 +230,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'pydplus', SALESPYFORCE_DOC_TITLE,
-     author, 'pydplus', 'A Python toolset for performing Salesforce API calls',
+    (master_doc, 'pydplus', PYDPLUS_DOC_TITLE,
+     author, 'pydplus', 'A Python toolset for the RSA ID Plus cloud authentication platform',
      'Miscellaneous'),
 ]
 
