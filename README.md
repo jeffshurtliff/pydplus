@@ -1,4 +1,9 @@
-# pydplus
+<img src="docs/_static/pydplus-icon-cropped.png"
+     class="pydplus-c-landing-page-logo" 
+     style="background-color: transparent; max-height: 320px;"
+     alt="PyDPlus Logo" />
+
+# PyDPlus
 A Python toolset for the RSA ID Plus cloud authentication platform.
 
 <table>
@@ -21,9 +26,9 @@ A Python toolset for the RSA ID Plus cloud authentication platform.
     <tr>
         <td>Build Status</td>
         <td>
-            <a href="https://github.com/jeffshurtliff/pydplus/blob/main/.github/workflows/python-package.yml">
+            <a href="https://github.com/jeffshurtliff/pydplus/blob/main/.github/workflows/ci.yml">
                 <img alt="GitHub Workflow Status" 
-                src="https://img.shields.io/github/actions/workflow/status/jeffshurtliff/pydplus/python-package.yml?branch=main">
+                src="https://img.shields.io/github/actions/workflow/status/jeffshurtliff/pydplus/ci.yml?branch=main">
             </a>
         </td>
     </tr>
