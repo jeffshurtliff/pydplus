@@ -1,0 +1,9 @@
+{% extends "!layout.html" %}
+
+{% block htmltitle %}
+  {% if pagename == "index" %}
+    <title>{{ project }} {{ release }} Documentation</title>
+  {% else %}
+    <title>{{ title }} | {{ project }} {{ release }} Documentation</title>
+  {% endif %}
+{% endblock %}
