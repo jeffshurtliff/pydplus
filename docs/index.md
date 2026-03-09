@@ -1,3 +1,8 @@
+<img src="_static/pydplus-icon-cropped.png"
+     class="pydplus-c-landing-page-logo" 
+     style="background-color: transparent; max-height: 320px;"
+     alt="PyDPlus Logo" />
+
 # PyDPlus Documentation
 
 PyDPlus is a Python package for working with RSA APIs through a single, 

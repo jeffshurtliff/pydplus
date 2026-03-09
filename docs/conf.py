@@ -122,8 +122,8 @@ html_theme = 'pydata_sphinx_theme'
 # Theme options are theme-specific and customize the look and feel of a theme.
 html_theme_options = {
     'logo': {
-        'image_light': 'pydplus-logo-navbar.svg',
-        'image_dark': 'pydplus-logo-navbar-dark.svg',
+        'image_light': 'pydplus-icon-cropped-72pxh.png',
+        'image_dark': 'pydplus-icon-cropped-72pxh.png',
         'alt_text': 'PyDPlus',
     },
     # 'github_url': 'https://github.com/jeffshurtliff/pydplus',
