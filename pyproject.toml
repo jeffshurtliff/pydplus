@@ -89,8 +89,13 @@ myst-parser = "^3.0.1"
 sphinx-favicon = "^1.0.1"
 
 [tool.pytest.ini_options]
-testpaths = ["tests/"]
+addopts = "--strict-markers --cov=pydplus --cov-report=term-missing --cov-report=xml"
+testpaths = ["tests"]
 pythonpath = ["src"]
+markers = [
+    "unit: fast, isolated tests that do not require external services",
+    "integration: multi-module tests that validate higher-level flows; use --run-integration to execute",
+]
 
 [build-system]
 requires = ["poetry-core>=1.2.0"]

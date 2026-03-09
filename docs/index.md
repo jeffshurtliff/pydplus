@@ -65,7 +65,7 @@ For a complete walkthrough, see the {doc}`getting-started/quickstart` page.
 
 - {doc}`guides/authentication`: Credential patterns and helper-file usage
 - {doc}`guides/error-handling`: Exceptions, diagnostics, and recovery patterns
-- {doc}`guides/testing`: Running tests from `tests/`
+- {doc}`guides/testing`: Running unit and integration tests with coverage
 
 ### API Reference
 

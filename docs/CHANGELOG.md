@@ -13,12 +13,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 (unreleased-added)=
 ### Added
 
-- TBD
+- Added shared pytest fixtures and integration-test controls in `tests/conftest.py`.
 
 (unreleased-changed)=
 ### Changed
 
-- TBD
+- Refactored tests into `tests/unit/` and `tests/integration/` with updated testing documentation and default coverage reporting.
 
 ---
 (relnotes-1.0.0)=
