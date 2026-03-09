@@ -40,7 +40,6 @@ A Python toolset for the RSA ID Plus cloud authentication platform.
             </a>
         </td>
     </tr>
-    <!--
     <tr>
         <td>Code Coverage</td>
         <td>
@@ -49,7 +48,6 @@ A Python toolset for the RSA ID Plus cloud authentication platform.
             </a>
         </td>
     </tr>
-    -->
     <tr>
         <td>Documentation</td>
         <td>
