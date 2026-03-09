@@ -1,0 +1,181 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-labelledby="title desc">
+  <title id="title">PyDPlus official logo vector redraw</title>
+  <desc id="desc">A clean vector redraw of the PyDPlus logo with a split security shield, red python snake, identity badge, and wordmark.</desc>
+
+  <defs>
+    <linearGradient id="shieldRed" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#7f0f12"/>
+      <stop offset="45%" stop-color="#be3a34"/>
+      <stop offset="100%" stop-color="#ff4b43"/>
+    </linearGradient>
+    <linearGradient id="shieldGray" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f1f3f6"/>
+      <stop offset="55%" stop-color="#cfd4db"/>
+      <stop offset="100%" stop-color="#868f99"/>
+    </linearGradient>
+    <linearGradient id="snakeMain" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ff6a62"/>
+      <stop offset="35%" stop-color="#be3a34"/>
+      <stop offset="100%" stop-color="#7c1418"/>
+    </linearGradient>
+    <linearGradient id="snakeDark" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#7d1114"/>
+      <stop offset="100%" stop-color="#3e0507"/>
+    </linearGradient>
+    <linearGradient id="badgeFace" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#d6dbe1"/>
+    </linearGradient>
+    <linearGradient id="wordPlate" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1f2731"/>
+      <stop offset="100%" stop-color="#0f141b"/>
+    </linearGradient>
+    <linearGradient id="plusRed" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#ff4d45"/>
+      <stop offset="100%" stop-color="#be3a34"/>
+    </linearGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="12" stdDeviation="18" flood-color="#000000" flood-opacity="0.28"/>
+    </filter>
+    <filter id="softShadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="7" stdDeviation="10" flood-color="#000000" flood-opacity="0.18"/>
+    </filter>
+    <style>
+      .outline { stroke: #16181d; stroke-width: 8; stroke-linejoin: round; }
+      .circuit { stroke: #69717a; stroke-width: 5; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+      .cnode { fill: #f1f3f6; stroke: #69717a; stroke-width: 4; }
+      .badge-dark { fill: #2d333b; }
+      .wordmark { font-family: Arial, Helvetica, sans-serif; font-weight: 700; }
+    </style>
+  </defs>
+
+  <!-- Shield -->
+  <g filter="url(#shadow)">
+    <path class="outline" fill="url(#shieldRed)"
+      d="M512 141
+         C462 178 387 203 258 206
+         L258 535
+         C258 657 351 764 512 851
+         Z"/>
+    <path class="outline" fill="url(#shieldGray)"
+      d="M512 141
+         C562 178 637 203 766 206
+         L766 535
+         C766 657 673 764 512 851
+         Z"/>
+    <path d="M512 170
+             C468 199 404 220 287 223
+             L287 524
+             C287 633 368 724 512 804
+             L512 170Z"
+          fill="none" stroke="#ff8d87" stroke-width="4" opacity="0.9"/>
+    <path d="M512 170
+             C556 199 620 220 737 223
+             L737 524
+             C737 633 656 724 512 804"
+          fill="none" stroke="#f9fafb" stroke-width="4" opacity="0.85"/>
+
+    <!-- Right-side circuit details -->
+    <path class="circuit" d="M596 226 L596 305 L578 324 L578 338"/>
+    <path class="circuit" d="M625 216 L625 362"/>
+    <path class="circuit" d="M654 216 L654 312"/>
+    <path class="circuit" d="M683 218 L683 280"/>
+    <path class="circuit" d="M712 224 L712 342 L727 356"/>
+    <path class="circuit" d="M741 230 L741 336"/>
+    <circle class="cnode" cx="578" cy="352" r="10"/>
+    <circle class="cnode" cx="596" cy="338" r="10"/>
+    <circle class="cnode" cx="625" cy="362" r="10"/>
+    <circle class="cnode" cx="654" cy="312" r="10"/>
+    <circle class="cnode" cx="683" cy="280" r="10"/>
+    <circle class="cnode" cx="727" cy="356" r="10"/>
+  </g>
+
+  <!-- Snake -->
+  <g filter="url(#shadow)">
+    <!-- Outer body -->
+    <path class="outline" fill="url(#snakeMain)"
+      d="M278 557
+         C236 520 234 457 278 414
+         C312 379 375 365 442 384
+         C448 337 488 289 560 280
+         C641 270 721 322 694 390
+         C672 444 592 461 530 437
+         C516 511 565 558 581 616
+         C600 689 562 773 482 796
+         C403 818 315 776 279 710
+         C248 654 250 595 278 557 Z"/>
+    <!-- Inner dark channel -->
+    <path fill="url(#snakeDark)" opacity="0.88"
+      d="M323 565
+         C292 534 292 484 322 455
+         C351 425 401 414 448 429
+         C459 385 496 342 551 334
+         C607 326 653 351 649 390
+         C645 428 592 438 543 419
+         C531 502 584 543 595 608
+         C610 695 560 752 493 768
+         C431 783 359 754 329 703
+         C304 661 303 603 323 565 Z"/>
+    <!-- Belly stripe -->
+    <path fill="#f6d6d8" opacity="0.95"
+      d="M470 420
+         C450 485 482 546 516 596
+         C545 640 553 694 534 734
+         C527 749 519 758 505 766
+         C524 712 515 660 484 614
+         C447 559 413 494 430 431
+         C438 403 451 380 469 362
+         C486 345 514 329 548 331
+         C516 344 487 372 470 420 Z"/>
+    <!-- Head -->
+    <path class="outline" fill="url(#snakeMain)"
+      d="M458 330
+         C493 293 551 273 611 277
+         C665 281 709 310 713 342
+         C718 382 675 412 615 416
+         C557 420 496 397 465 365
+         C450 350 447 342 458 330 Z"/>
+    <!-- Eye and smile -->
+    <path d="M591 329 C609 318 626 319 639 332 C623 342 607 344 591 329 Z" fill="#ffffff"/>
+    <circle cx="615" cy="332" r="5.5" fill="#1a1a1a"/>
+    <path d="M544 383 C585 404 639 401 677 379" fill="none" stroke="#1a0a0a" stroke-width="5" stroke-linecap="round"/>
+    <path d="M689 393 C707 398 724 412 736 430 C717 429 701 421 689 408 Z" fill="#be3a34"/>
+    <!-- Highlights -->
+    <path d="M503 306 C553 283 622 285 668 311" fill="none" stroke="#ffb3ae" stroke-width="7" stroke-linecap="round" opacity="0.8"/>
+    <path d="M292 467 C281 502 283 548 300 583" fill="none" stroke="#ff9e99" stroke-width="8" stroke-linecap="round" opacity="0.75"/>
+    <ellipse cx="289" cy="470" rx="10" ry="19" fill="#ffd0cd" opacity="0.9" transform="rotate(18 289 470)"/>
+    <ellipse cx="287" cy="520" rx="9" ry="15" fill="#ffd0cd" opacity="0.85" transform="rotate(-22 287 520)"/>
+    <ellipse cx="308" cy="575" rx="8" ry="13" fill="#ffd0cd" opacity="0.8" transform="rotate(-20 308 575)"/>
+  </g>
+
+  <!-- ID badge -->
+  <g filter="url(#softShadow)" transform="translate(454 386)">
+    <rect x="0" y="0" width="323" height="191" rx="18" fill="#232930"/>
+    <rect x="10" y="10" width="303" height="171" rx="14" fill="url(#badgeFace)" stroke="#f8fafc" stroke-width="4"/>
+    <rect x="145" y="-12" width="58" height="30" rx="10" fill="#232930"/>
+    <rect x="160" y="-2" width="28" height="10" rx="4" fill="#aeb6bf"/>
+    <circle class="badge-dark" cx="75" cy="83" r="28"/>
+    <path class="badge-dark" d="M40 150 C54 119 101 116 118 150 L118 166 L40 166 Z"/>
+    <rect x="128" y="99" width="69" height="11" rx="5" fill="#6a727b"/>
+    <rect x="128" y="123" width="54" height="11" rx="5" fill="#6a727b"/>
+    <path class="badge-dark"
+      d="M221 57
+         C247 41 276 57 276 88
+         L276 102
+         C276 118 265 130 253 141
+         L258 163
+         L214 163
+         L219 141
+         C207 130 196 118 196 102
+         L196 88
+         C196 57 226 41 221 57 Z"/>
+    <rect x="220" y="66" width="32" height="52" rx="14" fill="url(#badgeFace)"/>
+  </g>
+
+  <!-- Wordmark plate -->
+  <g filter="url(#softShadow)">
+    <path d="M231 688 L797 688 L781 823 L235 823 Z" fill="url(#wordPlate)" stroke="#0b1016" stroke-width="3"/>
+    <text x="278" y="788" class="wordmark" font-size="123" fill="#ffffff" letter-spacing="-5">PyD</text>
+    <text x="530" y="788" class="wordmark" font-size="123" fill="url(#plusRed)" letter-spacing="-5">Plus</text>
+  </g>
+</svg>
