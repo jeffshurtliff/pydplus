@@ -130,6 +130,7 @@ class HelperSettings:
     VALID_YAML_TRUE_VALUES: ClassVar[frozenset[str]] = frozenset({'yes', 'true'})
 
     # Root-level helper fields
+    ENV_NAME: ClassVar[str] = 'env'
     BASE_URL: ClassVar[str] = 'base_url'
     CONNECTION: ClassVar[str] = 'connection'
     CONNECTION_TYPE: ClassVar[str] = 'connection_type'
@@ -137,6 +138,7 @@ class HelperSettings:
     VERIFY_SSL: str = 'verify_ssl'
     ENV_VARIABLES: ClassVar[str] = 'env_variables'
     ROOT_LEVEL_BASIC_FIELDS: ClassVar[frozenset[str]] = frozenset({
+        ENV_NAME,
         BASE_URL,
         CONNECTION_TYPE,
         STRICT_MODE,
@@ -151,9 +153,12 @@ class HelperSettings:
     ENV_OAUTH_ISSUER_URL: ClassVar[str] = 'oauth_issuer_url'
     ENV_OAUTH_CLIENT_ID: ClassVar[str] = 'oauth_client_id'
     ENV_OAUTH_GRANT_TYPE: ClassVar[str] = 'oauth_grant_type'
+    ENV_OAUTH_CLIENT_AUTH: ClassVar[str] = 'oauth_client_authentication'
+    ENV_STRICT_MODE: ClassVar[str] = 'strict_mode'
     ENV_VERIFY_SSL: ClassVar[str] = 'verify_ssl'
 
     # Environment variable default values
+    ENV_DEFAULT_ENV_NAME: ClassVar[str] = 'PYDPLUS_ENV_NAME'
     ENV_DEFAULT_CONNECTION_TYPE: ClassVar[str] = 'PYDPLUS_CONNECTION_TYPE'
     ENV_DEFAULT_LEGACY_ACCESS_ID: ClassVar[str] = 'PYDPLUS_LEGACY_ACCESS_ID'
     ENV_DEFAULT_LEGACY_KEY_PATH: ClassVar[str] = 'PYDPLUS_LEGACY_KEY_PATH'
@@ -161,10 +166,13 @@ class HelperSettings:
     ENV_DEFAULT_OAUTH_ISSUER_URL: ClassVar[str] = 'PYDPLUS_OAUTH_ISSUER_URL'
     ENV_DEFAULT_OAUTH_CLIENT_ID: ClassVar[str] = 'PYDPLUS_OAUTH_CLIENT_ID'
     ENV_DEFAULT_OAUTH_GRANT_TYPE: ClassVar[str] = 'PYDPLUS_OAUTH_GRANT_TYPE'
+    ENV_DEFAULT_OAUTH_CLIENT_AUTH: ClassVar[str] = 'PYDPLUS_OAUTH_CLIENT_AUTH'
+    ENV_DEFAULT_STRICT_MODE: ClassVar[str] = 'PYDPLUS_STRICT_MODE'
     ENV_DEFAULT_VERIFY_SSL: ClassVar[str] = 'PYDPLUS_VERIFY_SSL'
 
     # Environment variable default mapping
     ENV_VARIABLE_DEFAULT_MAPPING: ClassVar[Mapping[str, str]] = MappingProxyType({
+        ENV_NAME: ENV_DEFAULT_ENV_NAME,
         ENV_CONNECTION_TYPE: ENV_DEFAULT_CONNECTION_TYPE,
         ENV_LEGACY_ACCESS_ID: ENV_DEFAULT_LEGACY_ACCESS_ID,
         ENV_LEGACY_KEY_PATH: ENV_DEFAULT_LEGACY_KEY_PATH,
@@ -172,6 +180,8 @@ class HelperSettings:
         ENV_OAUTH_ISSUER_URL: ENV_DEFAULT_OAUTH_ISSUER_URL,
         ENV_OAUTH_CLIENT_ID: ENV_DEFAULT_OAUTH_CLIENT_ID,
         ENV_OAUTH_GRANT_TYPE: ENV_DEFAULT_OAUTH_GRANT_TYPE,
+        ENV_OAUTH_CLIENT_AUTH: ENV_DEFAULT_OAUTH_CLIENT_AUTH,
+        ENV_STRICT_MODE: ENV_DEFAULT_STRICT_MODE,
         ENV_VERIFY_SSL: ENV_DEFAULT_VERIFY_SSL,
     })
 
@@ -185,11 +195,14 @@ class HelperSettings:
         'issuer_url': ENV_OAUTH_ISSUER_URL,
         'client_id': ENV_OAUTH_CLIENT_ID,
         'grant_type': ENV_OAUTH_GRANT_TYPE,
+        'client_authentication': ENV_OAUTH_CLIENT_AUTH,
     })
 
     # Other default values
+    DEFAULT_ENV_NAME = None
     DEFAULT_HELPER_FILE_TYPE = 'json'
     DEFAULT_VERIFY_SSL_VALUE = True
+    # DEFAULT_STRICT_MODE is defined at the module level
 
 
 # -------------------------------
@@ -226,6 +239,7 @@ class EnvVariables:
     OAUTH_ISSUER_URL: ClassVar[str] = 'PYDPLUS_OAUTH_ISSUER_URL'
     OAUTH_CLIENT_ID: ClassVar[str] = 'PYDPLUS_OAUTH_CLIENT_ID'
     OAUTH_GRANT_TYPE: ClassVar[str] = 'PYDPLUS_OAUTH_GRANT_TYPE'
+    OAUTH_CLIENT_AUTH: ClassVar[str] = 'PYDPLUS_OAUTH_CLIENT_AUTH'
 
     # ------------------------------------
     # Production Environment Variables
@@ -247,6 +261,7 @@ class EnvVariables:
     PROD_OAUTH_ISSUER_URL: ClassVar[str] = 'PYDPLUS_PROD_OAUTH_ISSUER_URL'
     PROD_OAUTH_CLIENT_ID: ClassVar[str] = 'PYDPLUS_PROD_OAUTH_CLIENT_ID'
     PROD_OAUTH_GRANT_TYPE: ClassVar[str] = 'PYDPLUS_PROD_OAUTH_GRANT_TYPE'
+    PROD_OAUTH_CLIENT_AUTH: ClassVar[str] = 'PYDPLUS_PROD_OAUTH_CLIENT_AUTH'
 
     # -------------------------------------
     # Development Environment Variables
@@ -268,6 +283,7 @@ class EnvVariables:
     DEV_OAUTH_ISSUER_URL: ClassVar[str] = 'PYDPLUS_DEV_OAUTH_ISSUER_URL'
     DEV_OAUTH_CLIENT_ID: ClassVar[str] = 'PYDPLUS_DEV_OAUTH_CLIENT_ID'
     DEV_OAUTH_GRANT_TYPE: ClassVar[str] = 'PYDPLUS_DEV_OAUTH_GRANT_TYPE'
+    DEV_OAUTH_CLIENT_AUTH: ClassVar[str] = 'PYDPLUS_DEV_OAUTH_CLIENT_AUTH'
 
     # --------------------------------
     # Custom Environment Variables
@@ -289,6 +305,111 @@ class EnvVariables:
     CUSTOM_OAUTH_ISSUER_URL: ClassVar[str] = 'PYDPLUS_{env_name}_OAUTH_ISSUER_URL'                  # Vars: env_name
     CUSTOM_OAUTH_CLIENT_ID: ClassVar[str] = 'PYDPLUS_{env_name}_OAUTH_CLIENT_ID'                    # Vars: env_name
     CUSTOM_OAUTH_GRANT_TYPE: ClassVar[str] = 'PYDPLUS_{env_name}_OAUTH_GRANT_TYPE'                  # Vars: env_name
+    CUSTOM_OAUTH_CLIENT_AUTH: ClassVar[str] = 'PYDPLUS_{env_name}_OAUTH_CLIENT_AUTH'                # Vars: env_name
+
+    # --------------------------------
+    # Environment Variable Mapping
+    # --------------------------------
+    # Environment Fields
+    DEFAULT_ENVIRONMENT: ClassVar[str] = 'DEFAULT'
+    PROD_ENVIRONMENT: ClassVar[str] = 'PROD'
+    DEV_ENVIRONMENT: ClassVar[str] = 'DEV'
+    CUSTOM_ENVIRONMENT: ClassVar[str] = 'CUSTOM'
+
+    # Mapping Fields
+    ENV_FIELD: ClassVar[str] = 'env'
+    BASE_URL_FIELD: ClassVar[str] = 'base_url'
+    CONNECTION_TYPE_FIELD: ClassVar[str] = 'connection_type'
+    LEGACY_ACCESS_ID_FIELD: ClassVar[str] = 'legacy_access_id'
+    LEGACY_KEY_PATH_FIELD: ClassVar[str] = 'legacy_key_path'
+    LEGACY_KEY_FILE_FIELD: ClassVar[str] = 'legacy_key_file'
+    OAUTH_ISSUER_URL_FIELD: ClassVar[str] = 'oauth_issuer_url'
+    OAUTH_CLIENT_ID_FIELD: ClassVar[str] = 'oauth_client_id'
+    OAUTH_GRANT_TYPE_FIELD: ClassVar[str] = 'oauth_grant_type'
+    OAUTH_CLIENT_AUTH_FIELD: ClassVar[str] = 'oauth_client_auth'
+    STRICT_MODE_FIELD: ClassVar[str] = 'strict_mode'
+    VERIFY_SSL_FIELD: ClassVar[str] = 'verify_ssl'
+
+    # Environment mapping
+    MAPPING: ClassVar[Mapping[str, Mapping[str, str]]] = MappingProxyType({
+        DEFAULT_ENVIRONMENT: {
+            ENV_FIELD: ENV_NAME,
+            BASE_URL_FIELD: BASE_URL,
+            CONNECTION_TYPE_FIELD: CONNECTION_TYPE,
+            LEGACY_ACCESS_ID_FIELD: LEGACY_ACCESS_ID,
+            LEGACY_KEY_PATH_FIELD: LEGACY_KEY_PATH,
+            LEGACY_KEY_FILE_FIELD: LEGACY_KEY_FILE,
+            OAUTH_ISSUER_URL_FIELD: OAUTH_ISSUER_URL,
+            OAUTH_CLIENT_ID_FIELD: OAUTH_CLIENT_ID,
+            OAUTH_GRANT_TYPE_FIELD: OAUTH_GRANT_TYPE,
+            OAUTH_CLIENT_AUTH_FIELD: OAUTH_CLIENT_AUTH,
+            STRICT_MODE_FIELD: STRICT_MODE,
+            VERIFY_SSL_FIELD: VERIFY_SSL,
+        },
+        PROD_ENVIRONMENT: {
+            BASE_URL_FIELD: PROD_BASE_URL,
+            CONNECTION_TYPE_FIELD: PROD_CONNECTION_TYPE,
+            LEGACY_ACCESS_ID_FIELD: PROD_LEGACY_ACCESS_ID,
+            LEGACY_KEY_PATH_FIELD: PROD_LEGACY_KEY_PATH,
+            LEGACY_KEY_FILE_FIELD: PROD_LEGACY_KEY_FILE,
+            OAUTH_ISSUER_URL_FIELD: PROD_OAUTH_ISSUER_URL,
+            OAUTH_CLIENT_ID_FIELD: PROD_OAUTH_CLIENT_ID,
+            OAUTH_GRANT_TYPE_FIELD: PROD_OAUTH_GRANT_TYPE,
+            OAUTH_CLIENT_AUTH_FIELD: PROD_OAUTH_CLIENT_AUTH,
+            STRICT_MODE_FIELD: PROD_STRICT_MODE,
+            VERIFY_SSL_FIELD: PROD_VERIFY_SSL,
+        },
+        DEV_ENVIRONMENT: {
+            BASE_URL_FIELD: DEV_BASE_URL,
+            CONNECTION_TYPE_FIELD: DEV_CONNECTION_TYPE,
+            LEGACY_ACCESS_ID_FIELD: DEV_LEGACY_ACCESS_ID,
+            LEGACY_KEY_PATH_FIELD: DEV_LEGACY_KEY_PATH,
+            LEGACY_KEY_FILE_FIELD: DEV_LEGACY_KEY_FILE,
+            OAUTH_ISSUER_URL_FIELD: DEV_OAUTH_ISSUER_URL,
+            OAUTH_CLIENT_ID_FIELD: DEV_OAUTH_CLIENT_ID,
+            OAUTH_GRANT_TYPE_FIELD: DEV_OAUTH_GRANT_TYPE,
+            OAUTH_CLIENT_AUTH_FIELD: DEV_OAUTH_CLIENT_AUTH,
+            STRICT_MODE_FIELD: DEV_STRICT_MODE,
+            VERIFY_SSL_FIELD: DEV_VERIFY_SSL,
+        },
+        CUSTOM_ENVIRONMENT: {
+            BASE_URL_FIELD: CUSTOM_BASE_URL,
+            CONNECTION_TYPE_FIELD: CUSTOM_CONNECTION_TYPE,
+            LEGACY_ACCESS_ID_FIELD: CUSTOM_LEGACY_ACCESS_ID,
+            LEGACY_KEY_PATH_FIELD: CUSTOM_LEGACY_KEY_PATH,
+            LEGACY_KEY_FILE_FIELD: CUSTOM_LEGACY_KEY_FILE,
+            OAUTH_ISSUER_URL_FIELD: CUSTOM_OAUTH_ISSUER_URL,
+            OAUTH_CLIENT_ID_FIELD: CUSTOM_OAUTH_CLIENT_ID,
+            OAUTH_GRANT_TYPE_FIELD: CUSTOM_OAUTH_GRANT_TYPE,
+            OAUTH_CLIENT_AUTH_FIELD: CUSTOM_OAUTH_CLIENT_AUTH,
+            STRICT_MODE_FIELD: CUSTOM_STRICT_MODE,
+            VERIFY_SSL_FIELD: CUSTOM_VERIFY_SSL,
+        },
+    })
+
+    # --------------------------------------------
+    # Environment Variable Validation Criteria
+    # --------------------------------------------
+    VALID_ENVIRONMENTS: ClassVar[frozenset[str]] = frozenset({
+        DEFAULT_ENVIRONMENT,
+        PROD_ENVIRONMENT,
+        DEV_ENVIRONMENT,
+        CUSTOM_ENVIRONMENT,
+    })
+    VALID_FIELDS: ClassVar[frozenset[str]] = frozenset({
+        ENV_FIELD,
+        BASE_URL_FIELD,
+        CONNECTION_TYPE_FIELD,
+        LEGACY_ACCESS_ID_FIELD,
+        LEGACY_KEY_PATH_FIELD,
+        LEGACY_KEY_FILE_FIELD,
+        OAUTH_ISSUER_URL_FIELD,
+        OAUTH_CLIENT_ID_FIELD,
+        OAUTH_GRANT_TYPE_FIELD,
+        OAUTH_CLIENT_AUTH_FIELD,
+        STRICT_MODE_FIELD,
+        VERIFY_SSL_FIELD,
+    })
 
 
 # -----------------------------
