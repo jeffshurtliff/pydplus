@@ -248,15 +248,29 @@ class PyDPlus(object):
             _env = os.getenv(const.ENV_VARIABLES.ENV_NAME)                               # Returns None if not found
         return _env
 
-    @staticmethod
-    def _get_env_variable_names(_custom_dict: Optional[Mapping[str, str]] = None) -> dict:
+    def _get_env_variable_names(self, _custom_dict: Optional[Mapping[str, str]] = None) -> dict:
         """Return the environment variable names to use when checking the OS for environment variables."""
         # Define the dictionary with the default environment variable names
         _env_variable_names = dict(const.HELPER_SETTINGS.ENV_VARIABLE_DEFAULT_MAPPING)
 
-        # Update the dictionary to use any defined custom names instead of the default names
-        _custom_dict = {} if _custom_dict is None else _custom_dict
-        if not isinstance(_custom_dict, Mapping):
+        # Update the environment variables to be specific to an environment is one has been defined
+        if self.env:
+            _env_specific_names = {}
+            for _name_key, _name_value in _env_variable_names.items():
+                try:
+                    _env_specific_value = core_utils.get_env_variable_name_by_environment(_name_key, self.env)
+                    _env_specific_names[_name_key] = _env_specific_value
+                except Exception as exc:
+                    exc_type = core_utils.get_exception_type(exc)
+                    error_msg = (f"Failed to retrieve the '{_name_key}' environment variable name specific to the "
+                                 f"{self.env} environment due to {exc_type} exception: {exc}")
+                    logger.exception(error_msg)
+                    logger.warning(f"Defaulting to the environment variable {_name_value} for '{_name_key}'")
+                    _env_specific_names[_name_key] = _name_value
+            _env_variable_names.update(_env_specific_names)
+
+        # Update the dictionary to use any defined custom names instead of the default (or env-specific) names
+        if _custom_dict and not isinstance(_custom_dict, Mapping):
             _error_msg = 'Unable to parse custom environment variable names because variable is not a dictionary.'
             logger.error(_error_msg)
             raise TypeError(_error_msg)
