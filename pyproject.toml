@@ -90,7 +90,7 @@ sphinx-favicon = "^1.0.1"
 
 [tool.pytest.ini_options]
 addopts = "--strict-markers --cov=pydplus --cov-report=term-missing --cov-report=xml"
-testpaths = ["tests"]
+testpaths = ["tests/unit", "tests/integration"]
 pythonpath = ["src"]
 markers = [
     "unit: fast, isolated tests that do not require external services",
