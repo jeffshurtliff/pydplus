@@ -1,4 +1,5 @@
 {
+  "env": "PROD",
   "base_url": "https://example-company.access.securid.com",
   "connection_type": "legacy",
   "strict_mode": false,
