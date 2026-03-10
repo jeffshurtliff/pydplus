@@ -9,6 +9,7 @@ on:
       - CLAUDE.md
       - LICENSE
       - .readthedocs.yaml
+      - .env.example
       - docs/**
       - docs_legacy/**
       - examples/**
@@ -22,6 +23,7 @@ on:
       - CLAUDE.md
       - LICENSE
       - .readthedocs.yaml
+      - .env.example
       - docs/**
       - docs_legacy/**
       - examples/**
