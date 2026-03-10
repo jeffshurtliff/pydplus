@@ -6,7 +6,7 @@
 :Example:           ``encoded_string = core_utils.encode_url(decoded_string)``
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     07 Mar 2026
+:Modified Date:     10 Mar 2026
 """
 
 from __future__ import annotations
@@ -15,11 +15,12 @@ import os
 import random
 import string
 import urllib.parse
-from typing import Tuple
+from typing import Optional, Tuple
 
 from . import log_utils
 from .. import errors
 from .. import constants as const
+from ..errors.handlers import get_exception_type
 
 # Initialize the logger for this module
 logger = log_utils.initialize_logging(__name__)
@@ -169,3 +170,41 @@ def get_random_string(length: int = 32, prefix_string: str = '') -> str:
     :returns: The randomized alphanumeric string
     """
     return f"{prefix_string}{''.join([random.choice(string.ascii_letters + string.digits) for _ in range(length)])}"
+
+
+def get_env_variable_name_by_environment(field: str, env: Optional[str] = None) -> str:
+    """Retrieve an environment variable name based on a given environment name.
+
+    :param field: The field mapped to an environment variable (e.g. ``connection_type``, ``verify_ssl``, etc.)
+    :type field: str
+    :param env: The environment associated with the environment variable (e.g. ``PROD``, ``DEV``, etc.)
+    :type env: str, None
+    :returns: The environment variable name as a string (e.g. ``PYDPLUS_VERIFY_SSL``)
+    :raises: :py:exc:`TypeError`,
+             :py:exc:`RuntimeError`
+    """
+    # Raise an exception if an invalid environment variable field
+    if field not in const.ENV_VARIABLES.VALID_FIELDS:
+        error_msg = f"'{field}' is not a valid field mapped to an environment variable"
+        logger.error(error_msg)
+        raise ValueError(error_msg)
+
+    # Ensure a valid environment is defined
+    if not env or field == const.ENV_VARIABLES.ENV_NAME:
+        env = const.ENV_VARIABLES.DEFAULT_ENVIRONMENT
+    elif env.upper() not in const.ENV_VARIABLES.VALID_ENVIRONMENTS:
+        env = const.ENV_VARIABLES.CUSTOM_ENVIRONMENT
+
+    # Retrieve and return the appropriate environment variable name
+    try:
+        if env.upper() == const.ENV_VARIABLES.CUSTOM_ENVIRONMENT:
+            var_name = const.ENV_VARIABLES.MAPPING[const.ENV_VARIABLES.CUSTOM_ENVIRONMENT].get(field).format(env_name=env.upper())
+        else:
+            var_name = const.ENV_VARIABLES.MAPPING[env.upper()].get(field)
+    except Exception as exc:
+        exc_type = get_exception_type(exc)
+        error_msg = (f"Failed to get the environment variable name for the given environment due to {exc_type} "
+                     f"exception: {exc}")
+        logger.exception(error_msg)
+        raise RuntimeError(error_msg)
+    return var_name
