@@ -6,7 +6,7 @@
 :Example:           ``pydp = PyDPlus()``
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     07 Mar 2026
+:Modified Date:     10 Mar 2026
 """
 
 from __future__ import annotations
@@ -34,6 +34,13 @@ class PyDPlus(object):
     :type connection_type: str, None
     :param base_url: The base URL to leverage when performing API calls
     :type base_url: str, None
+    :param env: Optionally specify the environment as ``PROD``, ``DEV``, or a custom name. (e.g. ``STAGING``)
+
+                .. note::
+                   This parameter will impact which environment variables are referenced when the client object
+                   is instantiated. (e.g. ``PYDPLUS_PROD_BASE_URL`` rather than ``PYDPLUS_BASE_URL``)
+
+    :type env: str, None
     :param private_key: The file path to the private key used for API authentication (OAuth or Legacy)
     :type private_key: str, None
     :param legacy_access_id: The Access ID associated with the Legacy API connection
@@ -61,6 +68,7 @@ class PyDPlus(object):
             connection_info: Optional[dict] = None,
             connection_type: Optional[str] = None,
             base_url: Optional[str] = None,
+            env: Optional[str] = None,
             private_key: Optional[str] = None,
             legacy_access_id: Optional[str] = None,
             oauth_client_id: Optional[str] = None,
@@ -77,6 +85,9 @@ class PyDPlus(object):
         self.base_headers = {}
         self.connected = False
         self.strict_mode = None
+
+        # Define the environment if explicitly defined as an argument or environment variable
+        self.env = self._get_env_name(env)
 
         # Check for a supplied helper file
         if helper:
@@ -227,6 +238,15 @@ class PyDPlus(object):
     def _import_user_class(self):
         """Allow the :py:class:`pydplus.core.PyDPlus.User` class to be utilized within the core object."""
         return PyDPlus.User(self)
+
+    @staticmethod
+    def _get_env_name(_env: Optional[str] = None) -> Union[str, None]:
+        """Identify the environment name if defined with an argument or environment variable."""
+        if _env and isinstance(_env, str):
+            _env = _env.upper()
+        else:
+            _env = os.getenv(const.ENV_VARIABLES.ENV_NAME)                               # Returns None if not found
+        return _env
 
     @staticmethod
     def _get_env_variable_names(_custom_dict: Optional[Mapping[str, str]] = None) -> dict:
