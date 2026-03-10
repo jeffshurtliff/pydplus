@@ -80,7 +80,7 @@ jobs:
 
       - name: Coverage (pytest-cov) and report
         run: |
-          poetry run pytest --cov-report=xml --cov=pydplus tests --color=yes
+          poetry run pytest --cov-report=xml --cov=pydplus tests/unit tests/integration --color=yes
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
