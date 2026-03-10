@@ -192,12 +192,11 @@ def get_env_variable_name_by_environment(field: str, env: Optional[str] = None) 
     # Ensure a valid environment is defined
     if not env or field == const.ENV_VARIABLES.ENV_NAME:
         env = const.ENV_VARIABLES.DEFAULT_ENVIRONMENT
-    elif env.upper() not in const.ENV_VARIABLES.VALID_ENVIRONMENTS:
-        env = const.ENV_VARIABLES.CUSTOM_ENVIRONMENT
 
     # Retrieve and return the appropriate environment variable name
     try:
-        if env.upper() == const.ENV_VARIABLES.CUSTOM_ENVIRONMENT:
+        if (env.upper() == const.ENV_VARIABLES.CUSTOM_ENVIRONMENT
+                or env.upper() not in const.ENV_VARIABLES.VALID_ENVIRONMENTS):
             var_name = const.ENV_VARIABLES.MAPPING[const.ENV_VARIABLES.CUSTOM_ENVIRONMENT].get(field).format(env_name=env.upper())
         else:
             var_name = const.ENV_VARIABLES.MAPPING[env.upper()].get(field)
