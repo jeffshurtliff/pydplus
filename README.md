@@ -44,7 +44,7 @@ A Python toolset for the RSA ID Plus cloud authentication platform.
         <td>Code Coverage</td>
         <td>
             <a href="https://codecov.io/gh/jeffshurtliff/pydplus">
-                <img src="https://codecov.io/gh/jeffshurtliff/pydplus/branch/main/graph/badge.svg" />
+                <img src="https://codecov.io/gh/jeffshurtliff/pydplus/branch/main/graph/badge.svg?token=QBynJO48jN" />
             </a>
         </td>
     </tr>
