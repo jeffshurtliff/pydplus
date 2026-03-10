@@ -112,6 +112,9 @@ class ClientSettings:
     CONNECTION_TYPE_LEGACY: ClassVar[str] = 'legacy'
     CONNECTION_TYPE_OAUTH: ClassVar[str] = 'oauth'
 
+    # Default values
+    DEFAULT_VERIFY_SSL_VALUE = True
+
 
 # -------------------------------
 # Helper Configuration Settings
