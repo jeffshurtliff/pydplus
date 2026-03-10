@@ -66,7 +66,7 @@ dependencies = [
 Homepage = "https://github.com/jeffshurtliff/pydplus"
 Repository = "https://github.com/jeffshurtliff/pydplus"
 Documentation = "https://pydplus.readthedocs.io/en/latest/"                      # Change to stable after first release
-# Changelog = "https://pydplus.readthedocs.io/en/latest/CHANGELOG.html"          # Uncomment when docs are ready
+Changelog = "https://pydplus.readthedocs.io/en/latest/CHANGELOG.html"            # Uncomment when docs are ready
 "Issue Tracker" = "https://github.com/jeffshurtliff/pydplus/issues"
 
 # --------------------------------------------------------------------
