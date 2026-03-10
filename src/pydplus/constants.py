@@ -4,7 +4,7 @@
 :Synopsis:          Constants that are utilized throughout the package
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     09 Mar 2026
+:Modified Date:     10 Mar 2026
 """
 
 from __future__ import annotations
