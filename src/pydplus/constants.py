@@ -120,6 +120,10 @@ class ClientSettings:
 class HelperSettings:
     """Fields, values, and other constants relating to the helper configuration settings and
        the :py:mod:`pydplus.utils.helper` module.
+
+    .. note::
+       If values are updated in this class for constants related to environment variables, then the
+       corresponding values should be updated in the :py:class:`pydplus.constants.EnvVariables` class.
     """
     # Validation criteria
     VALID_HELPER_FILE_TYPES: ClassVar[frozenset[str]] = frozenset({'json', 'yml', 'yaml'})
@@ -186,6 +190,105 @@ class HelperSettings:
     # Other default values
     DEFAULT_HELPER_FILE_TYPE = 'json'
     DEFAULT_VERIFY_SSL_VALUE = True
+
+
+# -------------------------------
+# Environment Variables
+# -------------------------------
+@dataclass(frozen=True)
+class EnvVariables:
+    """Constants relating to environment variable names.
+
+    .. note::
+       If values are updated in this class then the corresponding values should be updated
+       in the :py:class:`pydplus.constants.HelperSettings` class.
+    """
+    # ----------------------------------
+    # Standard Environment Variables
+    # ----------------------------------
+    # These environment variables are generic and used by default, and do not indicate a PROD or DEV environment.
+
+    # Environment Information
+    ENV_NAME: ClassVar[str] = 'PYDPLUS_ENV_NAME'
+
+    # Tenant Information
+    BASE_URL: ClassVar[str] = 'PYDPLUS_BASE_URL'
+
+    # General Settings
+    STRICT_MODE: ClassVar[str] = 'PYDPLUS_STRICT_MODE'
+    VERIFY_SSL: ClassVar[str] = 'PYDPLUS_VERIFY_SSL'
+
+    # Authentication / Connection
+    CONNECTION_TYPE: ClassVar[str] = 'PYDPLUS_CONNECTION_TYPE'
+    LEGACY_ACCESS_ID: ClassVar[str] = 'PYDPLUS_LEGACY_ACCESS_ID'
+    LEGACY_KEY_PATH: ClassVar[str] = 'PYDPLUS_LEGACY_KEY_PATH'
+    LEGACY_KEY_FILE: ClassVar[str] = 'PYDPLUS_LEGACY_KEY_FILE'
+    OAUTH_ISSUER_URL: ClassVar[str] = 'PYDPLUS_OAUTH_ISSUER_URL'
+    OAUTH_CLIENT_ID: ClassVar[str] = 'PYDPLUS_OAUTH_CLIENT_ID'
+    OAUTH_GRANT_TYPE: ClassVar[str] = 'PYDPLUS_OAUTH_GRANT_TYPE'
+
+    # ------------------------------------
+    # Production Environment Variables
+    # ------------------------------------
+    # These environment variables are specific to a Production (PROD) environment.
+
+    # Tenant Information
+    PROD_BASE_URL: ClassVar[str] = 'PYDPLUS_PROD_BASE_URL'
+
+    # General Settings
+    PROD_STRICT_MODE: ClassVar[str] = 'PYDPLUS_PROD_STRICT_MODE'
+    PROD_VERIFY_SSL: ClassVar[str] = 'PYDPLUS_PROD_VERIFY_SSL'
+
+    # Authentication / Connection
+    PROD_CONNECTION_TYPE: ClassVar[str] = 'PYDPLUS_PROD_CONNECTION_TYPE'
+    PROD_LEGACY_ACCESS_ID: ClassVar[str] = 'PYDPLUS_PROD_LEGACY_ACCESS_ID'
+    PROD_LEGACY_KEY_PATH: ClassVar[str] = 'PYDPLUS_PROD_LEGACY_KEY_PATH'
+    PROD_LEGACY_KEY_FILE: ClassVar[str] = 'PYDPLUS_PROD_LEGACY_KEY_FILE'
+    PROD_OAUTH_ISSUER_URL: ClassVar[str] = 'PYDPLUS_PROD_OAUTH_ISSUER_URL'
+    PROD_OAUTH_CLIENT_ID: ClassVar[str] = 'PYDPLUS_PROD_OAUTH_CLIENT_ID'
+    PROD_OAUTH_GRANT_TYPE: ClassVar[str] = 'PYDPLUS_PROD_OAUTH_GRANT_TYPE'
+
+    # -------------------------------------
+    # Development Environment Variables
+    # -------------------------------------
+    # These environment variables are specific to a Development (DEV) environment.
+
+    # Tenant Information
+    DEV_BASE_URL: ClassVar[str] = 'PYDPLUS_DEV_BASE_URL'
+
+    # General Settings
+    DEV_STRICT_MODE: ClassVar[str] = 'PYDPLUS_DEV_STRICT_MODE'
+    DEV_VERIFY_SSL: ClassVar[str] = 'PYDPLUS_DEV_VERIFY_SSL'
+
+    # Authentication / Connection
+    DEV_CONNECTION_TYPE: ClassVar[str] = 'PYDPLUS_DEV_CONNECTION_TYPE'
+    DEV_LEGACY_ACCESS_ID: ClassVar[str] = 'PYDPLUS_DEV_LEGACY_ACCESS_ID'
+    DEV_LEGACY_KEY_PATH: ClassVar[str] = 'PYDPLUS_DEV_LEGACY_KEY_PATH'
+    DEV_LEGACY_KEY_FILE: ClassVar[str] = 'PYDPLUS_DEV_LEGACY_KEY_FILE'
+    DEV_OAUTH_ISSUER_URL: ClassVar[str] = 'PYDPLUS_DEV_OAUTH_ISSUER_URL'
+    DEV_OAUTH_CLIENT_ID: ClassVar[str] = 'PYDPLUS_DEV_OAUTH_CLIENT_ID'
+    DEV_OAUTH_GRANT_TYPE: ClassVar[str] = 'PYDPLUS_DEV_OAUTH_GRANT_TYPE'
+
+    # --------------------------------
+    # Custom Environment Variables
+    # --------------------------------
+    # These environment variables are specific to a custom environment defined by the ENV_NAME variable.
+
+    # Tenant Information
+    CUSTOM_BASE_URL: ClassVar[str] = 'PYDPLUS_{env_name}_BASE_URL'                                  # Vars: env_name
+
+    # General Settings
+    CUSTOM_STRICT_MODE: ClassVar[str] = 'PYDPLUS_{env_name}_STRICT_MODE'                            # Vars: env_name
+    CUSTOM_VERIFY_SSL: ClassVar[str] = 'PYDPLUS_{env_name}_VERIFY_SSL'                              # Vars: env_name
+
+    # Authentication / Connection
+    CUSTOM_CONNECTION_TYPE: ClassVar[str] = 'PYDPLUS_{env_name}_CONNECTION_TYPE'                    # Vars: env_name
+    CUSTOM_LEGACY_ACCESS_ID: ClassVar[str] = 'PYDPLUS_{env_name}_LEGACY_ACCESS_ID'                  # Vars: env_name
+    CUSTOM_LEGACY_KEY_PATH: ClassVar[str] = 'PYDPLUS_{env_name}_LEGACY_KEY_PATH'                    # Vars: env_name
+    CUSTOM_LEGACY_KEY_FILE: ClassVar[str] = 'PYDPLUS_{env_name}_LEGACY_KEY_FILE'                    # Vars: env_name
+    CUSTOM_OAUTH_ISSUER_URL: ClassVar[str] = 'PYDPLUS_{env_name}_OAUTH_ISSUER_URL'                  # Vars: env_name
+    CUSTOM_OAUTH_CLIENT_ID: ClassVar[str] = 'PYDPLUS_{env_name}_OAUTH_CLIENT_ID'                    # Vars: env_name
+    CUSTOM_OAUTH_GRANT_TYPE: ClassVar[str] = 'PYDPLUS_{env_name}_OAUTH_GRANT_TYPE'                  # Vars: env_name
 
 
 # -----------------------------
@@ -504,6 +607,9 @@ CLIENT_SETTINGS: Final[ClientSettings] = ClientSettings()
 
 # Helper Utility
 HELPER_SETTINGS: Final[HelperSettings] = HelperSettings()
+
+# Environment Variables
+ENV_VARIABLES: Final[EnvVariables] = EnvVariables()
 
 # Connection Information (Client and Helper)
 CONNECTION_INFO: Final[ConnectionInfo] = ConnectionInfo()
