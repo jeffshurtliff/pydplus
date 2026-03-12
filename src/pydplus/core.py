@@ -98,60 +98,11 @@ class PyDPlus(object):
         # Check for any defined environment variables using the environment variable names defined above
         self._get_env_variables()
 
-        # Determine if strict mode is enabled or disabled by first checking if it was passed as an argument
-        if strict_mode is not None:
-            if not isinstance(strict_mode, bool):
-                error_msg = 'The value of the strict_mode parameter must be Boolean.'
-                logger.error(error_msg)
-                raise TypeError(error_msg)
-            self.strict_mode = strict_mode
+        # Define the strict_mode setting using a passed argument, helper setting, or environment variable
+        self._define_strict_mode(strict_mode)
 
-        # Check the helper settings to see if strict mode was defined
-        elif (self._helper_settings and const.HELPER_SETTINGS.STRICT_MODE in self._helper_settings
-                and isinstance(self._helper_settings[const.HELPER_SETTINGS.STRICT_MODE], bool)
-                and self._helper_settings[const.HELPER_SETTINGS.STRICT_MODE] is not None):
-            self.strict_mode = self._helper_settings.get(const.HELPER_SETTINGS.STRICT_MODE)
-
-        # Check the environment variables to see if strict mode was defined
-        elif (const.ENV_VARIABLES.STRICT_MODE_FIELD in self._env_variables
-              and isinstance(self._env_variables[const.ENV_VARIABLES.STRICT_MODE_FIELD], bool)
-              and self._env_variables[const.ENV_VARIABLES.STRICT_MODE_FIELD] is not None):
-            self.strict_mode = self._env_variables.get(const.ENV_VARIABLES.STRICT_MODE_FIELD)
-
-        # Use the default value (True) if not strict mode was not explicitly defined
-        else:
-            self.strict_mode = const.DEFAULT_STRICT_MODE
-
-        # Define the connection type to use by first checking if it was passed as an argument
-        if connection_type in const.CONNECTION_INFO.VALID_CONNECTION_TYPES:
-            self.connection_type = connection_type
-
-        # Attempt to retrieve the connection type via helper settings if present and populated
-        elif (self._helper_settings and const.HELPER_SETTINGS.CONNECTION_TYPE in self._helper_settings
-                and self._helper_settings[const.HELPER_SETTINGS.CONNECTION_TYPE] is not None):
-            if self._helper_settings.get(const.HELPER_SETTINGS.CONNECTION_TYPE) in const.CONNECTION_INFO.VALID_CONNECTION_TYPES:
-                self.connection_type = self._helper_settings.get(const.HELPER_SETTINGS.CONNECTION_TYPE)
-            else:
-                error_msg = 'The connection_type value in the helper settings in invalid and will be ignored.'
-                expected_types = ','.join(const.CONNECTION_INFO.VALID_CONNECTION_TYPES)
-                error_msg += (f"(Expected: {expected_types}; "
-                              f"Provided: {self._helper_settings.get(const.HELPER_SETTINGS.CONNECTION_TYPE)})")
-                logger.error(error_msg)
-                self.connection_type = const.CONNECTION_INFO.DEFAULT_CONNECTION_TYPE
-
-        # Attempt to retrieve the connection type via environment variable if defined
-        elif (const.ENV_VARIABLES.CONNECTION_TYPE_FIELD in self._env_variables
-              and self._env_variables[const.ENV_VARIABLES.CONNECTION_TYPE_FIELD] is not None):
-            if self._env_variables.get(const.ENV_VARIABLES.CONNECTION_TYPE_FIELD) in const.CONNECTION_INFO.VALID_CONNECTION_TYPES:
-                self.connection_type = self._env_variables.get(const.ENV_VARIABLES.CONNECTION_TYPE_FIELD)
-            else:
-                error_msg = 'The connection_type environment variable in invalid and the default connection type will be used.'
-                logger.error(error_msg)
-                self.connection_type = const.CONNECTION_INFO.DEFAULT_CONNECTION_TYPE
-
-        # Use the default connection type (OAuth) if it hasn't been defined elsewhere
-        else:
-            self.connection_type = const.CONNECTION_INFO.DEFAULT_CONNECTION_TYPE
+        # Define the connection type that should be used to authenticate
+        self._get_connection_type(connection_type)
 
         # Define the verify_ssl value using the argument if defined
         if verify_ssl is not None and isinstance(verify_ssl, bool):
@@ -244,6 +195,18 @@ class PyDPlus(object):
         """Allow the :py:class:`pydplus.core.PyDPlus.User` class to be utilized within the core object."""
         return PyDPlus.User(self)
 
+    @staticmethod
+    def _get_env_name(_env: Optional[str] = None) -> Union[str, None]:
+        """Identify the environment name if defined with an argument or environment variable."""
+        if _env:
+            if not isinstance(_env, str):
+                error_msg = f"The 'env' argument is an invalid data type (Expected: str, Provided: {type(_env)})"
+                logger.error(error_msg)
+                raise TypeError(error_msg)
+            return _env.upper()
+        else:
+            return os.getenv(const.ENV_VARIABLES.ENV_NAME)                               # Returns None if not found
+
     def _get_helper_settings(self, _helper):
         """Retrieve the settings from a helper configuration file if passed as an argument."""
         if _helper:
@@ -281,15 +244,6 @@ class PyDPlus(object):
         # Check for environment-specific variable names or use the default
         else:
             self._get_env_variable_names()
-
-    @staticmethod
-    def _get_env_name(_env: Optional[str] = None) -> Union[str, None]:
-        """Identify the environment name if defined with an argument or environment variable."""
-        if _env and isinstance(_env, str):
-            _env = _env.upper()
-        else:
-            _env = os.getenv(const.ENV_VARIABLES.ENV_NAME)                               # Returns None if not found
-        return _env
 
     def _get_env_variable_names(self, _custom_dict: Optional[Mapping[str, str]] = None) -> None:
         """Return the environment variable names to use when checking the OS for environment variables."""
@@ -332,6 +286,65 @@ class PyDPlus(object):
             _var_value = os.getenv(_var_name)                               # Returns None if not found
             _env_variables.update({_config_name: _var_value})
         self._env_variables = _env_variables
+
+    def _define_strict_mode(self, _strict_mode_from_arg: Optional[bool]) -> None:
+        """Define the strict_mode setting using a passed argument, helper setting, or environment variable."""
+        # Check if the strict_mode value was passed as an argument
+        if _strict_mode_from_arg is not None:
+            if not isinstance(_strict_mode_from_arg, bool):
+                error_msg = 'The value of the strict_mode parameter must be Boolean.'
+                logger.error(error_msg)
+                raise TypeError(error_msg)
+            self.strict_mode = _strict_mode_from_arg
+
+        # Check the helper settings to see if strict mode was defined
+        elif (self._helper_settings and const.HELPER_SETTINGS.STRICT_MODE in self._helper_settings
+                and isinstance(self._helper_settings[const.HELPER_SETTINGS.STRICT_MODE], bool)
+                and self._helper_settings[const.HELPER_SETTINGS.STRICT_MODE] is not None):
+            self.strict_mode = self._helper_settings.get(const.HELPER_SETTINGS.STRICT_MODE)
+
+        # Check the environment variables to see if strict mode was defined
+        elif (const.ENV_VARIABLES.STRICT_MODE_FIELD in self._env_variables
+              and isinstance(self._env_variables[const.ENV_VARIABLES.STRICT_MODE_FIELD], bool)
+              and self._env_variables[const.ENV_VARIABLES.STRICT_MODE_FIELD] is not None):
+            self.strict_mode = self._env_variables.get(const.ENV_VARIABLES.STRICT_MODE_FIELD)
+
+        # Use the default value (True) if not strict mode was not explicitly defined
+        else:
+            self.strict_mode = const.DEFAULT_STRICT_MODE
+
+    def _get_connection_type(self, _connection_type_from_arg: Optional[str]) -> None:
+        """Define the connection type that should be used to authenticate to the RSA ID Plus tenant."""
+        # Check if the connection type was passed as an argument
+        if _connection_type_from_arg in const.CONNECTION_INFO.VALID_CONNECTION_TYPES:
+            self.connection_type = _connection_type_from_arg
+
+        # Attempt to retrieve the connection type via helper settings if present and populated
+        elif (self._helper_settings and const.HELPER_SETTINGS.CONNECTION_TYPE in self._helper_settings
+                and self._helper_settings[const.HELPER_SETTINGS.CONNECTION_TYPE] is not None):
+            if self._helper_settings.get(const.HELPER_SETTINGS.CONNECTION_TYPE) in const.CONNECTION_INFO.VALID_CONNECTION_TYPES:
+                self.connection_type = self._helper_settings.get(const.HELPER_SETTINGS.CONNECTION_TYPE)
+            else:
+                error_msg = 'The connection_type value in the helper settings in invalid and will be ignored.'
+                expected_types = ','.join(const.CONNECTION_INFO.VALID_CONNECTION_TYPES)
+                error_msg += (f"(Expected: {expected_types}; "
+                              f"Provided: {self._helper_settings.get(const.HELPER_SETTINGS.CONNECTION_TYPE)})")
+                logger.error(error_msg)
+                self.connection_type = const.CONNECTION_INFO.DEFAULT_CONNECTION_TYPE
+
+        # Attempt to retrieve the connection type via environment variable if defined
+        elif (const.ENV_VARIABLES.CONNECTION_TYPE_FIELD in self._env_variables
+              and self._env_variables[const.ENV_VARIABLES.CONNECTION_TYPE_FIELD] is not None):
+            if self._env_variables.get(const.ENV_VARIABLES.CONNECTION_TYPE_FIELD) in const.CONNECTION_INFO.VALID_CONNECTION_TYPES:
+                self.connection_type = self._env_variables.get(const.ENV_VARIABLES.CONNECTION_TYPE_FIELD)
+            else:
+                error_msg = 'The connection_type environment variable in invalid and the default connection type will be used.'
+                logger.error(error_msg)
+                self.connection_type = const.CONNECTION_INFO.DEFAULT_CONNECTION_TYPE
+
+        # Use the default connection type (OAuth) if it hasn't been defined elsewhere
+        else:
+            self.connection_type = const.CONNECTION_INFO.DEFAULT_CONNECTION_TYPE
 
     def _parse_helper_connection_info(self) -> dict[str, dict[str, Any]]:
         """Parse the helper content to populate the connection info."""
