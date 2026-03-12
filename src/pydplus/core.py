@@ -32,7 +32,7 @@ class PyDPlus(object):
     :type connection_info: dict, None
     :param connection_type: Determines whether to leverage a(n) ``oauth`` (default) or ``legacy`` connection
     :type connection_type: str, None
-    :param base_url: The base URL to leverage when performing API calls
+    :param base_url: The base URL to leverage when performing Administration API calls
     :type base_url: str, None
     :param env: Optionally specify the environment as ``PROD``, ``DEV``, or a custom name. (e.g. ``STAGING``)
 
@@ -89,61 +89,44 @@ class PyDPlus(object):
         # Define the environment if explicitly defined as an argument or environment variable
         self.env = self._get_env_name(env)
 
-        # Check for a supplied helper file
-        if helper:
-            # Parse the helper file contents
-            if any((isinstance(helper, tuple), isinstance(helper, list), isinstance(helper, set))):
-                helper_file_path, helper_file_type = helper
-            elif isinstance(helper, str):
-                helper_file_path, helper_file_type = (helper, const.HELPER_SETTINGS.DEFAULT_HELPER_FILE_TYPE)
-            elif isinstance(helper, dict):
-                helper_file_path, helper_file_type = helper.values()
-            else:
-                error_msg = "The 'helper' argument can only be supplied as string, tuple, list, set or dict."
-                logger.error(error_msg)
-                raise TypeError(error_msg)
-            self.helper_path = helper_file_path
-            self._helper_settings = get_helper_settings(helper_file_path, helper_file_type)
-        else:
-            self._helper_settings = {}
+        # Check for a supplied helper file and extract the configuration settings if found
+        self._get_helper_settings(helper)
 
-        # Check for custom environment variable names
-        if env_variables:
-            if not isinstance(env_variables, dict):
-                logger.error("The 'env_variables' parameter must be a dictionary and will be ignored.")
-            else:
-                self._env_variable_names = self._get_env_variable_names(env_variables)
-        elif const.HELPER_SETTINGS.ENV_VARIABLES in self._helper_settings:
-            self._env_variable_names = self._get_env_variable_names(
-                self._helper_settings.get(const.HELPER_SETTINGS.ENV_VARIABLES, {})
-            )
-        else:
-            self._env_variable_names = self._get_env_variable_names()
+        # Define the environment variable names to retrieve when defined
+        self._define_env_variable_names(env_variables)
 
-        # Check for any defined environment variables
-        self._env_variables = self._get_env_variables()
+        # Check for any defined environment variables using the environment variable names defined above
+        self._get_env_variables()
 
-        # Determine if strict mode is enabled or disabled
+        # Determine if strict mode is enabled or disabled by first checking if it was passed as an argument
         if strict_mode is not None:
             if not isinstance(strict_mode, bool):
                 error_msg = 'The value of the strict_mode parameter must be Boolean.'
                 logger.error(error_msg)
                 raise TypeError(error_msg)
             self.strict_mode = strict_mode
+
+        # Check the helper settings to see if strict mode was defined
         elif (self._helper_settings and const.HELPER_SETTINGS.STRICT_MODE in self._helper_settings
                 and isinstance(self._helper_settings[const.HELPER_SETTINGS.STRICT_MODE], bool)
                 and self._helper_settings[const.HELPER_SETTINGS.STRICT_MODE] is not None):
             self.strict_mode = self._helper_settings.get(const.HELPER_SETTINGS.STRICT_MODE)
-        elif (const.HELPER_SETTINGS.STRICT_MODE in self._env_variables
-              and isinstance(self._env_variables[const.HELPER_SETTINGS.STRICT_MODE], bool)
-              and self._env_variables[const.HELPER_SETTINGS.STRICT_MODE] is not None):
-            self.strict_mode = self._env_variables.get(const.HELPER_SETTINGS.STRICT_MODE)
+
+        # Check the environment variables to see if strict mode was defined
+        elif (const.ENV_VARIABLES.STRICT_MODE_FIELD in self._env_variables
+              and isinstance(self._env_variables[const.ENV_VARIABLES.STRICT_MODE_FIELD], bool)
+              and self._env_variables[const.ENV_VARIABLES.STRICT_MODE_FIELD] is not None):
+            self.strict_mode = self._env_variables.get(const.ENV_VARIABLES.STRICT_MODE_FIELD)
+
+        # Use the default value (True) if not strict mode was not explicitly defined
         else:
             self.strict_mode = const.DEFAULT_STRICT_MODE
 
-        # Define the connection type to use
+        # Define the connection type to use by first checking if it was passed as an argument
         if connection_type in const.CONNECTION_INFO.VALID_CONNECTION_TYPES:
             self.connection_type = connection_type
+
+        # Attempt to retrieve the connection type via helper settings if present and populated
         elif (self._helper_settings and const.HELPER_SETTINGS.CONNECTION_TYPE in self._helper_settings
                 and self._helper_settings[const.HELPER_SETTINGS.CONNECTION_TYPE] is not None):
             if self._helper_settings.get(const.HELPER_SETTINGS.CONNECTION_TYPE) in const.CONNECTION_INFO.VALID_CONNECTION_TYPES:
@@ -155,36 +138,58 @@ class PyDPlus(object):
                               f"Provided: {self._helper_settings.get(const.HELPER_SETTINGS.CONNECTION_TYPE)})")
                 logger.error(error_msg)
                 self.connection_type = const.CONNECTION_INFO.DEFAULT_CONNECTION_TYPE
-        elif (const.HELPER_SETTINGS.CONNECTION_TYPE in self._env_variables
-              and self._env_variables[const.HELPER_SETTINGS.CONNECTION_TYPE] is not None):
-            if self._env_variables.get(const.HELPER_SETTINGS.CONNECTION_TYPE) in const.CONNECTION_INFO.VALID_CONNECTION_TYPES:
-                self.connection_type = self._env_variables.get(const.HELPER_SETTINGS.CONNECTION_TYPE)
+
+        # Attempt to retrieve the connection type via environment variable if defined
+        elif (const.ENV_VARIABLES.CONNECTION_TYPE_FIELD in self._env_variables
+              and self._env_variables[const.ENV_VARIABLES.CONNECTION_TYPE_FIELD] is not None):
+            if self._env_variables.get(const.ENV_VARIABLES.CONNECTION_TYPE_FIELD) in const.CONNECTION_INFO.VALID_CONNECTION_TYPES:
+                self.connection_type = self._env_variables.get(const.ENV_VARIABLES.CONNECTION_TYPE_FIELD)
             else:
                 error_msg = 'The connection_type environment variable in invalid and the default connection type will be used.'
                 logger.error(error_msg)
                 self.connection_type = const.CONNECTION_INFO.DEFAULT_CONNECTION_TYPE
+
+        # Use the default connection type (OAuth) if it hasn't been defined elsewhere
         else:
             self.connection_type = const.CONNECTION_INFO.DEFAULT_CONNECTION_TYPE
 
-        # Define the verify_ssl value
+        # Define the verify_ssl value using the argument if defined
         if verify_ssl is not None and isinstance(verify_ssl, bool):
             self.verify_ssl = verify_ssl
-        elif self._helper_settings and const.HELPER_SETTINGS.VERIFY_SSL in self._helper_settings:
-            self.verify_ssl = self._helper_settings.get(const.HELPER_SETTINGS.VERIFY_SSL, True)
-        elif self._env_variables and const.HELPER_SETTINGS.VERIFY_SSL in self._env_variables:
-            self.verify_ssl = self._env_variables.get(const.HELPER_SETTINGS.VERIFY_SSL, True)
-        else:
-            self.verify_ssl = True
 
-        # Attempt to define the base URL value
+        # Attempt to define the verify_ssl value using Helper Settings if present and populated
+        elif self._helper_settings and const.HELPER_SETTINGS.VERIFY_SSL in self._helper_settings:
+            self.verify_ssl = self._helper_settings.get(
+                const.HELPER_SETTINGS.VERIFY_SSL,
+                const.CLIENT_SETTINGS.DEFAULT_VERIFY_SSL_VALUE      # Fallback value
+            )
+
+        # Attempt to define the verify_ssl value using an environment variable if defined
+        elif self._env_variables and const.ENV_VARIABLES.VERIFY_SSL_FIELD in self._env_variables:
+            self.verify_ssl = self._env_variables.get(
+                const.ENV_VARIABLES.VERIFY_SSL_FIELD,
+                const.CLIENT_SETTINGS.DEFAULT_VERIFY_SSL_VALUE      # Fallback value
+            )
+
+        # Use the default value (True) if not defined elsewhere
+        else:
+            self.verify_ssl = const.CLIENT_SETTINGS.DEFAULT_VERIFY_SSL_VALUE
+
+        # Attempt to define the base URL value for the Administration API by first checking if defined via argument
         if base_url:
             self.base_url = core_utils.get_base_url(base_url)
+
+        # Attempt to define the base URL using the helper settings if defined and populated
         elif (self._helper_settings and const.HELPER_SETTINGS.BASE_URL in self._helper_settings
                 and self._helper_settings.get(const.HELPER_SETTINGS.BASE_URL) is not None):
             self.base_url = core_utils.get_base_url(self._helper_settings.get(const.HELPER_SETTINGS.BASE_URL))
-        elif (const.HELPER_SETTINGS.BASE_URL in self._env_variables
-              and self._env_variables.get(const.HELPER_SETTINGS.BASE_URL) is not None):
-            self.base_url = core_utils.get_base_url(self._env_variables.get(const.HELPER_SETTINGS.BASE_URL))
+
+        # Attempt to define the base URL using an environment variable if defined
+        elif (const.ENV_VARIABLES.BASE_URL_FIELD in self._env_variables
+              and self._env_variables.get(const.ENV_VARIABLES.BASE_URL_FIELD) is not None):
+            self.base_url = core_utils.get_base_url(self._env_variables.get(const.ENV_VARIABLES.BASE_URL_FIELD))
+
+        # Set the value to None if the base URL could not be found
         else:
             self.base_url = None
 
@@ -239,6 +244,44 @@ class PyDPlus(object):
         """Allow the :py:class:`pydplus.core.PyDPlus.User` class to be utilized within the core object."""
         return PyDPlus.User(self)
 
+    def _get_helper_settings(self, _helper):
+        """Retrieve the settings from a helper configuration file if passed as an argument."""
+        if _helper:
+            # Parse the helper file contents
+            if any((isinstance(_helper, tuple), isinstance(_helper, list), isinstance(_helper, set))):
+                helper_file_path, helper_file_type = _helper
+            elif isinstance(_helper, str):
+                helper_file_path, helper_file_type = (_helper, const.HELPER_SETTINGS.DEFAULT_HELPER_FILE_TYPE)
+            elif isinstance(_helper, dict):
+                helper_file_path, helper_file_type = _helper.values()
+            else:
+                error_msg = "The 'helper' argument can only be supplied as string, tuple, list, set or dict."
+                logger.error(error_msg)
+                raise TypeError(error_msg)
+            self.helper_path = helper_file_path
+            self._helper_settings = get_helper_settings(helper_file_path, helper_file_type)
+        else:
+            self._helper_settings = {}
+
+    def _define_env_variable_names(self, _env_variables_from_arg: Optional[dict]) -> None:
+        """Define the environment variable names to use based on an explicit argument or helper settings."""
+        # Check for custom environment variable names passed as an argument (or environment-specific)
+        if _env_variables_from_arg:
+            if not isinstance(_env_variables_from_arg, dict):
+                logger.error("The 'env_variables' parameter must be a dictionary and will be ignored.")
+            else:
+                self._get_env_variable_names(_env_variables_from_arg)
+
+        # Check for custom environment variable names provided within the helper settings (or environment-specific)
+        elif const.HELPER_SETTINGS.ENV_VARIABLES in self._helper_settings:
+            self._get_env_variable_names(
+                self._helper_settings.get(const.HELPER_SETTINGS.ENV_VARIABLES, {})
+            )
+
+        # Check for environment-specific variable names or use the default
+        else:
+            self._get_env_variable_names()
+
     @staticmethod
     def _get_env_name(_env: Optional[str] = None) -> Union[str, None]:
         """Identify the environment name if defined with an argument or environment variable."""
@@ -248,7 +291,7 @@ class PyDPlus(object):
             _env = os.getenv(const.ENV_VARIABLES.ENV_NAME)                               # Returns None if not found
         return _env
 
-    def _get_env_variable_names(self, _custom_dict: Optional[Mapping[str, str]] = None) -> dict:
+    def _get_env_variable_names(self, _custom_dict: Optional[Mapping[str, str]] = None) -> None:
         """Return the environment variable names to use when checking the OS for environment variables."""
         # Define the dictionary with the default environment variable names
         _env_variable_names = dict(const.HELPER_SETTINGS.ENV_VARIABLE_DEFAULT_MAPPING)
@@ -280,7 +323,7 @@ class PyDPlus(object):
                     _env_variable_names[_name_key] = _name_value
 
         # Return the finalized dictionary with the mapped environment variable names
-        return _env_variable_names
+        self._env_variable_names = _env_variable_names
 
     def _get_env_variables(self):
         """Retrieve any defined environment variables to use with the instantiated core object."""
@@ -288,7 +331,7 @@ class PyDPlus(object):
         for _config_name, _var_name in self._env_variable_names.items():
             _var_value = os.getenv(_var_name)                               # Returns None if not found
             _env_variables.update({_config_name: _var_value})
-        return _env_variables
+        self._env_variables = _env_variables
 
     def _parse_helper_connection_info(self) -> dict[str, dict[str, Any]]:
         """Parse the helper content to populate the connection info."""
