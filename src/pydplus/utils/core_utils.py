@@ -147,14 +147,30 @@ def split_file_path(full_path: str) -> Tuple[str, str]:
 def get_base_url(url: str, include_scheme: bool = True) -> str:
     """Parse a URL to return only the base URL with or without the scheme.
 
-    :param url: The URL to parse
+    :param url: A valid, fully qualified URL
     :type url: str
     :param include_scheme: Determines if the scheme (e.g. ``https://``) should be included (``True`` by default)
     :type include_scheme: bool
     :returns: The base URL as a string
-    :raises: :py:exc:`TypeError`
+    :raises: :py:exc:`TypeError`,
+             :py:exc:`pydplus.errors.exceptions.InvalidURLError`
     """
+    # Raise an exception if the url is not a string
+    if not isinstance(url, str):
+        error_msg = f"The 'url' value must be a string (Provided: {type(url)})"
+        logger.error(error_msg)
+        raise TypeError(error_msg)
+
+    # Parse the provided URL
     parsed_url = urllib.parse.urlparse(url)
+
+    # Raise an exception if an invalid URL was provided
+    if not parsed_url.netloc or not parsed_url.scheme:
+        error_msg = f"The provided URL '{url}' is invalid"
+        logger.error(error_msg)
+        raise errors.exceptions.InvalidURLError(error_msg)
+
+    # Extract and return the base URL
     base_url = parsed_url.netloc
     base_url = f'{parsed_url.scheme}://{base_url}' if include_scheme else base_url
     return base_url
