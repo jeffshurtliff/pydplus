@@ -6,7 +6,7 @@
 :Example:           ``pydp = PyDPlus()``
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     15 Mar 2026
+:Modified Date:     16 Mar 2026
 """
 
 from __future__ import annotations
@@ -529,7 +529,7 @@ class PyDPlus(object):
 
         return _merged_connection_info
 
-    def _populate_missing_connection_details(self, _partial_connection_info):
+    def _populate_missing_connection_details(self, _partial_connection_info: dict) -> dict:
         """Add missing field values the connection info dictionary as needed."""
         # Define variables for the dictionary keys/fields
         issuer_url_key = const.CONNECTION_INFO.OAUTH_ISSUER_URL
@@ -556,7 +556,7 @@ class PyDPlus(object):
         # Return the updated connection info dictionary
         return _partial_connection_info
 
-    def _check_if_connected(self):
+    def _check_if_connected(self) -> None:
         """Check to see if the object is connected to the tenant and raises an exception if not."""
         if not self.connected:
             error_msg = 'Must be connected to the tenant before performing an API call. Call the connect() method.'
@@ -772,13 +772,14 @@ class PyDPlus(object):
     
     class User(object):
         """Class containing user-related methods."""
-        def __init__(self, pydp_object):
+        def __init__(self, pydp_object) -> None:
             """Initialize the :py:class:`pydplus.core.PyDPlus.User` inner class object.
 
             :param pydp_object: The core :py:class:`pydplus.PyDPlus` object
             :type pydp_object: class[pydplus.PyDPlus]
+            :returns: None
             """
-            self.pydp_object = pydp_object
+            self.pydp_object: PyDPlus = pydp_object
 
         def get_user_details(
                 self,
@@ -806,12 +807,13 @@ class PyDPlus(object):
             :type allow_failed_response: bool, None
             :returns: The user details in JSON format or the API response as a ``requests`` object
             :raises: :py:exc:`TypeError`,
+                     :py:exc:`errors.exceptions.APIConnectionError`,
                      :py:exc:`errors.exceptions.APIMethodError`,
                      :py:exc:`errors.exceptions.APIRequestError`,
                      :py:exc:`errors.exceptions.APIResponseConversionError`,
                      :py:exc:`errors.exceptions.InvalidFieldError`
             """
-            # TODO: Check to ensure connection to the tenant has already been established
+            self.pydp_object._check_if_connected()
             return users_module.get_user_details(self.pydp_object, email=email, search_unsynced=search_unsynced,
                                                  timeout=timeout, show_full_error=show_full_error,
                                                  return_json=return_json, allow_failed_response=allow_failed_response)
@@ -839,13 +841,14 @@ class PyDPlus(object):
             :returns: The User ID for the given user as a string (e.g. ``54082ac6-4713-6368-2251-df813c41159f``)
                       or an empty string if the User ID could not be retrieved successfully
             :raises: :py:exc:`TypeError`,
+                     :py:exc:`errors.exceptions.APIConnectionError`,
                      :py:exc:`errors.exceptions.APIMethodError`,
                      :py:exc:`errors.exceptions.APIRequestError`,
                      :py:exc:`errors.exceptions.APIResponseConversionError`,
                      :py:exc:`errors.exceptions.InvalidFieldError`,
                      :py:exc:`errors.exceptions.MissingRequiredDataError`
             """
-            # TODO: Check to ensure connection to the tenant has already been established
+            self.pydp_object._check_if_connected()
             return users_module.get_user_id(self.pydp_object, email=email, user_details=user_details,
                                             search_unsynced=search_unsynced, timeout=timeout,
                                             show_full_error=show_full_error)
@@ -873,13 +876,14 @@ class PyDPlus(object):
             :type allow_failed_response: bool, None
             :returns: The API response in JSON format or as a ``requests`` object
             :raises: :py:exc:`TypeError`,
+                     :py:exc:`errors.exceptions.APIConnectionError`,
                      :py:exc:`errors.exceptions.APIMethodError`,
                      :py:exc:`errors.exceptions.APIRequestError`,
                      :py:exc:`errors.exceptions.APIResponseConversionError`,
                      :py:exc:`errors.exceptions.InvalidFieldError`,
                      :py:exc:`errors.exceptions.MissingRequiredDataError`
             """
-            # TODO: Check to ensure connection to the tenant has already been established
+            self.pydp_object._check_if_connected()
             return users_module.enable_user(self.pydp_object, user_id=user_id, timeout=timeout,
                                             show_full_error=show_full_error, return_json=return_json,
                                             allow_failed_response=allow_failed_response)
@@ -907,13 +911,14 @@ class PyDPlus(object):
             :type allow_failed_response: bool, None
             :returns: The API response in JSON format or as a ``requests`` object
             :raises: :py:exc:`TypeError`,
+                     :py:exc:`errors.exceptions.APIConnectionError`,
                      :py:exc:`errors.exceptions.APIMethodError`,
                      :py:exc:`errors.exceptions.APIRequestError`,
                      :py:exc:`errors.exceptions.APIResponseConversionError`,
                      :py:exc:`errors.exceptions.InvalidFieldError`,
                      :py:exc:`errors.exceptions.MissingRequiredDataError`
             """
-            # TODO: Check to ensure connection to the tenant has already been established
+            self.pydp_object._check_if_connected()
             return users_module.disable_user(self.pydp_object, user_id=user_id, timeout=timeout,
                                              show_full_error=show_full_error, return_json=return_json,
                                              allow_failed_response=allow_failed_response)
@@ -941,13 +946,14 @@ class PyDPlus(object):
             :type allow_failed_response: bool, None
             :returns: The API response in JSON format or as a ``requests`` object
             :raises: :py:exc:`TypeError`,
+                     :py:exc:`errors.exceptions.APIConnectionError`,
                      :py:exc:`errors.exceptions.APIMethodError`,
                      :py:exc:`errors.exceptions.APIRequestError`,
                      :py:exc:`errors.exceptions.APIResponseConversionError`,
                      :py:exc:`errors.exceptions.InvalidFieldError`,
                      :py:exc:`errors.exceptions.MissingRequiredDataError`
             """
-            # TODO: Check to ensure connection to the tenant has already been established
+            self.pydp_object._check_if_connected()
             return users_module.synchronize_user(self.pydp_object, user_id=user_id, timeout=timeout,
                                                  show_full_error=show_full_error, return_json=return_json,
                                                  allow_failed_response=allow_failed_response)
@@ -975,13 +981,14 @@ class PyDPlus(object):
             :type allow_failed_response: bool, None
             :returns: The API response in JSON format or as a ``requests`` object
             :raises: :py:exc:`TypeError`,
+                     :py:exc:`errors.exceptions.APIConnectionError`,
                      :py:exc:`errors.exceptions.APIMethodError`,
                      :py:exc:`errors.exceptions.APIRequestError`,
                      :py:exc:`errors.exceptions.APIResponseConversionError`,
                      :py:exc:`errors.exceptions.InvalidFieldError`,
                      :py:exc:`errors.exceptions.MissingRequiredDataError`
             """
-            # TODO: Check to ensure connection to the tenant has already been established
+            self.pydp_object._check_if_connected()
             return users_module.mark_deleted(self.pydp_object, user_id=user_id, timeout=timeout,
                                              show_full_error=show_full_error, return_json=return_json,
                                              allow_failed_response=allow_failed_response)
@@ -1009,13 +1016,14 @@ class PyDPlus(object):
             :type allow_failed_response: bool, None
             :returns: The API response in JSON format or as a ``requests`` object
             :raises: :py:exc:`TypeError`,
+                     :py:exc:`errors.exceptions.APIConnectionError`,
                      :py:exc:`errors.exceptions.APIMethodError`,
                      :py:exc:`errors.exceptions.APIRequestError`,
                      :py:exc:`errors.exceptions.APIResponseConversionError`,
                      :py:exc:`errors.exceptions.InvalidFieldError`,
                      :py:exc:`errors.exceptions.MissingRequiredDataError`
             """
-            # TODO: Check to ensure connection to the tenant has already been established
+            self.pydp_object._check_if_connected()
             return users_module.unmark_deleted(self.pydp_object, user_id=user_id, timeout=timeout,
                                                show_full_error=show_full_error, return_json=return_json,
                                                allow_failed_response=allow_failed_response)
