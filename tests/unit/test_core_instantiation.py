@@ -4,7 +4,7 @@
 :Synopsis:          Unit tests for client object instantiation and connection-info compilation
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff (via GPT-5.3-codex)
-:Modified Date:     09 Mar 2026
+:Modified Date:     15 Mar 2026
 """
 
 from __future__ import annotations
@@ -55,5 +55,7 @@ def test_instantiate_core_object_with_connection_info_and_no_auto_connect(
     assert pydp_object.base_url == sample_base_url
     assert pydp_object.connected is False
     assert pydp_object.base_headers == {}
-    assert pydp_object.admin_base_url.endswith('/AdminInterface/restapi')
-    assert pydp_object.auth_base_url.endswith('/mfa/v1_1/authn')
+    assert pydp_object.admin_base_url == sample_base_url
+    assert pydp_object.admin_base_rest_url.endswith('/AdminInterface/restapi')
+    assert pydp_object.auth_base_url is None
+    assert pydp_object.auth_base_rest_url is None
