@@ -14,11 +14,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Added shared pytest fixtures and integration-test controls in `tests/conftest.py`.
+- Added unit tests in `tests/unit/test_logging.py` for `pydplus.utils.log_utils`.
 
 (unreleased-changed)=
 ### Changed
 
 - Refactored tests into `tests/unit/` and `tests/integration/` with updated testing documentation and default coverage reporting.
+- Updated `pydplus.utils.log_utils` with comprehensive type hints/docstrings and improved handler/level configuration behavior.
 
 ---
 (relnotes-1.0.0)=
