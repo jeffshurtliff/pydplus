@@ -4,7 +4,7 @@
 :Synopsis:          Constants that are utilized throughout the package
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     10 Mar 2026
+:Modified Date:     14 Mar 2026
 """
 
 from __future__ import annotations
@@ -74,9 +74,9 @@ class ExceptionClasses:
     _VALUE: ClassVar[str] = 'value'
 
     # Exception messages and message segments
-    _API_CUSTOM_MSG: ClassVar[str] = 'The {type} request failed with the following message:'
-    _API_DEFAULT_MSG: ClassVar[str] = 'The {type} request did not return a successful response.'
-    _CANNOT_LOCATE_FILE: ClassVar[str] = 'Unable to locate the following file: {file_path}'
+    _API_CUSTOM_MSG: ClassVar[str] = 'The {type} request failed with the following message:'        # Vars: type
+    _API_DEFAULT_MSG: ClassVar[str] = 'The {type} request did not return a successful response.'    # Vars: type
+    _CANNOT_LOCATE_FILE: ClassVar[str] = 'Unable to locate the following file: {file_path}'         # Vars: file_path
     _INVALID_HELPER_DEFAULT_MSG: ClassVar[str] = "The helper configuration file can only have the 'yml', 'yaml' or 'json' file type."
     _WITH_THE_FOLLOWING_SEGMENT: ClassVar[str] = ' with the following'
 
@@ -134,7 +134,9 @@ class HelperSettings:
 
     # Root-level helper fields
     ENV_NAME: ClassVar[str] = 'env'
+    TENANT_NAME: ClassVar[str] = 'tenant_name'
     BASE_URL: ClassVar[str] = 'base_url'
+    BASE_URLS: ClassVar[str] = 'base_urls'
     CONNECTION: ClassVar[str] = 'connection'
     CONNECTION_TYPE: ClassVar[str] = 'connection_type'
     STRICT_MODE: ClassVar[str] = 'strict_mode'
@@ -142,13 +144,26 @@ class HelperSettings:
     ENV_VARIABLES: ClassVar[str] = 'env_variables'
     ROOT_LEVEL_BASIC_FIELDS: ClassVar[frozenset[str]] = frozenset({
         ENV_NAME,
+        TENANT_NAME,
         BASE_URL,
         CONNECTION_TYPE,
         STRICT_MODE,
         VERIFY_SSL,
     })
 
+    # Base URL fields
+    ADMIN: ClassVar[str] = 'admin'
+    ADMIN_BASE_URL: ClassVar[str] = 'admin_base_url'
+    AUTH: ClassVar[str] = 'auth'
+    AUTH_BASE_URL: ClassVar[str] = 'auth_base_url'
+    API_BASE_URL: ClassVar[str] = '{type}_base_url'                                                 # Vars: type
+
     # Environment variable fields
+    ENV_ENV_NAME: ClassVar[str] = 'env',
+    ENV_TENANT_NAME: ClassVar[str] = 'tenant_name',
+    ENV_BASE_URL: ClassVar[str] = 'base_url',
+    ENV_ADMIN_BASE_URL: ClassVar[str] = 'admin_base_url',
+    ENV_AUTH_BASE_URL: ClassVar[str] = 'auth_base_url',
     ENV_CONNECTION_TYPE: ClassVar[str] = 'connection_type'
     ENV_LEGACY_ACCESS_ID: ClassVar[str] = 'legacy_access_id'
     ENV_LEGACY_KEY_PATH: ClassVar[str] = 'legacy_key_path'
@@ -162,6 +177,10 @@ class HelperSettings:
 
     # Environment variable default values
     ENV_DEFAULT_ENV_NAME: ClassVar[str] = 'PYDPLUS_ENV_NAME'
+    ENV_DEFAULT_TENANT_NAME: ClassVar[str] = 'PYDPLUS_TENANT_NAME'
+    ENV_DEFAULT_BASE_URL: ClassVar[str] = 'PYDPLUS_BASE_URL'
+    ENV_DEFAULT_ADMIN_BASE_URL: ClassVar[str] = 'PYDPLUS_ADMIN_BASE_URL'
+    ENV_DEFAULT_AUTH_BASE_URL: ClassVar[str] = 'PYDPLUS_AUTH_BASE_URL'
     ENV_DEFAULT_CONNECTION_TYPE: ClassVar[str] = 'PYDPLUS_CONNECTION_TYPE'
     ENV_DEFAULT_LEGACY_ACCESS_ID: ClassVar[str] = 'PYDPLUS_LEGACY_ACCESS_ID'
     ENV_DEFAULT_LEGACY_KEY_PATH: ClassVar[str] = 'PYDPLUS_LEGACY_KEY_PATH'
@@ -175,7 +194,11 @@ class HelperSettings:
 
     # Environment variable default mapping
     ENV_VARIABLE_DEFAULT_MAPPING: ClassVar[Mapping[str, str]] = MappingProxyType({
-        ENV_NAME: ENV_DEFAULT_ENV_NAME,
+        ENV_ENV_NAME: ENV_DEFAULT_ENV_NAME,
+        ENV_TENANT_NAME: ENV_DEFAULT_TENANT_NAME,
+        ENV_BASE_URL: ENV_DEFAULT_BASE_URL,
+        ENV_ADMIN_BASE_URL: ENV_DEFAULT_ADMIN_BASE_URL,
+        ENV_AUTH_BASE_URL: ENV_DEFAULT_AUTH_BASE_URL,
         ENV_CONNECTION_TYPE: ENV_DEFAULT_CONNECTION_TYPE,
         ENV_LEGACY_ACCESS_ID: ENV_DEFAULT_LEGACY_ACCESS_ID,
         ENV_LEGACY_KEY_PATH: ENV_DEFAULT_LEGACY_KEY_PATH,
@@ -205,7 +228,7 @@ class HelperSettings:
     DEFAULT_ENV_NAME = None
     DEFAULT_HELPER_FILE_TYPE = 'json'
     DEFAULT_VERIFY_SSL_VALUE = True
-    # DEFAULT_STRICT_MODE is defined at the module level
+    # DEFAULT_STRICT_MODE is defined at the module level under the "HTTP / Networking Defaults" section
 
 
 # -------------------------------
@@ -220,15 +243,25 @@ class EnvVariables:
        in the :py:class:`pydplus.constants.HelperSettings` class.
     """
     # ----------------------------------
+    # Environment Identifier Names
+    # ----------------------------------
+    DEFAULT_ENVIRONMENT: ClassVar[str] = 'DEFAULT'
+    PROD_ENVIRONMENT: ClassVar[str] = 'PROD'
+    DEV_ENVIRONMENT: ClassVar[str] = 'DEV'
+    CUSTOM_ENVIRONMENT: ClassVar[str] = 'CUSTOM'
+
+    # ----------------------------------
     # Standard Environment Variables
     # ----------------------------------
-    # These environment variables are generic and used by default, and do not indicate a PROD or DEV environment.
+    # These environment variables are generic and used by default, and do not indicate a specific environment
 
     # Environment Information
     ENV_NAME: ClassVar[str] = 'PYDPLUS_ENV_NAME'
 
     # Tenant Information
     BASE_URL: ClassVar[str] = 'PYDPLUS_BASE_URL'
+    ADMIN_BASE_URL: ClassVar[str] = 'PYDPLUS_ADMIN_BASE_URL'
+    AUTH_BASE_URL: ClassVar[str] = 'PYDPLUS_AUTH_BASE_URL'
 
     # General Settings
     STRICT_MODE: ClassVar[str] = 'PYDPLUS_STRICT_MODE'
@@ -244,57 +277,15 @@ class EnvVariables:
     OAUTH_GRANT_TYPE: ClassVar[str] = 'PYDPLUS_OAUTH_GRANT_TYPE'
     OAUTH_CLIENT_AUTH: ClassVar[str] = 'PYDPLUS_OAUTH_CLIENT_AUTH'
 
-    # ------------------------------------
-    # Production Environment Variables
-    # ------------------------------------
-    # These environment variables are specific to a Production (PROD) environment.
-
-    # Tenant Information
-    PROD_BASE_URL: ClassVar[str] = 'PYDPLUS_PROD_BASE_URL'
-
-    # General Settings
-    PROD_STRICT_MODE: ClassVar[str] = 'PYDPLUS_PROD_STRICT_MODE'
-    PROD_VERIFY_SSL: ClassVar[str] = 'PYDPLUS_PROD_VERIFY_SSL'
-
-    # Authentication / Connection
-    PROD_CONNECTION_TYPE: ClassVar[str] = 'PYDPLUS_PROD_CONNECTION_TYPE'
-    PROD_LEGACY_ACCESS_ID: ClassVar[str] = 'PYDPLUS_PROD_LEGACY_ACCESS_ID'
-    PROD_LEGACY_KEY_PATH: ClassVar[str] = 'PYDPLUS_PROD_LEGACY_KEY_PATH'
-    PROD_LEGACY_KEY_FILE: ClassVar[str] = 'PYDPLUS_PROD_LEGACY_KEY_FILE'
-    PROD_OAUTH_ISSUER_URL: ClassVar[str] = 'PYDPLUS_PROD_OAUTH_ISSUER_URL'
-    PROD_OAUTH_CLIENT_ID: ClassVar[str] = 'PYDPLUS_PROD_OAUTH_CLIENT_ID'
-    PROD_OAUTH_GRANT_TYPE: ClassVar[str] = 'PYDPLUS_PROD_OAUTH_GRANT_TYPE'
-    PROD_OAUTH_CLIENT_AUTH: ClassVar[str] = 'PYDPLUS_PROD_OAUTH_CLIENT_AUTH'
-
-    # -------------------------------------
-    # Development Environment Variables
-    # -------------------------------------
-    # These environment variables are specific to a Development (DEV) environment.
-
-    # Tenant Information
-    DEV_BASE_URL: ClassVar[str] = 'PYDPLUS_DEV_BASE_URL'
-
-    # General Settings
-    DEV_STRICT_MODE: ClassVar[str] = 'PYDPLUS_DEV_STRICT_MODE'
-    DEV_VERIFY_SSL: ClassVar[str] = 'PYDPLUS_DEV_VERIFY_SSL'
-
-    # Authentication / Connection
-    DEV_CONNECTION_TYPE: ClassVar[str] = 'PYDPLUS_DEV_CONNECTION_TYPE'
-    DEV_LEGACY_ACCESS_ID: ClassVar[str] = 'PYDPLUS_DEV_LEGACY_ACCESS_ID'
-    DEV_LEGACY_KEY_PATH: ClassVar[str] = 'PYDPLUS_DEV_LEGACY_KEY_PATH'
-    DEV_LEGACY_KEY_FILE: ClassVar[str] = 'PYDPLUS_DEV_LEGACY_KEY_FILE'
-    DEV_OAUTH_ISSUER_URL: ClassVar[str] = 'PYDPLUS_DEV_OAUTH_ISSUER_URL'
-    DEV_OAUTH_CLIENT_ID: ClassVar[str] = 'PYDPLUS_DEV_OAUTH_CLIENT_ID'
-    DEV_OAUTH_GRANT_TYPE: ClassVar[str] = 'PYDPLUS_DEV_OAUTH_GRANT_TYPE'
-    DEV_OAUTH_CLIENT_AUTH: ClassVar[str] = 'PYDPLUS_DEV_OAUTH_CLIENT_AUTH'
-
     # --------------------------------
     # Custom Environment Variables
     # --------------------------------
-    # These environment variables are specific to a custom environment defined by the ENV_NAME variable.
+    # These environment variables are for a custom or otherwise specific environment defined by the env_name variable
 
     # Tenant Information
     CUSTOM_BASE_URL: ClassVar[str] = 'PYDPLUS_{env_name}_BASE_URL'                                  # Vars: env_name
+    CUSTOM_ADMIN_BASE_URL: ClassVar[str] = 'PYDPLUS_{env_name}_ADMIN_BASE_URL'                      # Vars: env_name
+    CUSTOM_AUTH_BASE_URL: ClassVar[str] = 'PYDPLUS_{env_name}_AUTH_BASE_URL'                        # Vars: env_name
 
     # General Settings
     CUSTOM_STRICT_MODE: ClassVar[str] = 'PYDPLUS_{env_name}_STRICT_MODE'                            # Vars: env_name
@@ -310,18 +301,62 @@ class EnvVariables:
     CUSTOM_OAUTH_GRANT_TYPE: ClassVar[str] = 'PYDPLUS_{env_name}_OAUTH_GRANT_TYPE'                  # Vars: env_name
     CUSTOM_OAUTH_CLIENT_AUTH: ClassVar[str] = 'PYDPLUS_{env_name}_OAUTH_CLIENT_AUTH'                # Vars: env_name
 
+    # ------------------------------------
+    # Production Environment Variables
+    # ------------------------------------
+    # These environment variables are specific to a Production (PROD) environment
+
+    # Tenant Information
+    PROD_BASE_URL: ClassVar[str] = CUSTOM_BASE_URL.format(env_name=PROD_ENVIRONMENT)
+    PROD_ADMIN_BASE_URL: ClassVar[str] = CUSTOM_ADMIN_BASE_URL.format(env_name=PROD_ENVIRONMENT)
+    PROD_AUTH_BASE_URL: ClassVar[str] = CUSTOM_AUTH_BASE_URL.format(env_name=PROD_ENVIRONMENT)
+
+    # General Settings
+    PROD_STRICT_MODE: ClassVar[str] = CUSTOM_STRICT_MODE.format(env_name=PROD_ENVIRONMENT)
+    PROD_VERIFY_SSL: ClassVar[str] = CUSTOM_VERIFY_SSL.format(env_name=PROD_ENVIRONMENT)
+
+    # Authentication / Connection
+    PROD_CONNECTION_TYPE: ClassVar[str] = CONNECTION_TYPE.format(env_name=PROD_ENVIRONMENT)
+    PROD_LEGACY_ACCESS_ID: ClassVar[str] = CUSTOM_LEGACY_ACCESS_ID.format(env_name=PROD_ENVIRONMENT)
+    PROD_LEGACY_KEY_PATH: ClassVar[str] = CUSTOM_LEGACY_KEY_PATH.format(env_name=PROD_ENVIRONMENT)
+    PROD_LEGACY_KEY_FILE: ClassVar[str] = CUSTOM_LEGACY_KEY_FILE.format(env_name=PROD_ENVIRONMENT)
+    PROD_OAUTH_ISSUER_URL: ClassVar[str] = CUSTOM_OAUTH_ISSUER_URL.format(env_name=PROD_ENVIRONMENT)
+    PROD_OAUTH_CLIENT_ID: ClassVar[str] = CUSTOM_OAUTH_CLIENT_ID.format(env_name=PROD_ENVIRONMENT)
+    PROD_OAUTH_GRANT_TYPE: ClassVar[str] = CUSTOM_OAUTH_GRANT_TYPE.format(env_name=PROD_ENVIRONMENT)
+    PROD_OAUTH_CLIENT_AUTH: ClassVar[str] = CUSTOM_OAUTH_CLIENT_AUTH.format(env_name=PROD_ENVIRONMENT)
+
+    # -------------------------------------
+    # Development Environment Variables
+    # -------------------------------------
+    # These environment variables are specific to a Development (DEV) environment
+
+    # Tenant Information
+    DEV_BASE_URL: ClassVar[str] = CUSTOM_BASE_URL.format(env_name=DEV_ENVIRONMENT)
+    DEV_ADMIN_BASE_URL: ClassVar[str] = CUSTOM_ADMIN_BASE_URL.format(env_name=DEV_ENVIRONMENT)
+    DEV_AUTH_BASE_URL: ClassVar[str] = CUSTOM_AUTH_BASE_URL.format(env_name=DEV_ENVIRONMENT)
+
+    # General Settings
+    DEV_STRICT_MODE: ClassVar[str] = CUSTOM_STRICT_MODE.format(env_name=DEV_ENVIRONMENT)
+    DEV_VERIFY_SSL: ClassVar[str] = CUSTOM_VERIFY_SSL.format(env_name=DEV_ENVIRONMENT)
+
+    # Authentication / Connection
+    DEV_CONNECTION_TYPE: ClassVar[str] = CONNECTION_TYPE.format(env_name=DEV_ENVIRONMENT)
+    DEV_LEGACY_ACCESS_ID: ClassVar[str] = CUSTOM_LEGACY_ACCESS_ID.format(env_name=DEV_ENVIRONMENT)
+    DEV_LEGACY_KEY_PATH: ClassVar[str] = CUSTOM_LEGACY_KEY_PATH.format(env_name=DEV_ENVIRONMENT)
+    DEV_LEGACY_KEY_FILE: ClassVar[str] = CUSTOM_LEGACY_KEY_FILE.format(env_name=DEV_ENVIRONMENT)
+    DEV_OAUTH_ISSUER_URL: ClassVar[str] = CUSTOM_OAUTH_ISSUER_URL.format(env_name=DEV_ENVIRONMENT)
+    DEV_OAUTH_CLIENT_ID: ClassVar[str] = CUSTOM_OAUTH_CLIENT_ID.format(env_name=DEV_ENVIRONMENT)
+    DEV_OAUTH_GRANT_TYPE: ClassVar[str] = CUSTOM_OAUTH_GRANT_TYPE.format(env_name=DEV_ENVIRONMENT)
+    DEV_OAUTH_CLIENT_AUTH: ClassVar[str] = CUSTOM_OAUTH_CLIENT_AUTH.format(env_name=DEV_ENVIRONMENT)
+
     # --------------------------------
     # Environment Variable Mapping
     # --------------------------------
-    # Environment Fields
-    DEFAULT_ENVIRONMENT: ClassVar[str] = 'DEFAULT'
-    PROD_ENVIRONMENT: ClassVar[str] = 'PROD'
-    DEV_ENVIRONMENT: ClassVar[str] = 'DEV'
-    CUSTOM_ENVIRONMENT: ClassVar[str] = 'CUSTOM'
-
     # Mapping Fields
     ENV_FIELD: ClassVar[str] = 'env'
     BASE_URL_FIELD: ClassVar[str] = 'base_url'
+    ADMIN_BASE_URL_FIELD: ClassVar[str] = 'admin_base_url'
+    AUTH_BASE_URL_FIELD: ClassVar[str] = 'auth_base_url'
     CONNECTION_TYPE_FIELD: ClassVar[str] = 'connection_type'
     LEGACY_ACCESS_ID_FIELD: ClassVar[str] = 'legacy_access_id'
     LEGACY_KEY_PATH_FIELD: ClassVar[str] = 'legacy_key_path'
@@ -338,6 +373,8 @@ class EnvVariables:
         DEFAULT_ENVIRONMENT: {
             ENV_FIELD: ENV_NAME,
             BASE_URL_FIELD: BASE_URL,
+            ADMIN_BASE_URL_FIELD: ADMIN_BASE_URL,
+            AUTH_BASE_URL_FIELD: AUTH_BASE_URL,
             CONNECTION_TYPE_FIELD: CONNECTION_TYPE,
             LEGACY_ACCESS_ID_FIELD: LEGACY_ACCESS_ID,
             LEGACY_KEY_PATH_FIELD: LEGACY_KEY_PATH,
@@ -351,6 +388,8 @@ class EnvVariables:
         },
         PROD_ENVIRONMENT: {
             BASE_URL_FIELD: PROD_BASE_URL,
+            ADMIN_BASE_URL_FIELD: PROD_ADMIN_BASE_URL,
+            AUTH_BASE_URL_FIELD: PROD_AUTH_BASE_URL,
             CONNECTION_TYPE_FIELD: PROD_CONNECTION_TYPE,
             LEGACY_ACCESS_ID_FIELD: PROD_LEGACY_ACCESS_ID,
             LEGACY_KEY_PATH_FIELD: PROD_LEGACY_KEY_PATH,
@@ -364,6 +403,8 @@ class EnvVariables:
         },
         DEV_ENVIRONMENT: {
             BASE_URL_FIELD: DEV_BASE_URL,
+            ADMIN_BASE_URL_FIELD: DEV_ADMIN_BASE_URL,
+            AUTH_BASE_URL_FIELD: DEV_AUTH_BASE_URL,
             CONNECTION_TYPE_FIELD: DEV_CONNECTION_TYPE,
             LEGACY_ACCESS_ID_FIELD: DEV_LEGACY_ACCESS_ID,
             LEGACY_KEY_PATH_FIELD: DEV_LEGACY_KEY_PATH,
@@ -377,6 +418,8 @@ class EnvVariables:
         },
         CUSTOM_ENVIRONMENT: {
             BASE_URL_FIELD: CUSTOM_BASE_URL,
+            ADMIN_BASE_URL_FIELD: CUSTOM_ADMIN_BASE_URL,
+            AUTH_BASE_URL_FIELD: CUSTOM_AUTH_BASE_URL,
             CONNECTION_TYPE_FIELD: CUSTOM_CONNECTION_TYPE,
             LEGACY_ACCESS_ID_FIELD: CUSTOM_LEGACY_ACCESS_ID,
             LEGACY_KEY_PATH_FIELD: CUSTOM_LEGACY_KEY_PATH,
@@ -402,6 +445,8 @@ class EnvVariables:
     VALID_FIELDS: ClassVar[frozenset[str]] = frozenset({
         ENV_FIELD,
         BASE_URL_FIELD,
+        ADMIN_BASE_URL_FIELD,
+        AUTH_BASE_URL_FIELD,
         CONNECTION_TYPE_FIELD,
         LEGACY_ACCESS_ID_FIELD,
         LEGACY_KEY_PATH_FIELD,
@@ -480,7 +525,7 @@ AUTH_API_TYPE: Final[str] = 'auth'
 DEFAULT_API_TIMEOUT_SECONDS: Final[int] = 30
 DEFAULT_API_MAX_RETRIES: Final[int] = 3
 DEFAULT_API_TYPE: Final[str] = ADMIN_API_TYPE
-DEFAULT_STRICT_MODE: Final[bool] = False
+DEFAULT_STRICT_MODE: Final[bool] = True
 DEFAULT_HEADER_TYPE: Final[str] = 'default'
 
 # Validation criteria
@@ -564,7 +609,7 @@ class AuthSchemes:
     """Authentication schemes that are leveraged with the HTTP ``Authorization`` header.
        (`Reference <https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Authentication>`__)
     """
-    BEARER: ClassVar[str] = 'Bearer {token}'
+    BEARER: ClassVar[str] = 'Bearer {token}'                                                        # Vars: token
 
 
 # -----------------------------
@@ -597,7 +642,7 @@ class EncodingTypes:
     DCZ: ClassVar[str] = 'dcz'
     IDENTITY: ClassVar[str] = 'identity'
     WILDCARD: ClassVar[str] = '*'
-    Q: ClassVar[str] = ';q={weight}'
+    Q: ClassVar[str] = ';q={weight}'                                                                # Vars: weight
 
 
 # -----------------------------
@@ -621,7 +666,7 @@ class Languages:
     ZH_CN: ClassVar[str] = 'zh-CN'
     ZH_TW: ClassVar[str] = 'zh-TW'
     WILDCARD: ClassVar[str] = '*'
-    Q: ClassVar[str] = ';q={weight}'
+    Q: ClassVar[str] = ';q={weight}'                                                                # Vars: weight
 
 
 # -------------------------------
@@ -630,7 +675,14 @@ class Languages:
 @dataclass(frozen=True)
 class Urls:
     """Common URLs leveraged throughout the package."""
+    # Schemes
+    HTTP: ClassVar[str] = 'http://'
+    HTTPS: ClassVar[str] = 'https://'
+
     # General URLs
+    BASE_URL: ClassVar[str] = HTTPS + '{tenant_name}.{api_type}.securid.com'                        # Vars: tenant_name, api_type
+    BASE_ADMIN_URL: ClassVar[str] = HTTPS + '{tenant_name}.access.securid.com'                      # Vars: tenant_name
+    BASE_AUTH_URL: ClassVar[str] = HTTPS + '{tenant_name}.auth.securid.com'                         # Vars: tenant_name
     OAUTH: ClassVar[str] = '{base_url}/oauth'                                                       # Vars: base_url
 
 
@@ -646,11 +698,15 @@ class RestPaths:
     codebase. The templates are designed to be formatted with runtime
     values such as ``user_id``, ``timeout``, and so forth.
     """
+    # Versions
+    V1_1: ClassVar[str] = 'v1_1'
+
     # General REST paths
-    # TODO: Add constants here as needed
+    ADMIN_BASE: ClassVar[str] = '/AdminInterface/restapi'
+    AUTH_BASE: ClassVar[str] = '/mfa/' + V1_1 + '/authn'
 
     # Users endpoint paths
-    # TODO: Update the base URL to end in a slash for consistency
+    # TODO: Add a preceding slash to USERS string after ensuring base URL references end with slash
     USERS: ClassVar[str] = 'v1/users'
     USERS_LOOKUP: ClassVar[str] = USERS + '/lookup'
     USER_BY_ID: ClassVar[str] = USERS + '/{user_id}'                                            # Vars: user_id
@@ -707,11 +763,11 @@ class ResponseKeys:
 @dataclass(frozen=True)
 class LogMessages:
     """Common log messages that are utilized in multiple locations throughout the package."""
-    _INVALID_PARAM_VALUE_DEFAULT: ClassVar[str] = 'The {param} value is not valid and will default to {default}'
-    _INVALID_PARAM_VALUE_IGNORE: ClassVar[str] = "The {param} value '{value}' is not valid and will be ignored"
-    _MISSING_REQUIRED_DATA: ClassVar[str] = '{data} is missing and must be provided as it is required'
-    _MUST_BE_PROVIDED_ERROR: ClassVar[str] = 'The {data} must be provided.'
-    _PARAM_EXCEEDS_MAX_VALUE: ClassVar[str] = 'The {param} value exceeds the maximum and will default to {default}'
+    _INVALID_PARAM_VALUE_DEFAULT: ClassVar[str] = 'The {param} value is not valid and will default to {default}'        # Vars: param, default
+    _INVALID_PARAM_VALUE_IGNORE: ClassVar[str] = "The {param} value '{value}' is not valid and will be ignored"         # Vars: param, value
+    _MISSING_REQUIRED_DATA: ClassVar[str] = '{data} is missing and must be provided as it is required'                  # Vars: data
+    _MUST_BE_PROVIDED_ERROR: ClassVar[str] = 'The {data} must be provided.'                                             # Vars: data
+    _PARAM_EXCEEDS_MAX_VALUE: ClassVar[str] = 'The {param} value exceeds the maximum and will default to {default}'     # Vars: param, default
 
 
 # -----------------------------

@@ -6,7 +6,7 @@
 :Example:           ``pydp = PyDPlus()``
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     10 Mar 2026
+:Modified Date:     15 Mar 2026
 """
 
 from __future__ import annotations
@@ -33,7 +33,23 @@ class PyDPlus(object):
     :param connection_type: Determines whether to leverage a(n) ``oauth`` (default) or ``legacy`` connection
     :type connection_type: str, None
     :param base_url: The base URL to leverage when performing Administration API calls
+
+                     .. note::
+                        This parameter is for backwards compatibility only and will eventually be fully deprecated.
+                        The ``base_admin_url`` should be leveraged instead as a best practice.
+
     :type base_url: str, None
+    :param base_admin_url: The base URL to leverage when performing Administration API calls
+    :type base_admin_url: str, None
+    :param base_auth_url: The base URL to leverage when performing Authentication API calls
+    :type base_auth_url: str, None
+    :param tenant_name: Specify the tenant name for the RSA ID Plus tenant (e.g. ``example-corporation``)
+
+                        .. note::
+                           Specifying the tenant name will allow the base URLs to be defined if not already
+                           defined via argument, helper setting, or environment variable.
+
+    :type tenant_name: str, None
     :param env: Optionally specify the environment as ``PROD``, ``DEV``, or a custom name. (e.g. ``STAGING``)
 
                 .. note::
@@ -60,14 +76,18 @@ class PyDPlus(object):
     :param helper: Optionally provide the file path for a helper file used to define the object configuration
     :type helper: str, tuple, list, set, dict, None
     :returns: The instantiated PyDPlus object
-    :raises: :py:exc:`TypeError`
+    :raises: :py:exc:`TypeError`,
+             :py:exc:`pydplus.errors.exceptions.MissingRequiredDataError`,
+             :py:exc:`pydplus.errors.exceptions.APIConnectionError`
     """
-    # Define the function that initializes the object instance (i.e. instantiates the object)
     def __init__(
             self,
             connection_info: Optional[dict] = None,
             connection_type: Optional[str] = None,
+            tenant_name: Optional[str] = None,
             base_url: Optional[str] = None,
+            base_admin_url: Optional[str] = None,
+            base_auth_url: Optional[str] = None,
             env: Optional[str] = None,
             private_key: Optional[str] = None,
             legacy_access_id: Optional[str] = None,
@@ -84,7 +104,8 @@ class PyDPlus(object):
         self._env_variables = {}
         self.base_headers = {}
         self.connected = False
-        self.strict_mode = None
+        self.strict_mode = strict_mode
+        self.tenant_name = tenant_name
 
         # Define the environment if explicitly defined as an argument or environment variable
         self.env = self._get_env_name(env)
@@ -99,89 +120,28 @@ class PyDPlus(object):
         self._get_env_variables()
 
         # Define the strict_mode setting using a passed argument, helper setting, or environment variable
-        self._define_strict_mode(strict_mode)
+        self._define_strict_mode(strict_mode)                           # Defines self.strict_mode
 
         # Define the connection type that should be used to authenticate
-        self._get_connection_type(connection_type)
+        self._get_connection_type(connection_type)                      # Defines self.connection_type
 
-        # Define the verify_ssl value using the argument if defined
-        if verify_ssl is not None and isinstance(verify_ssl, bool):
-            self.verify_ssl = verify_ssl
+        # Define the verify_ssl value either from a user-defined setting or using the default value
+        self._get_verify_ssl_setting(verify_ssl)                        # Defines self.verify_ssl
 
-        # Attempt to define the verify_ssl value using Helper Settings if present and populated
-        elif self._helper_settings and const.HELPER_SETTINGS.VERIFY_SSL in self._helper_settings:
-            self.verify_ssl = self._helper_settings.get(
-                const.HELPER_SETTINGS.VERIFY_SSL,
-                const.CLIENT_SETTINGS.DEFAULT_VERIFY_SSL_VALUE      # Fallback value
-            )
+        # Define the base_url value or raise an exception if it cannot be defined
+        self._define_base_url(base_url)                                 # Defines self.base_url
 
-        # Attempt to define the verify_ssl value using an environment variable if defined
-        elif self._env_variables and const.ENV_VARIABLES.VERIFY_SSL_FIELD in self._env_variables:
-            self.verify_ssl = self._env_variables.get(
-                const.ENV_VARIABLES.VERIFY_SSL_FIELD,
-                const.CLIENT_SETTINGS.DEFAULT_VERIFY_SSL_VALUE      # Fallback value
-            )
+        # Define the admin_base_url (required) and auth_base_url (optional) values
+        self._define_base_urls(base_admin_url, base_auth_url)           # Defines self.admin_base_url, self.auth_base_url
 
-        # Use the default value (True) if not defined elsewhere
-        else:
-            self.verify_ssl = const.CLIENT_SETTINGS.DEFAULT_VERIFY_SSL_VALUE
-
-        # Attempt to define the base URL value for the Administration API by first checking if defined via argument
-        if base_url:
-            self.base_url = core_utils.get_base_url(base_url)
-
-        # Attempt to define the base URL using the helper settings if defined and populated
-        elif (self._helper_settings and const.HELPER_SETTINGS.BASE_URL in self._helper_settings
-                and self._helper_settings.get(const.HELPER_SETTINGS.BASE_URL) is not None):
-            self.base_url = core_utils.get_base_url(self._helper_settings.get(const.HELPER_SETTINGS.BASE_URL))
-
-        # Attempt to define the base URL using an environment variable if defined
-        elif (const.ENV_VARIABLES.BASE_URL_FIELD in self._env_variables
-              and self._env_variables.get(const.ENV_VARIABLES.BASE_URL_FIELD) is not None):
-            self.base_url = core_utils.get_base_url(self._env_variables.get(const.ENV_VARIABLES.BASE_URL_FIELD))
-
-        # Set the value to None if the base URL could not be found
-        else:
-            self.base_url = None
-
-        # Raise an exception if a base URL could not be defined
-        if not self.base_url:
-            error_msg = 'A base URL must be defined in order to instantiate the PyDPlus object.'
-            logger.error(error_msg)
-            raise errors.exceptions.MissingRequiredDataError(error_msg)
-
-        # Define the Admin API base URL to use in API calls
-        # TODO: Ensure the ending slash (or lack thereof) is consistent and use const.URLS for URL paths
-        self.admin_base_url = f'{core_utils.ensure_ending_slash(self.base_url)}AdminInterface/restapi'
+        # Define the Administration API base REST URL to use in API calls
+        self.admin_base_rest_url = self.admin_base_url + const.REST_PATHS.ADMIN_BASE
 
         # Define the Authentication API base URL to use in API calls
-        # Refer to https://community.securid.com/s/article/RSA-SecurID-Authentication-API-Developer-s-Guide pg 15
-        # TODO: Ensure the ending slash (or lack thereof) is consistent and use const.URLS for URL paths
-        self.auth_base_url = f'{core_utils.ensure_ending_slash(self.base_url)}mfa/v1_1/authn'
+        self.auth_base_rest_url = self.auth_base_url + const.REST_PATHS.AUTH_BASE if self.auth_base_url else None
 
         # Check for provided connection info and define the class object attribute
-        if not connection_info:
-            # Check for individual parameters defined in object instantiation
-            connection_info = compile_connection_info(
-                base_url=base_url,
-                private_key=private_key,
-                legacy_access_id=legacy_access_id,
-                oauth_client_id=oauth_client_id,
-            )
-
-            # Check for defined helper settings
-            if self._helper_settings:
-                helper_connection_info = self._parse_helper_connection_info()
-                connection_info = self._merge_connection_variables(connection_info, helper_connection_info)
-
-            # Check for defined environment variables
-            if self._env_variables:
-                env_connection_info = self._parse_env_connection_info()
-                connection_info = self._merge_connection_variables(connection_info, env_connection_info)
-
-            # Add missing field values where possible and when needed
-            connection_info = self._populate_missing_connection_details(connection_info)
-        self.connection_info = connection_info
+        self._validate_connection_info(connection_info, private_key, legacy_access_id, oauth_client_id)
 
         # Connect to the tenant (if auto-connect is enabled) and retrieve the base API headers
         if auto_connect:
@@ -189,23 +149,11 @@ class PyDPlus(object):
             # TODO: Figure out how to connect after instantiation and update self.connected and self.base_headers
 
         # Import inner object classes so their methods can be called from the primary object
-        self.users = self._import_user_class()
+        self.users: PyDPlus.User = self._import_user_class()
 
     def _import_user_class(self):
         """Allow the :py:class:`pydplus.core.PyDPlus.User` class to be utilized within the core object."""
         return PyDPlus.User(self)
-
-    @staticmethod
-    def _get_env_name(_env: Optional[str] = None) -> Union[str, None]:
-        """Identify the environment name if defined with an argument or environment variable."""
-        if _env:
-            if not isinstance(_env, str):
-                error_msg = f"The 'env' argument is an invalid data type (Expected: str, Provided: {type(_env)})"
-                logger.error(error_msg)
-                raise TypeError(error_msg)
-            return _env.upper()
-        else:
-            return os.getenv(const.ENV_VARIABLES.ENV_NAME)                               # Returns None if not found
 
     def _get_helper_settings(self, _helper):
         """Retrieve the settings from a helper configuration file if passed as an argument."""
@@ -225,6 +173,18 @@ class PyDPlus(object):
             self._helper_settings = get_helper_settings(helper_file_path, helper_file_type)
         else:
             self._helper_settings = {}
+
+    @staticmethod
+    def _get_env_name(_env: Optional[str] = None) -> Union[str, None]:
+        """Identify the environment name if defined with an argument or environment variable."""
+        if _env:
+            if not isinstance(_env, str):
+                error_msg = f"The 'env' argument is an invalid data type (Expected: str, Provided: {type(_env)})"
+                logger.error(error_msg)
+                raise TypeError(error_msg)
+            return _env.upper()
+        else:
+            return os.getenv(const.ENV_VARIABLES.ENV_NAME)  # Returns None if not found
 
     def _define_env_variable_names(self, _env_variables_from_arg: Optional[dict]) -> None:
         """Define the environment variable names to use based on an explicit argument or helper settings."""
@@ -345,6 +305,179 @@ class PyDPlus(object):
         # Use the default connection type (OAuth) if it hasn't been defined elsewhere
         else:
             self.connection_type = const.CONNECTION_INFO.DEFAULT_CONNECTION_TYPE
+
+    def _get_verify_ssl_setting(self, _verify_ssl_from_arg: Optional[bool]) -> None:
+        """Determine the ``verify_ssl`` value from a passed argument, helper setting, or environment variable."""
+        # Define the verify_ssl value using the argument if defined
+        if _verify_ssl_from_arg is not None and isinstance(_verify_ssl_from_arg, bool):
+            self.verify_ssl = _verify_ssl_from_arg
+
+        # Attempt to define the verify_ssl value using Helper Settings if present and populated
+        elif (self._helper_settings and const.HELPER_SETTINGS.VERIFY_SSL in self._helper_settings
+              and self._helper_settings[const.HELPER_SETTINGS.VERIFY_SSL] is not None):
+            self.verify_ssl = self._helper_settings.get(
+                const.HELPER_SETTINGS.VERIFY_SSL,
+                const.CLIENT_SETTINGS.DEFAULT_VERIFY_SSL_VALUE      # Fallback value
+            )
+
+        # Attempt to define the verify_ssl value using an environment variable if defined
+        elif (self._env_variables and const.ENV_VARIABLES.VERIFY_SSL_FIELD in self._env_variables
+              and self._env_variables[const.ENV_VARIABLES.VERIFY_SSL_FIELD] is not None):
+            self.verify_ssl = self._env_variables.get(
+                const.ENV_VARIABLES.VERIFY_SSL_FIELD,
+                const.CLIENT_SETTINGS.DEFAULT_VERIFY_SSL_VALUE      # Fallback value
+            )
+
+        # Use the default value (True) if not defined elsewhere
+        else:
+            self.verify_ssl = const.CLIENT_SETTINGS.DEFAULT_VERIFY_SSL_VALUE
+
+    def _construct_base_url_with_tenant_name(self, _api_type: str, _tenant_name: Optional[str] = None) -> str:
+        """Construct the base URL for a given API type using a tenant name."""
+        # Ensure the tenant name is defined
+        if not _tenant_name:
+            if self.tenant_name:
+                _tenant_name = self.tenant_name
+            else:
+                _error_msg = 'A tenant name must be defined or specified to construct a base URL'
+                logger.error(_error_msg)
+                raise errors.exceptions.MissingRequiredDataError(_error_msg)
+
+        # Construct the appropriate URL based on the provided API type
+        if _api_type == const.ADMIN_API_TYPE:
+            _base_url = const.URLS.BASE_ADMIN_URL.format(tenant_name=_tenant_name)
+        elif _api_type == const.AUTH_API_TYPE:
+            _base_url = const.URLS.BASE_AUTH_URL.format(tenant_name=_tenant_name)
+        else:
+            _error_msg = f"'{_api_type}' is not a valid API type"
+            logger.error(_error_msg)
+            raise ValueError(_error_msg)
+
+        # Return the constructed base URL
+        return _base_url
+
+    def _define_base_url(self, _base_url_from_arg: Optional[str]) -> None:
+        """Define the base_url value from user-defined setting or raise an exception if it cannot be defined."""
+        # Attempt to define the base URL value for the Administration API by first checking if defined via argument
+        if _base_url_from_arg:
+            self.base_url = core_utils.get_base_url(_base_url_from_arg)
+
+        # Attempt to define the base URL using the helper settings if defined and populated
+        elif (self._helper_settings and const.HELPER_SETTINGS.BASE_URL in self._helper_settings
+              and self._helper_settings[const.HELPER_SETTINGS.BASE_URL]):
+            self.base_url = core_utils.get_base_url(self._helper_settings.get(const.HELPER_SETTINGS.BASE_URL))
+
+        # Attempt to define the base URL using an environment variable if defined
+        elif (const.ENV_VARIABLES.BASE_URL_FIELD in self._env_variables
+              and self._env_variables[const.ENV_VARIABLES.BASE_URL_FIELD]):
+            self.base_url = core_utils.get_base_url(self._env_variables.get(const.ENV_VARIABLES.BASE_URL_FIELD))
+
+        # Set the value to None if the base URL could not be found
+        else:
+            self.base_url = None
+
+    def _identify_base_url(
+            self,
+            _api_type: str,
+            _base_url_arg: Optional[str] = None,
+    ) -> str:
+        """Identify the base URL for a specific API type and return the value."""
+        # Define the lookup field for the applicable base URL
+        _lookup_field = const.HELPER_SETTINGS.API_BASE_URL.format(type=_api_type)
+
+        # Leverage the base URL passed as an argument if defined
+        if _base_url_arg:
+            _base_url = core_utils.get_base_url(_base_url_arg)
+
+        # Attempt to define the base URL using the helper settings if defined and populated
+        elif (self._helper_settings and _lookup_field in self._helper_settings
+              and self._helper_settings[_lookup_field]):
+            _base_url = core_utils.get_base_url(self._helper_settings.get(_lookup_field))
+
+        # Attempt to define the base URL using an environment variable if defined
+        elif _lookup_field in self._env_variables and self._env_variables[_lookup_field]:
+            _base_url = core_utils.get_base_url(self._env_variables.get(_lookup_field))
+
+        # Set the value to None if the base URL could not be found
+        else:
+            _base_url = None
+
+        # Return the base URL value
+        return _base_url
+
+    def _define_base_urls(
+            self,
+            _base_admin_url_arg: Optional[str],
+            _base_auth_url_arg: Optional[str],
+    ) -> None:
+        """Define the base URLs for the Administration API (required)and the Authentication API (optional)."""
+        # Attempt to define the admin_base_url value (required)
+        self.admin_base_url = self._identify_base_url(const.ADMIN_API_TYPE, _base_admin_url_arg)
+
+        # Leverage the standard base_url value for the admin base URL if the previous attempt returned no result
+        if not self.admin_base_url:
+            self.admin_base_url = self.base_url
+
+            # Attempt to construct the base URL using the tenant name if the value is still undefined
+            if not self.admin_base_url and self.tenant_name:
+                self.admin_base_url = self._construct_base_url_with_tenant_name(const.ADMIN_API_TYPE)
+
+            # Raise an exception if a base URL could not be defined
+            if not self.admin_base_url:
+                _error_msg = ('A base URL for the Administration API must be defined in order to fully instantiate '
+                              'the PyDPlus client object')
+                logger.error(_error_msg)
+                raise errors.exceptions.MissingRequiredDataError(_error_msg)
+
+        # Ensure there is no ending slash at the end of the admin_base_url value
+        self.admin_base_url = core_utils.remove_ending_slash(self.admin_base_url)
+
+        # Attempt to define the auth_base_url value (optional)
+        self.auth_base_url = self._identify_base_url(const.AUTH_API_TYPE, _base_auth_url_arg)
+
+        # Attempt to construct the base URL using the tenant name if the value is still undefined
+        if not self.auth_base_url and self.tenant_name:
+            self.auth_base_url = self._construct_base_url_with_tenant_name(const.AUTH_API_TYPE)
+
+        # Log a warning if the Authentication API base URL could not be defined but do not raise an exception
+        if not self.auth_base_url:
+            _warn_msg = 'The base URL for the Authentication API could not be defined and calls to that API will fail.'
+            logger.warning(_warn_msg)
+        else:
+            # Ensure there is no ending slash at the end of the admin_base_url value
+            self.auth_base_url = core_utils.remove_ending_slash(self.auth_base_url)
+
+    def _validate_connection_info(
+            self,
+            _connection_info: Optional[dict] = None,
+            _private_key: Optional[str] = None,
+            _legacy_access_id: Optional[str] = None,
+            _oauth_client_id: Optional[str] = None,
+    ) -> None:
+        """Check for provided connection info and define the class object attribute."""
+        if not _connection_info:
+            # Check for individual parameters defined in object instantiation
+            _connection_info = compile_connection_info(
+                base_url=self.base_url,
+                admin_base_url=self.admin_base_url,
+                private_key=_private_key,
+                legacy_access_id=_legacy_access_id,
+                oauth_client_id=_oauth_client_id,
+            )
+
+            # Check for defined helper settings
+            if self._helper_settings:
+                _helper_connection_info = self._parse_helper_connection_info()
+                _connection_info = self._merge_connection_variables(_connection_info, _helper_connection_info)
+
+            # Check for defined environment variables
+            if self._env_variables:
+                _env_connection_info = self._parse_env_connection_info()
+                _connection_info = self._merge_connection_variables(_connection_info, _env_connection_info)
+
+            # Add missing field values where possible and when needed
+            _connection_info = self._populate_missing_connection_details(_connection_info)
+        self.connection_info = _connection_info
 
     def _parse_helper_connection_info(self) -> dict[str, dict[str, Any]]:
         """Parse the helper content to populate the connection info."""
@@ -889,15 +1022,18 @@ class PyDPlus(object):
 
 
 def compile_connection_info(
-        base_url: Optional[str],
-        private_key: Optional[str],
-        legacy_access_id: Optional[str],
-        oauth_client_id: Optional[str],
+        base_url: Optional[str] = None,
+        admin_base_url: Optional[str] = None,
+        private_key: Optional[str] = None,
+        legacy_access_id: Optional[str] = None,
+        oauth_client_id: Optional[str] = None,
 ) -> dict:
     """Compile the connection_info dictionary to use when authenticating to the API.
 
-    :param base_url: The base URL to leverage when performing API calls
+    :param base_url: The base URL to leverage when performing API calls (deprecated and kept for backwards compatibility)
     :type base_url: str, None
+    :param admin_base_url: The base URL for the Administration API
+    :type admin_base_url: str, None
     :param private_key: The file path to the private key used for API authentication (OAuth or Legacy)
     :type private_key: str, None
     :param legacy_access_id: The Access ID associated with the Legacy API connection
@@ -907,11 +1043,24 @@ def compile_connection_info(
     :returns: The compiled connection_info dictionary
     :raises: :py:exc:`TypeError`
     """
-    private_key_path, private_key_file = None, None
+    # Define the two private key variables if defined
     if private_key and isinstance(private_key, str):
         private_key_path, private_key_file = core_utils.split_file_path(private_key)
-    base_url = core_utils.get_base_url(base_url) if base_url else base_url
-    issuer_url = const.URLS.OAUTH.format(base_url=base_url) if base_url else None
+    else:
+        private_key_path, private_key_file = None, None
+
+    # Prepare the admin_base_url value in order to construct the issuer_url value
+    if base_url and admin_base_url:
+        if base_url == admin_base_url:
+            logger.debug("The 'base_url' argument is not needed if 'admin_base_url' is defined")
+        else:
+            logger.warning("The 'base_url' and 'admin_base_url' values do not match and the latter will be used")
+        admin_base_url = core_utils.get_base_url(base_url)
+    elif base_url and not admin_base_url:
+        admin_base_url = core_utils.get_base_url(base_url)
+
+    # Define the issuer URL and compile the connection info
+    issuer_url = const.URLS.OAUTH.format(base_url=admin_base_url) if admin_base_url else None
     connection_info = {
         const.CONNECTION_INFO.LEGACY: {
             const.CONNECTION_INFO.LEGACY_ACCESS_ID: legacy_access_id,

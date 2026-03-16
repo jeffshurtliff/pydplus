@@ -4,7 +4,7 @@
 :Synopsis:          Defines the basic functions associated with the RSA ID Plus API
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     07 Mar 2026
+:Modified Date:     14 Mar 2026
 """
 
 from __future__ import annotations
@@ -372,9 +372,9 @@ def _get_full_api_url(_pydp_object, _endpoint: str, _api_type: str = const.DEFAU
     """
     # Define the base URL to leverage based on the API type or raise an exception if API type is invalid
     if _api_type.lower() == const.ADMIN_API_TYPE:
-        _base_url = _pydp_object.admin_base_url
+        _base_url = _pydp_object.admin_base_rest_url
     elif _api_type.lower() == const.AUTH_API_TYPE:
-        _base_url = _pydp_object.auth_base_url
+        _base_url = _pydp_object.auth_base_rest_url
     else:
         if not isinstance(_api_type, str):
             _error_msg = f'The API Type value must be a string. (provided: {type(_api_type)})'

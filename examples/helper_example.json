@@ -1,6 +1,11 @@
 {
   "env": "PROD",
+  "tenant_name": "example-company",
   "base_url": "https://example-company.access.securid.com",
+  "base_urls": {
+    "admin": "https://example-company.access.securid.com",
+    "auth": "https://example-company.auth.securid.com"
+  },
   "connection_type": "legacy",
   "strict_mode": false,
   "connection": {
@@ -18,6 +23,11 @@
   },
   "verify_ssl": true,
   "env_variables": {
+    "env": "PYDPLUS_ENV_NAME",
+    "tenant_name": "PYDPLUS_TENANT_NAME",
+    "base_url": "PYDPLUS_BASE_URL",
+    "admin_base_url": "PYDPLUS_ADMIN_BASE_URL",
+    "auth_base_url": "PYDPLUS_AUTH_BASE_URL",
     "connection_type": "PYDPLUS_CONNECTION_TYPE",
     "legacy_access_id": "PYDPLUS_LEGACY_ACCESS_ID",
     "legacy_key_path": "PYDPLUS_LEGACY_KEY_PATH",

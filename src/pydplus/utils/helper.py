@@ -6,7 +6,7 @@
 :Example:           ``helper_settings = helper.get_settings('/tmp/helper.yml', 'yaml')``
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     10 Mar 2026
+:Modified Date:     15 Mar 2026
 """
 
 from __future__ import annotations
@@ -112,7 +112,7 @@ def get_helper_settings(
 
     :param file_path: The file path to the helper configuration file
     :type file_path: str
-    :param file_type: Defines the helper configuration file as a ``json`` file (default) or a ``yaml`` file
+    :param file_type: Defines the helper configuration file as a ``json`` file (default) or a ``yaml``/``yml`` file
     :type file_type: str
     :param defined_settings: Core object settings (if any) defined via the ``defined_settings`` parameter
     :type defined_settings: dict, None
@@ -130,6 +130,20 @@ def get_helper_settings(
 
     # Populate the root-level fields that do not require further validation
     helper_settings = _collect_values(const.HELPER_SETTINGS.ROOT_LEVEL_BASIC_FIELDS, helper_cfg, defined_settings)
+
+    # Populate the specific admin and auth base URLs if defined
+    if const.HELPER_SETTINGS.BASE_URLS in helper_cfg and isinstance(helper_cfg[const.HELPER_SETTINGS.BASE_URLS], dict):
+        # Add the admin_base_url value to the helper settings if found
+        if const.HELPER_SETTINGS.ADMIN in helper_cfg[const.HELPER_SETTINGS.BASE_URLS]:
+            helper_settings[const.HELPER_SETTINGS.ADMIN_BASE_URL] = helper_cfg[const.HELPER_SETTINGS.BASE_URLS].get(
+                const.HELPER_SETTINGS.ADMIN
+            )
+
+        # Add the auth_base_url value to the helper settings if found
+        if const.HELPER_SETTINGS.AUTH in helper_cfg[const.HELPER_SETTINGS.BASE_URLS]:
+            helper_settings[const.HELPER_SETTINGS.AUTH_BASE_URL] = helper_cfg[const.HELPER_SETTINGS.BASE_URLS].get(
+                const.HELPER_SETTINGS.AUTH
+            )
 
     # Populate the connection information in the helper dictionary
     if const.HELPER_SETTINGS.CONNECTION in helper_cfg and const.HELPER_SETTINGS.CONNECTION not in defined_settings:
