@@ -63,7 +63,7 @@ class IDPlusLegacyKeyMaterial:
         :param text: JSON content for the RSA ID Plus `.key` file
         :type text: str
         :returns: Parsed and validated key material
-        :raises :py:exc:`TypeError`,
+        :raises: :py:exc:`TypeError`,
                 :py:exc:`pydplus.errors.exceptions.IDPlusCredentialError`
         """
         if not isinstance(text, str):
@@ -114,7 +114,7 @@ class IDPlusLegacyKeyMaterial:
 
         :param path: The path to the `.key` JSON file
         :returns: Parsed and validated key material
-        :raises :py:exc:`TypeError`,
+        :raises: :py:exc:`TypeError`,
                 :py:exc:`pydplus.errors.exceptions.IDPlusCredentialError`
         """
         if not isinstance(path, (str, Path)):
@@ -220,7 +220,7 @@ class IDPlusLegacyKeyMaterial:
         :param path: Optional destination path (Defaults to ``~/.pydplus/certs/<safe_filename>.pem``)
         :param overwrite: Whether to overwrite an existing destination file (``False`` by default)
         :returns: The final path for the persisted PEM file
-        :raises :py:exc:`FileExistsError`,
+        :raises: :py:exc:`FileExistsError`,
                 :py:exc:`pydplus.errors.exceptions.IDPlusCredentialError`
         """
         self.validate()
