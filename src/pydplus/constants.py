@@ -3,8 +3,8 @@
 :Module:            pydplus.constants
 :Synopsis:          Constants that are utilized throughout the package
 :Created By:        Jeff Shurtliff
-:Last Modified:     Jeff Shurtliff
-:Modified Date:     14 Mar 2026
+:Last Modified:     Jeff Shurtliff (via GPT-5.3-codex)
+:Modified Date:     18 Mar 2026
 """
 
 from __future__ import annotations
@@ -12,6 +12,12 @@ from __future__ import annotations
 from dataclasses import dataclass
 from types import MappingProxyType
 from typing import Any, Final, ClassVar, Mapping, Union
+
+
+# --------------------------------------
+# Common and Generic Values
+# --------------------------------------
+UTF8_ENCODING: Final[str] = 'utf-8'
 
 
 # --------------------------------------
@@ -50,6 +56,30 @@ class ArgumentValues:
     })
 
 
+# -------------------------------
+# Credential Parsing / Security
+# -------------------------------
+@dataclass(frozen=True)
+class CredentialValues:
+    """Constants used by secure credential parsing and private-key persistence helpers."""
+    JSON_FIELD_CUSTOMER_NAME: ClassVar[str] = 'customerName'
+    JSON_FIELD_ACCESS_ID: ClassVar[str] = 'accessID'
+    JSON_FIELD_ACCESS_KEY: ClassVar[str] = 'accessKey'
+    JSON_FIELD_ADMIN_REST_API_URL: ClassVar[str] = 'adminRestApiUrl'
+    JSON_FIELD_DESCRIPTION: ClassVar[str] = 'description'
+
+    PEM_BEGIN_MARKER: ClassVar[str] = 'BEGIN RSA PRIVATE KEY'
+
+    DEFAULT_CERT_HOME_DIR: ClassVar[str] = '.pydplus'
+    DEFAULT_CERT_SUBDIR: ClassVar[str] = 'certs'
+    DEFAULT_PEM_BASENAME: ClassVar[str] = 'idplus-legacy'
+    DEFAULT_PEM_EXTENSION: ClassVar[str] = '.pem'
+    DEFAULT_FILENAME_FALLBACK: ClassVar[str] = 'tenant'
+
+    PRIVATE_DIR_MODE: ClassVar[int] = 0o700
+    PRIVATE_FILE_MODE: ClassVar[int] = 0o600
+
+
 # -----------------------------
 # Exception Classes
 # -----------------------------
@@ -74,10 +104,11 @@ class ExceptionClasses:
     _VALUE: ClassVar[str] = 'value'
 
     # Exception messages and message segments
-    _API_CUSTOM_MSG: ClassVar[str] = 'The {type} request failed with the following message:'        # Vars: type
-    _API_DEFAULT_MSG: ClassVar[str] = 'The {type} request did not return a successful response.'    # Vars: type
-    _CANNOT_LOCATE_FILE: ClassVar[str] = 'Unable to locate the following file: {file_path}'         # Vars: file_path
+    _API_CUSTOM_MSG: ClassVar[str] = 'The {type} request failed with the following message:'                # Vars: type
+    _API_DEFAULT_MSG: ClassVar[str] = 'The {type} request did not return a successful response.'            # Vars: type
+    _CANNOT_LOCATE_FILE: ClassVar[str] = 'Unable to locate the following file: {file_path}'                 # Vars: file_path
     _INVALID_HELPER_DEFAULT_MSG: ClassVar[str] = "The helper configuration file can only have the 'yml', 'yaml' or 'json' file type."
+    _PRIVATE_KEY_ALREADY_EXISTS: ClassVar[str] = "The private key file already exists at '{final_path}'"    # Vars: final_path
     _WITH_THE_FOLLOWING_SEGMENT: ClassVar[str] = ' with the following'
 
 
@@ -90,12 +121,16 @@ class FileExtensions:
     # Without delimiter
     JPEG: ClassVar[str] = 'jpeg'
     JSON: ClassVar[str] = 'json'
+    PEM: ClassVar[str] = 'pem'
+    TMP: ClassVar[str] = 'tmp'
     YAML: ClassVar[str] = 'yaml'
     YML: ClassVar[str] = 'yml'
 
     # With delimiter
     DOT_JPEG: ClassVar[str] = f'.{JPEG}'
     DOT_JSON: ClassVar[str] = f'.{JSON}'
+    DOT_PEM: ClassVar[str] = f'.{PEM}'
+    DOT_TMP: ClassVar[str] = f'.{TMP}'
     DOT_YAML: ClassVar[str] = f'.{YAML}'
     DOT_YML: ClassVar[str] = f'.{YML}'
 
@@ -678,6 +713,8 @@ class Urls:
     # Schemes
     HTTP: ClassVar[str] = 'http://'
     HTTPS: ClassVar[str] = 'https://'
+    HTTP_SCHEME: ClassVar[str] = 'http'
+    HTTPS_SCHEME: ClassVar[str] = 'https'
 
     # General URLs
     BASE_URL: ClassVar[str] = HTTPS + '{tenant_name}.{api_type}.securid.com'                        # Vars: tenant_name, api_type
@@ -775,6 +812,7 @@ class LogMessages:
 # -----------------------------
 # Common (Public)
 ARGUMENT_VALUES: Final[ArgumentValues] = ArgumentValues()
+CREDENTIAL_VALUES: Final[CredentialValues] = CredentialValues()
 FILE_EXTENSIONS: Final[FileExtensions] = FileExtensions()
 URLS: Final[Urls] = Urls()
 
