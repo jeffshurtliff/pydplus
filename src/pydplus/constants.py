@@ -516,6 +516,7 @@ class ConnectionInfo:
     LEGACY_ACCESS_ID: ClassVar[str] = 'access_id'
     LEGACY_PRIVATE_KEY_FILE: ClassVar[str] = 'private_key_file'
     LEGACY_PRIVATE_KEY_PATH: ClassVar[str] = 'private_key_path'
+    LEGACY_PRIVATE_KEY_PEM: ClassVar[str] = 'private_key_pem'
     LEGACY_FIELDS: ClassVar[frozenset[str]] = frozenset({
         LEGACY_ACCESS_ID,
         LEGACY_PRIVATE_KEY_FILE,

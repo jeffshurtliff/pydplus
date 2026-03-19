@@ -6,17 +6,19 @@
 :Example:           ``pydp = PyDPlus()``
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     16 Mar 2026
+:Modified Date:     19 Mar 2026
 """
 
 from __future__ import annotations
 
 import os
+from pathlib import Path
 from typing import Any, Optional, Union, Tuple
 from collections.abc import Mapping
 
 from . import auth, api, errors
 from . import constants as const
+from .credentials import IDPlusLegacyKeyMaterial
 from . import users as users_module
 from .utils import core_utils, log_utils
 from .utils.helper import get_helper_settings
@@ -61,6 +63,8 @@ class PyDPlus(object):
     :type private_key: str, None
     :param legacy_access_id: The Access ID associated with the Legacy API connection
     :type legacy_access_id: str, None
+    :param legacy_key_material: Legacy key material as a ``.key`` file path or parsed object
+    :type legacy_key_material: str, pathlib.Path, pydplus.credentials.IDPlusLegacyKeyMaterial, None
     :param oauth_client_id: The Client ID associated with the OAuth API connection
     :type oauth_client_id: str, None
     :param verify_ssl: Determines if SSL connections should be verified (``True`` by default)
@@ -91,6 +95,7 @@ class PyDPlus(object):
             env: Optional[str] = None,
             private_key: Optional[str] = None,
             legacy_access_id: Optional[str] = None,
+            legacy_key_material: Union[Optional[str], Optional[Path], Optional[IDPlusLegacyKeyMaterial]] = None,
             oauth_client_id: Optional[str] = None,
             verify_ssl: Optional[bool] = None,
             auto_connect: bool = True,
@@ -106,6 +111,7 @@ class PyDPlus(object):
         self.connected = False
         self.strict_mode = strict_mode
         self.tenant_name = tenant_name
+        self.legacy_key_material = self._parse_legacy_key_material(legacy_key_material)
 
         # Define the environment if explicitly defined as an argument or environment variable
         self.env = self._get_env_name(env)
@@ -128,6 +134,13 @@ class PyDPlus(object):
         # Define the verify_ssl value either from a user-defined setting or using the default value
         self._get_verify_ssl_setting(verify_ssl)                        # Defines self.verify_ssl
 
+        # Use parsed key material as a base URL fallback when no explicit values were provided
+        if self.legacy_key_material:
+            if not base_url:
+                base_url = self.legacy_key_material.admin_rest_api_url            # Base URL will be parsed below
+            if not base_admin_url:
+                base_admin_url = self.legacy_key_material.admin_rest_api_url      # Base Admin URL will be parsed below
+
         # Define the base_url value or raise an exception if it cannot be defined
         self._define_base_url(base_url)                                 # Defines self.base_url
 
@@ -141,7 +154,13 @@ class PyDPlus(object):
         self.auth_base_rest_url = self.auth_base_url + const.REST_PATHS.AUTH_BASE if self.auth_base_url else None
 
         # Check for provided connection info and define the class object attribute
-        self._validate_connection_info(connection_info, private_key, legacy_access_id, oauth_client_id)
+        self._validate_connection_info(
+            connection_info,
+            private_key,
+            legacy_access_id,
+            oauth_client_id,
+            self.legacy_key_material,
+        )
 
         # Connect to the tenant (if auto-connect is enabled) and retrieve the base API headers
         if auto_connect:
@@ -175,13 +194,30 @@ class PyDPlus(object):
             self._helper_settings = {}
 
     @staticmethod
+    def _parse_legacy_key_material(
+            _legacy_key_material: Union[Optional[str], Optional[Path], Optional[IDPlusLegacyKeyMaterial]] = None,
+    ) -> Optional[IDPlusLegacyKeyMaterial]:
+        """Parse and validate the legacy key material if provided."""
+        if _legacy_key_material is None:
+            return None
+        if isinstance(_legacy_key_material, IDPlusLegacyKeyMaterial):
+            _legacy_key_material.validate()
+            return _legacy_key_material
+        if isinstance(_legacy_key_material, (str, Path)):
+            return IDPlusLegacyKeyMaterial.from_file(_legacy_key_material)
+        _error_msg = ("The 'legacy_key_material' parameter must be a string path, pathlib.Path value, "
+                      "or IDPlusLegacyKeyMaterial object.")
+        logger.error(_error_msg)
+        raise TypeError(_error_msg)
+
+    @staticmethod
     def _get_env_name(_env: Optional[str] = None) -> Union[str, None]:
         """Identify the environment name if defined with an argument or environment variable."""
         if _env:
             if not isinstance(_env, str):
-                error_msg = f"The 'env' argument is an invalid data type (Expected: str, Provided: {type(_env)})"
-                logger.error(error_msg)
-                raise TypeError(error_msg)
+                _error_msg = f"The 'env' argument is an invalid data type (Expected: str, Provided: {type(_env)})"
+                logger.error(_error_msg)
+                raise TypeError(_error_msg)
             return _env.upper()
         else:
             return os.getenv(const.ENV_VARIABLES.ENV_NAME)  # Returns None if not found
@@ -453,8 +489,12 @@ class PyDPlus(object):
             _private_key: Optional[str] = None,
             _legacy_access_id: Optional[str] = None,
             _oauth_client_id: Optional[str] = None,
+            _legacy_key_material: Optional[IDPlusLegacyKeyMaterial] = None,
     ) -> None:
         """Check for provided connection info and define the class object attribute."""
+        if _legacy_key_material and not _legacy_access_id:
+            _legacy_access_id = _legacy_key_material.access_id
+
         if not _connection_info:
             # Check for individual parameters defined in object instantiation
             _connection_info = compile_connection_info(
@@ -477,7 +517,31 @@ class PyDPlus(object):
 
             # Add missing field values where possible and when needed
             _connection_info = self._populate_missing_connection_details(_connection_info)
+
+        # Merge parsed legacy key material into connection info when available
+        if _legacy_key_material:
+            _connection_info = self._merge_legacy_key_material(_connection_info, _legacy_key_material)
         self.connection_info = _connection_info
+
+    @staticmethod
+    def _merge_legacy_key_material(
+            _connection_info: Optional[dict],
+            _legacy_key_material: IDPlusLegacyKeyMaterial,
+    ) -> dict:
+        """Merge legacy key material into connection info without overriding explicit file-path values."""
+        if not _connection_info:
+            _connection_info = dict(const.CONNECTION_INFO.EMPTY_CONNECTION_INFO)
+
+        legacy_section = dict(_connection_info.get(const.CONNECTION_INFO.LEGACY, {}))
+        if not legacy_section.get(const.CONNECTION_INFO.LEGACY_ACCESS_ID):
+            legacy_section[const.CONNECTION_INFO.LEGACY_ACCESS_ID] = _legacy_key_material.access_id
+
+        has_explicit_key_file = bool(legacy_section.get(const.CONNECTION_INFO.LEGACY_PRIVATE_KEY_FILE))
+        if not has_explicit_key_file:
+            legacy_section[const.CONNECTION_INFO.LEGACY_PRIVATE_KEY_PEM] = _legacy_key_material.access_key_pem
+
+        _connection_info[const.CONNECTION_INFO.LEGACY] = legacy_section
+        return _connection_info
 
     def _parse_helper_connection_info(self) -> dict[str, dict[str, Any]]:
         """Parse the helper content to populate the connection info."""
