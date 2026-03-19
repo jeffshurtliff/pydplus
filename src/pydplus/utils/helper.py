@@ -6,7 +6,7 @@
 :Example:           ``helper_settings = helper.get_settings('/tmp/helper.yml', 'yaml')``
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     15 Mar 2026
+:Modified Date:     19 Mar 2026
 """
 
 from __future__ import annotations
@@ -52,8 +52,12 @@ def _convert_yaml_to_bool(_yaml_bool_value: str) -> bool:
     """Convert the 'yes' and 'no' YAML values to traditional Boolean values."""
     if _yaml_bool_value.lower() in const.HELPER_SETTINGS.VALID_YAML_TRUE_VALUES:
         return True
-    else:
+    elif _yaml_bool_value.lower() in const.HELPER_SETTINGS.VALID_YAML_FALSE_VALUES:
         return False
+    else:
+        _error_msg = 'An invalid Boolean YAML value was provided and cannot be parsed'
+        logger.error(_error_msg)
+        raise ValueError(_error_msg)
 
 
 def _get_connection_info(_helper_cfg: dict) -> dict[str, dict]:
@@ -95,8 +99,8 @@ def _collect_values(
                 _key_val = const.YAML_BOOLEAN_MAPPING.get(_key_val)
             _helper_dict[_key] = _key_val
         elif _key == const.HELPER_SETTINGS.VERIFY_SSL:
-            # Verify SSL certificates by default unless explicitly set to false
-            _helper_dict[_key] = True
+            # Verify SSL certificates by default unless explicitly set to False
+            _helper_dict[_key] = const.HELPER_SETTINGS.DEFAULT_VERIFY_SSL_VALUE
         else:
             if not _ignore_missing:
                 _helper_dict[_key] = None
