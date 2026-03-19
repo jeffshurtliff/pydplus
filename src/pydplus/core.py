@@ -179,17 +179,17 @@ class PyDPlus(object):
         if _helper:
             # Parse the helper file contents
             if any((isinstance(_helper, tuple), isinstance(_helper, list), isinstance(_helper, set))):
-                helper_file_path, helper_file_type = _helper
+                _helper_file_path, _helper_file_type = _helper
             elif isinstance(_helper, str):
-                helper_file_path, helper_file_type = (_helper, const.HELPER_SETTINGS.DEFAULT_HELPER_FILE_TYPE)
+                _helper_file_path, _helper_file_type = (_helper, const.HELPER_SETTINGS.DEFAULT_HELPER_FILE_TYPE)
             elif isinstance(_helper, dict):
-                helper_file_path, helper_file_type = _helper.values()
+                _helper_file_path, _helper_file_type = _helper.values()
             else:
-                error_msg = "The 'helper' argument can only be supplied as string, tuple, list, set or dict."
-                logger.error(error_msg)
-                raise TypeError(error_msg)
-            self.helper_path = helper_file_path
-            self._helper_settings = get_helper_settings(helper_file_path, helper_file_type)
+                _error_msg = "The 'helper' argument can only be supplied as string, tuple, list, set or dict."
+                logger.error(_error_msg)
+                raise TypeError(_error_msg)
+            self.helper_path = _helper_file_path
+            self._helper_settings = get_helper_settings(_helper_file_path, _helper_file_type)
         else:
             self._helper_settings = {}
 
@@ -253,11 +253,11 @@ class PyDPlus(object):
                 try:
                     _env_specific_value = core_utils.get_env_variable_name_by_environment(_name_key, self.env)
                     _env_specific_names[_name_key] = _env_specific_value
-                except Exception as exc:
-                    exc_type = core_utils.get_exception_type(exc)
-                    error_msg = (f"Failed to retrieve the '{_name_key}' environment variable name specific to the "
-                                 f"{self.env} environment due to {exc_type} exception: {exc}")
-                    logger.exception(error_msg)
+                except Exception as _exc:
+                    _exc_type = core_utils.get_exception_type(_exc)
+                    _error_msg = (f"Failed to retrieve the '{_name_key}' environment variable name specific to the "
+                                  f"{self.env} environment due to {_exc_type} exception: {_exc}")
+                    logger.exception(_error_msg)
                     logger.warning(f"Defaulting to the environment variable {_name_value} for '{_name_key}'")
                     _env_specific_names[_name_key] = _name_value
             _env_variable_names.update(_env_specific_names)
@@ -288,9 +288,9 @@ class PyDPlus(object):
         # Check if the strict_mode value was passed as an argument
         if _strict_mode_from_arg is not None:
             if not isinstance(_strict_mode_from_arg, bool):
-                error_msg = 'The value of the strict_mode parameter must be Boolean.'
-                logger.error(error_msg)
-                raise TypeError(error_msg)
+                _error_msg = 'The value of the strict_mode parameter must be Boolean.'
+                logger.error(_error_msg)
+                raise TypeError(_error_msg)
             self.strict_mode = _strict_mode_from_arg
 
         # Check the helper settings to see if strict mode was defined
@@ -321,11 +321,11 @@ class PyDPlus(object):
             if self._helper_settings.get(const.HELPER_SETTINGS.CONNECTION_TYPE) in const.CONNECTION_INFO.VALID_CONNECTION_TYPES:
                 self.connection_type = self._helper_settings.get(const.HELPER_SETTINGS.CONNECTION_TYPE)
             else:
-                error_msg = 'The connection_type value in the helper settings in invalid and will be ignored.'
-                expected_types = ','.join(const.CONNECTION_INFO.VALID_CONNECTION_TYPES)
-                error_msg += (f"(Expected: {expected_types}; "
-                              f"Provided: {self._helper_settings.get(const.HELPER_SETTINGS.CONNECTION_TYPE)})")
-                logger.error(error_msg)
+                _error_msg = 'The connection_type value in the helper settings in invalid and will be ignored.'
+                _expected_types = ','.join(const.CONNECTION_INFO.VALID_CONNECTION_TYPES)
+                _error_msg += (f"(Expected: {_expected_types}; "
+                               f"Provided: {self._helper_settings.get(const.HELPER_SETTINGS.CONNECTION_TYPE)})")
+                logger.error(_error_msg)
                 self.connection_type = const.CONNECTION_INFO.DEFAULT_CONNECTION_TYPE
 
         # Attempt to retrieve the connection type via environment variable if defined
@@ -334,8 +334,8 @@ class PyDPlus(object):
             if self._env_variables.get(const.ENV_VARIABLES.CONNECTION_TYPE_FIELD) in const.CONNECTION_INFO.VALID_CONNECTION_TYPES:
                 self.connection_type = self._env_variables.get(const.ENV_VARIABLES.CONNECTION_TYPE_FIELD)
             else:
-                error_msg = 'The connection_type environment variable in invalid and the default connection type will be used.'
-                logger.error(error_msg)
+                _error_msg = 'The connection_type environment variable in invalid and the default connection type will be used.'
+                logger.error(_error_msg)
                 self.connection_type = const.CONNECTION_INFO.DEFAULT_CONNECTION_TYPE
 
         # Use the default connection type (OAuth) if it hasn't been defined elsewhere
@@ -532,15 +532,15 @@ class PyDPlus(object):
         if not _connection_info:
             _connection_info = dict(const.CONNECTION_INFO.EMPTY_CONNECTION_INFO)
 
-        legacy_section = dict(_connection_info.get(const.CONNECTION_INFO.LEGACY, {}))
-        if not legacy_section.get(const.CONNECTION_INFO.LEGACY_ACCESS_ID):
-            legacy_section[const.CONNECTION_INFO.LEGACY_ACCESS_ID] = _legacy_key_material.access_id
+        _legacy_section = dict(_connection_info.get(const.CONNECTION_INFO.LEGACY, {}))
+        if not _legacy_section.get(const.CONNECTION_INFO.LEGACY_ACCESS_ID):
+            _legacy_section[const.CONNECTION_INFO.LEGACY_ACCESS_ID] = _legacy_key_material.access_id
 
-        has_explicit_key_file = bool(legacy_section.get(const.CONNECTION_INFO.LEGACY_PRIVATE_KEY_FILE))
-        if not has_explicit_key_file:
-            legacy_section[const.CONNECTION_INFO.LEGACY_PRIVATE_KEY_PEM] = _legacy_key_material.access_key_pem
+        _has_explicit_key_file = bool(_legacy_section.get(const.CONNECTION_INFO.LEGACY_PRIVATE_KEY_FILE))
+        if not _has_explicit_key_file:
+            _legacy_section[const.CONNECTION_INFO.LEGACY_PRIVATE_KEY_PEM] = _legacy_key_material.access_key_pem
 
-        _connection_info[const.CONNECTION_INFO.LEGACY] = legacy_section
+        _connection_info[const.CONNECTION_INFO.LEGACY] = _legacy_section
         return _connection_info
 
     def _parse_helper_connection_info(self) -> dict[str, dict[str, Any]]:
@@ -596,26 +596,26 @@ class PyDPlus(object):
     def _populate_missing_connection_details(self, _partial_connection_info: dict) -> dict:
         """Add missing field values the connection info dictionary as needed."""
         # Define variables for the dictionary keys/fields
-        issuer_url_key = const.CONNECTION_INFO.OAUTH_ISSUER_URL
-        oauth_key = const.CONNECTION_INFO.OAUTH
-        grant_type_key = const.CONNECTION_INFO.OAUTH_GRANT_TYPE
-        client_auth_key = const.CONNECTION_INFO.OAUTH_CLIENT_AUTHENTICATION
+        _issuer_url_key = const.CONNECTION_INFO.OAUTH_ISSUER_URL
+        _oauth_key = const.CONNECTION_INFO.OAUTH
+        _grant_type_key = const.CONNECTION_INFO.OAUTH_GRANT_TYPE
+        _client_auth_key = const.CONNECTION_INFO.OAUTH_CLIENT_AUTHENTICATION
 
         # Populate the Issuer URL value for OAuth connections if not defined
-        if ((issuer_url_key not in _partial_connection_info[oauth_key]
-             or not _partial_connection_info[oauth_key][issuer_url_key])
+        if ((_issuer_url_key not in _partial_connection_info[_oauth_key]
+             or not _partial_connection_info[_oauth_key][_issuer_url_key])
                 and self.base_url is not None):
-            _partial_connection_info[oauth_key][issuer_url_key] = const.URLS.OAUTH.format(base_url=self.base_url)
+            _partial_connection_info[_oauth_key][_issuer_url_key] = const.URLS.OAUTH.format(base_url=self.base_url)
 
         # Populate the Grant Type value for OAuth connections if not defined
-        if (grant_type_key not in _partial_connection_info[oauth_key]
-                or not _partial_connection_info[oauth_key][grant_type_key]):
-            _partial_connection_info[oauth_key][grant_type_key] = const.CONNECTION_INFO.OAUTH_DEFAULT_GRANT_TYPE
+        if (_grant_type_key not in _partial_connection_info[_oauth_key]
+                or not _partial_connection_info[_oauth_key][_grant_type_key]):
+            _partial_connection_info[_oauth_key][_grant_type_key] = const.CONNECTION_INFO.OAUTH_DEFAULT_GRANT_TYPE
 
         # Populate the Client Authentication value for OAuth connections if not defined
-        if (client_auth_key not in _partial_connection_info[oauth_key][client_auth_key]
-                or not _partial_connection_info[oauth_key][client_auth_key]):
-            _partial_connection_info[oauth_key][client_auth_key] = const.CONNECTION_INFO.OAUTH_DEFAULT_CLIENT_AUTH
+        if (_client_auth_key not in _partial_connection_info[_oauth_key][_client_auth_key]
+                or not _partial_connection_info[_oauth_key][_client_auth_key]):
+            _partial_connection_info[_oauth_key][_client_auth_key] = const.CONNECTION_INFO.OAUTH_DEFAULT_CLIENT_AUTH
 
         # Return the updated connection info dictionary
         return _partial_connection_info
@@ -623,9 +623,9 @@ class PyDPlus(object):
     def _check_if_connected(self) -> None:
         """Check to see if the object is connected to the tenant and raises an exception if not."""
         if not self.connected:
-            error_msg = 'Must be connected to the tenant before performing an API call. Call the connect() method.'
-            logger.error(error_msg)
-            raise errors.exceptions.APIConnectionError(error_msg)
+            _error_msg = 'Must be connected to the tenant before performing an API call. Call the connect() method.'
+            logger.error(_error_msg)
+            raise errors.exceptions.APIConnectionError(_error_msg)
 
     def connect(self) -> Tuple[bool, dict[str, str]]:
         """Connect to the RSA ID Plus tenant using the Legacy API or OAuth method.
