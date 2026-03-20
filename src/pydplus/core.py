@@ -114,6 +114,7 @@ class PyDPlus(object):
         self.tenant_name = tenant_name
 
         # Define the environment if explicitly defined as an argument or environment variable
+        # TODO: Move this method call until after helper settings are defined to get env from helper when applicable
         self.env = self._get_env_name(env)
 
         # Check for a supplied helper file and extract the configuration settings if found
