@@ -6,7 +6,7 @@
 :Example:           ``helper_settings = helper.get_settings('/tmp/helper.yml', 'yaml')``
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     19 Mar 2026
+:Modified Date:     20 Mar 2026
 """
 
 from __future__ import annotations
@@ -34,7 +34,7 @@ def import_helper_file(file_path: str, file_type: str) -> dict:
     :type file_type: str
     :returns: The parsed configuration data
     :raises: :py:exc:`FileNotFoundError`,
-             :py:exc:`salespyforce.errors.exceptions.InvalidHelperFileTypeError`
+             :py:exc:`pydplus.errors.exceptions.InvalidHelperFileTypeError`
     """
     with open(file_path, 'r') as cfg_file:
         if file_type.replace('.', '') in (const.FILE_EXTENSIONS.YML, const.FILE_EXTENSIONS.YAML):
