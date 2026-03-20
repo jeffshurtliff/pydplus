@@ -285,6 +285,7 @@ class PyDPlus(object):
                 logger.error(_error_msg)
                 raise TypeError(_error_msg)
             return _env.upper()
+        # TODO: Check the helper settings (will need to change this method to not be static)
         else:
             return os.getenv(const.ENV_VARIABLES.ENV_NAME)  # Returns None if not found
 
