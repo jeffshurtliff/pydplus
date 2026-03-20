@@ -3,8 +3,8 @@
 :Module:            pydplus.constants
 :Synopsis:          Constants that are utilized throughout the package
 :Created By:        Jeff Shurtliff
-:Last Modified:     Jeff Shurtliff (via GPT-5.3-codex)
-:Modified Date:     18 Mar 2026
+:Last Modified:     Jeff Shurtliff
+:Modified Date:     20 Mar 2026
 """
 
 from __future__ import annotations
@@ -166,6 +166,7 @@ class HelperSettings:
     # Validation criteria
     VALID_HELPER_FILE_TYPES: ClassVar[frozenset[str]] = frozenset({'json', 'yml', 'yaml'})
     VALID_YAML_TRUE_VALUES: ClassVar[frozenset[str]] = frozenset({'yes', 'true'})
+    VALID_YAML_FALSE_VALUES: ClassVar[frozenset[str]] = frozenset({'no', 'false'})
 
     # Root-level helper fields
     ENV_NAME: ClassVar[str] = 'env'
@@ -203,6 +204,9 @@ class HelperSettings:
     ENV_LEGACY_ACCESS_ID: ClassVar[str] = 'legacy_access_id'
     ENV_LEGACY_KEY_PATH: ClassVar[str] = 'legacy_key_path'
     ENV_LEGACY_KEY_FILE: ClassVar[str] = 'legacy_key_file'
+    ENV_LEGACY_KEY_PEM: ClassVar[str] = 'legacy_key_pem'
+    ENV_LEGACY_KEY_MATERIAL_PATH: ClassVar[str] = 'legacy_key_material_path'
+    ENV_LEGACY_KEY_MATERIAL_FILE: ClassVar[str] = 'legacy_key_material_file'
     ENV_OAUTH_ISSUER_URL: ClassVar[str] = 'oauth_issuer_url'
     ENV_OAUTH_CLIENT_ID: ClassVar[str] = 'oauth_client_id'
     ENV_OAUTH_GRANT_TYPE: ClassVar[str] = 'oauth_grant_type'
@@ -220,6 +224,9 @@ class HelperSettings:
     ENV_DEFAULT_LEGACY_ACCESS_ID: ClassVar[str] = 'PYDPLUS_LEGACY_ACCESS_ID'
     ENV_DEFAULT_LEGACY_KEY_PATH: ClassVar[str] = 'PYDPLUS_LEGACY_KEY_PATH'
     ENV_DEFAULT_LEGACY_KEY_FILE: ClassVar[str] = 'PYDPLUS_LEGACY_KEY_FILE'
+    ENV_DEFAULT_LEGACY_KEY_PEM: ClassVar[str] = 'PYDPLUS_LEGACY_KEY_PEM'
+    ENV_DEFAULT_LEGACY_KEY_MATERIAL_PATH: ClassVar[str] = 'PYDPLUS_LEGACY_KEY_MATERIAL_PATH'
+    ENV_DEFAULT_LEGACY_KEY_MATERIAL_FILE: ClassVar[str] = 'PYDPLUS_LEGACY_KEY_MATERIAL_FILE'
     ENV_DEFAULT_OAUTH_ISSUER_URL: ClassVar[str] = 'PYDPLUS_OAUTH_ISSUER_URL'
     ENV_DEFAULT_OAUTH_CLIENT_ID: ClassVar[str] = 'PYDPLUS_OAUTH_CLIENT_ID'
     ENV_DEFAULT_OAUTH_GRANT_TYPE: ClassVar[str] = 'PYDPLUS_OAUTH_GRANT_TYPE'
@@ -238,6 +245,9 @@ class HelperSettings:
         ENV_LEGACY_ACCESS_ID: ENV_DEFAULT_LEGACY_ACCESS_ID,
         ENV_LEGACY_KEY_PATH: ENV_DEFAULT_LEGACY_KEY_PATH,
         ENV_LEGACY_KEY_FILE: ENV_DEFAULT_LEGACY_KEY_FILE,
+        ENV_LEGACY_KEY_PEM: ENV_DEFAULT_LEGACY_KEY_PEM,
+        ENV_LEGACY_KEY_MATERIAL_PATH: ENV_DEFAULT_LEGACY_KEY_MATERIAL_PATH,
+        ENV_LEGACY_KEY_MATERIAL_FILE: ENV_DEFAULT_LEGACY_KEY_MATERIAL_FILE,
         ENV_OAUTH_ISSUER_URL: ENV_DEFAULT_OAUTH_ISSUER_URL,
         ENV_OAUTH_CLIENT_ID: ENV_DEFAULT_OAUTH_CLIENT_ID,
         ENV_OAUTH_GRANT_TYPE: ENV_DEFAULT_OAUTH_GRANT_TYPE,
@@ -251,6 +261,9 @@ class HelperSettings:
         'access_id': ENV_LEGACY_ACCESS_ID,
         'private_key_path': ENV_LEGACY_KEY_PATH,
         'private_key_file': ENV_LEGACY_KEY_FILE,
+        'private_key_pem': ENV_LEGACY_KEY_PEM,
+        'private_key_material_path': ENV_LEGACY_KEY_MATERIAL_PATH,
+        'private_key_material_file': ENV_LEGACY_KEY_MATERIAL_FILE,
     })
     ENV_OAUTH_CONNECTION_MAPPING: ClassVar[Mapping[str, str]] = MappingProxyType({
         'issuer_url': ENV_OAUTH_ISSUER_URL,
@@ -307,6 +320,9 @@ class EnvVariables:
     LEGACY_ACCESS_ID: ClassVar[str] = 'PYDPLUS_LEGACY_ACCESS_ID'
     LEGACY_KEY_PATH: ClassVar[str] = 'PYDPLUS_LEGACY_KEY_PATH'
     LEGACY_KEY_FILE: ClassVar[str] = 'PYDPLUS_LEGACY_KEY_FILE'
+    LEGACY_KEY_PEM: ClassVar[str] = 'PYDPLUS_LEGACY_KEY_PEM'
+    LEGACY_KEY_MATERIAL_PATH: ClassVar[str] = 'PYDPLUS_LEGACY_KEY_MATERIAL_PATH'
+    LEGACY_KEY_MATERIAL_FILE: ClassVar[str] = 'PYDPLUS_LEGACY_KEY_MATERIAL_FILE'
     OAUTH_ISSUER_URL: ClassVar[str] = 'PYDPLUS_OAUTH_ISSUER_URL'
     OAUTH_CLIENT_ID: ClassVar[str] = 'PYDPLUS_OAUTH_CLIENT_ID'
     OAUTH_GRANT_TYPE: ClassVar[str] = 'PYDPLUS_OAUTH_GRANT_TYPE'
@@ -331,6 +347,9 @@ class EnvVariables:
     CUSTOM_LEGACY_ACCESS_ID: ClassVar[str] = 'PYDPLUS_{env_name}_LEGACY_ACCESS_ID'                  # Vars: env_name
     CUSTOM_LEGACY_KEY_PATH: ClassVar[str] = 'PYDPLUS_{env_name}_LEGACY_KEY_PATH'                    # Vars: env_name
     CUSTOM_LEGACY_KEY_FILE: ClassVar[str] = 'PYDPLUS_{env_name}_LEGACY_KEY_FILE'                    # Vars: env_name
+    CUSTOM_LEGACY_KEY_PEM: ClassVar[str] = 'PYDPLUS_{env_name}_LEGACY_KEY_PEM'                      # Vars: env_name
+    CUSTOM_LEGACY_KEY_MATERIAL_PATH: ClassVar[str] = 'PYDPLUS_{env_name}_LEGACY_KEY_MATERIAL_PATH'  # Vars: env_name
+    CUSTOM_LEGACY_KEY_MATERIAL_FILE: ClassVar[str] = 'PYDPLUS_{env_name}_LEGACY_KEY_MATERIAL_FILE'  # Vars: env_name
     CUSTOM_OAUTH_ISSUER_URL: ClassVar[str] = 'PYDPLUS_{env_name}_OAUTH_ISSUER_URL'                  # Vars: env_name
     CUSTOM_OAUTH_CLIENT_ID: ClassVar[str] = 'PYDPLUS_{env_name}_OAUTH_CLIENT_ID'                    # Vars: env_name
     CUSTOM_OAUTH_GRANT_TYPE: ClassVar[str] = 'PYDPLUS_{env_name}_OAUTH_GRANT_TYPE'                  # Vars: env_name
@@ -355,6 +374,9 @@ class EnvVariables:
     PROD_LEGACY_ACCESS_ID: ClassVar[str] = CUSTOM_LEGACY_ACCESS_ID.format(env_name=PROD_ENVIRONMENT)
     PROD_LEGACY_KEY_PATH: ClassVar[str] = CUSTOM_LEGACY_KEY_PATH.format(env_name=PROD_ENVIRONMENT)
     PROD_LEGACY_KEY_FILE: ClassVar[str] = CUSTOM_LEGACY_KEY_FILE.format(env_name=PROD_ENVIRONMENT)
+    PROD_LEGACY_KEY_PEM: ClassVar[str] = CUSTOM_LEGACY_KEY_PEM.format(env_name=PROD_ENVIRONMENT)
+    PROD_LEGACY_KEY_MATERIAL_PATH: ClassVar[str] = CUSTOM_LEGACY_KEY_MATERIAL_PATH.format(env_name=PROD_ENVIRONMENT)
+    PROD_LEGACY_KEY_MATERIAL_FILE: ClassVar[str] = CUSTOM_LEGACY_KEY_MATERIAL_FILE.format(env_name=PROD_ENVIRONMENT)
     PROD_OAUTH_ISSUER_URL: ClassVar[str] = CUSTOM_OAUTH_ISSUER_URL.format(env_name=PROD_ENVIRONMENT)
     PROD_OAUTH_CLIENT_ID: ClassVar[str] = CUSTOM_OAUTH_CLIENT_ID.format(env_name=PROD_ENVIRONMENT)
     PROD_OAUTH_GRANT_TYPE: ClassVar[str] = CUSTOM_OAUTH_GRANT_TYPE.format(env_name=PROD_ENVIRONMENT)
@@ -379,6 +401,9 @@ class EnvVariables:
     DEV_LEGACY_ACCESS_ID: ClassVar[str] = CUSTOM_LEGACY_ACCESS_ID.format(env_name=DEV_ENVIRONMENT)
     DEV_LEGACY_KEY_PATH: ClassVar[str] = CUSTOM_LEGACY_KEY_PATH.format(env_name=DEV_ENVIRONMENT)
     DEV_LEGACY_KEY_FILE: ClassVar[str] = CUSTOM_LEGACY_KEY_FILE.format(env_name=DEV_ENVIRONMENT)
+    DEV_LEGACY_KEY_PEM: ClassVar[str] = CUSTOM_LEGACY_KEY_PEM.format(env_name=DEV_ENVIRONMENT)
+    DEV_LEGACY_KEY_MATERIAL_PATH: ClassVar[str] = CUSTOM_LEGACY_KEY_MATERIAL_PATH.format(env_name=DEV_ENVIRONMENT)
+    DEV_LEGACY_KEY_MATERIAL_FILE: ClassVar[str] = CUSTOM_LEGACY_KEY_MATERIAL_FILE.format(env_name=DEV_ENVIRONMENT)
     DEV_OAUTH_ISSUER_URL: ClassVar[str] = CUSTOM_OAUTH_ISSUER_URL.format(env_name=DEV_ENVIRONMENT)
     DEV_OAUTH_CLIENT_ID: ClassVar[str] = CUSTOM_OAUTH_CLIENT_ID.format(env_name=DEV_ENVIRONMENT)
     DEV_OAUTH_GRANT_TYPE: ClassVar[str] = CUSTOM_OAUTH_GRANT_TYPE.format(env_name=DEV_ENVIRONMENT)
@@ -396,6 +421,9 @@ class EnvVariables:
     LEGACY_ACCESS_ID_FIELD: ClassVar[str] = 'legacy_access_id'
     LEGACY_KEY_PATH_FIELD: ClassVar[str] = 'legacy_key_path'
     LEGACY_KEY_FILE_FIELD: ClassVar[str] = 'legacy_key_file'
+    LEGACY_KEY_PEM_FIELD: ClassVar[str] = 'legacy_key_pem'
+    LEGACY_KEY_MATERIAL_PATH_FIELD: ClassVar[str] = 'legacy_key_material_path'
+    LEGACY_KEY_MATERIAL_FILE_FIELD: ClassVar[str] = 'legacy_key_material_file'
     OAUTH_ISSUER_URL_FIELD: ClassVar[str] = 'oauth_issuer_url'
     OAUTH_CLIENT_ID_FIELD: ClassVar[str] = 'oauth_client_id'
     OAUTH_GRANT_TYPE_FIELD: ClassVar[str] = 'oauth_grant_type'
@@ -414,6 +442,9 @@ class EnvVariables:
             LEGACY_ACCESS_ID_FIELD: LEGACY_ACCESS_ID,
             LEGACY_KEY_PATH_FIELD: LEGACY_KEY_PATH,
             LEGACY_KEY_FILE_FIELD: LEGACY_KEY_FILE,
+            LEGACY_KEY_PEM_FIELD: LEGACY_KEY_PEM,
+            LEGACY_KEY_MATERIAL_PATH_FIELD: LEGACY_KEY_MATERIAL_PATH,
+            LEGACY_KEY_MATERIAL_FILE_FIELD: LEGACY_KEY_MATERIAL_FILE,
             OAUTH_ISSUER_URL_FIELD: OAUTH_ISSUER_URL,
             OAUTH_CLIENT_ID_FIELD: OAUTH_CLIENT_ID,
             OAUTH_GRANT_TYPE_FIELD: OAUTH_GRANT_TYPE,
@@ -429,6 +460,9 @@ class EnvVariables:
             LEGACY_ACCESS_ID_FIELD: PROD_LEGACY_ACCESS_ID,
             LEGACY_KEY_PATH_FIELD: PROD_LEGACY_KEY_PATH,
             LEGACY_KEY_FILE_FIELD: PROD_LEGACY_KEY_FILE,
+            LEGACY_KEY_PEM_FIELD: PROD_LEGACY_KEY_PEM,
+            LEGACY_KEY_MATERIAL_PATH_FIELD: PROD_LEGACY_KEY_MATERIAL_PATH,
+            LEGACY_KEY_MATERIAL_FILE_FIELD: PROD_LEGACY_KEY_MATERIAL_FILE,
             OAUTH_ISSUER_URL_FIELD: PROD_OAUTH_ISSUER_URL,
             OAUTH_CLIENT_ID_FIELD: PROD_OAUTH_CLIENT_ID,
             OAUTH_GRANT_TYPE_FIELD: PROD_OAUTH_GRANT_TYPE,
@@ -444,6 +478,9 @@ class EnvVariables:
             LEGACY_ACCESS_ID_FIELD: DEV_LEGACY_ACCESS_ID,
             LEGACY_KEY_PATH_FIELD: DEV_LEGACY_KEY_PATH,
             LEGACY_KEY_FILE_FIELD: DEV_LEGACY_KEY_FILE,
+            LEGACY_KEY_PEM_FIELD: DEV_LEGACY_KEY_PEM,
+            LEGACY_KEY_MATERIAL_PATH_FIELD: DEV_LEGACY_KEY_MATERIAL_PATH,
+            LEGACY_KEY_MATERIAL_FILE_FIELD: DEV_LEGACY_KEY_MATERIAL_FILE,
             OAUTH_ISSUER_URL_FIELD: DEV_OAUTH_ISSUER_URL,
             OAUTH_CLIENT_ID_FIELD: DEV_OAUTH_CLIENT_ID,
             OAUTH_GRANT_TYPE_FIELD: DEV_OAUTH_GRANT_TYPE,
@@ -459,6 +496,9 @@ class EnvVariables:
             LEGACY_ACCESS_ID_FIELD: CUSTOM_LEGACY_ACCESS_ID,
             LEGACY_KEY_PATH_FIELD: CUSTOM_LEGACY_KEY_PATH,
             LEGACY_KEY_FILE_FIELD: CUSTOM_LEGACY_KEY_FILE,
+            LEGACY_KEY_PEM_FIELD: CUSTOM_LEGACY_KEY_PEM,
+            LEGACY_KEY_MATERIAL_PATH_FIELD: CUSTOM_LEGACY_KEY_MATERIAL_PATH,
+            LEGACY_KEY_MATERIAL_FILE_FIELD: CUSTOM_LEGACY_KEY_MATERIAL_FILE,
             OAUTH_ISSUER_URL_FIELD: CUSTOM_OAUTH_ISSUER_URL,
             OAUTH_CLIENT_ID_FIELD: CUSTOM_OAUTH_CLIENT_ID,
             OAUTH_GRANT_TYPE_FIELD: CUSTOM_OAUTH_GRANT_TYPE,
@@ -486,6 +526,9 @@ class EnvVariables:
         LEGACY_ACCESS_ID_FIELD,
         LEGACY_KEY_PATH_FIELD,
         LEGACY_KEY_FILE_FIELD,
+        LEGACY_KEY_PEM_FIELD,
+        LEGACY_KEY_MATERIAL_PATH_FIELD,
+        LEGACY_KEY_MATERIAL_FILE_FIELD,
         OAUTH_ISSUER_URL_FIELD,
         OAUTH_CLIENT_ID_FIELD,
         OAUTH_GRANT_TYPE_FIELD,
@@ -517,10 +560,15 @@ class ConnectionInfo:
     LEGACY_PRIVATE_KEY_FILE: ClassVar[str] = 'private_key_file'
     LEGACY_PRIVATE_KEY_PATH: ClassVar[str] = 'private_key_path'
     LEGACY_PRIVATE_KEY_PEM: ClassVar[str] = 'private_key_pem'
+    LEGACY_KEY_MATERIAL_PATH: ClassVar[str] = 'private_key_material_path'
+    LEGACY_KEY_MATERIAL_FILE: ClassVar[str] = 'private_key_material_file'
     LEGACY_FIELDS: ClassVar[frozenset[str]] = frozenset({
         LEGACY_ACCESS_ID,
         LEGACY_PRIVATE_KEY_FILE,
         LEGACY_PRIVATE_KEY_PATH,
+        LEGACY_PRIVATE_KEY_PEM,
+        LEGACY_KEY_MATERIAL_PATH,
+        LEGACY_KEY_MATERIAL_FILE,
     })
 
     # OAuth authentication fields

@@ -6,7 +6,7 @@
 :Example:           ``pydp = PyDPlus()``
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     19 Mar 2026
+:Modified Date:     20 Mar 2026
 """
 
 from __future__ import annotations
@@ -109,9 +109,9 @@ class PyDPlus(object):
         self._env_variables = {}
         self.base_headers = {}
         self.connected = False
+        self.connection_type = None
         self.strict_mode = strict_mode
         self.tenant_name = tenant_name
-        self.legacy_key_material = self._parse_legacy_key_material(legacy_key_material)
 
         # Define the environment if explicitly defined as an argument or environment variable
         self.env = self._get_env_name(env)
@@ -128,11 +128,11 @@ class PyDPlus(object):
         # Define the strict_mode setting using a passed argument, helper setting, or environment variable
         self._define_strict_mode(strict_mode)                           # Defines self.strict_mode
 
-        # Define the connection type that should be used to authenticate
-        self._get_connection_type(connection_type)                      # Defines self.connection_type
-
         # Define the verify_ssl value either from a user-defined setting or using the default value
         self._get_verify_ssl_setting(verify_ssl)                        # Defines self.verify_ssl
+
+        # Define the legacy key material when applicable
+        self.legacy_key_material = self._parse_legacy_key_material(legacy_key_material, connection_info)
 
         # Use parsed key material as a base URL fallback when no explicit values were provided
         if self.legacy_key_material:
@@ -140,6 +140,9 @@ class PyDPlus(object):
                 base_url = self.legacy_key_material.admin_rest_api_url            # Base URL will be parsed below
             if not base_admin_url:
                 base_admin_url = self.legacy_key_material.admin_rest_api_url      # Base Admin URL will be parsed below
+
+        # Define the connection type that should be used to authenticate
+        self._get_connection_type(connection_type)                      # Defines self.connection_type
 
         # Define the base_url value or raise an exception if it cannot be defined
         self._define_base_url(base_url)                                 # Defines self.base_url
@@ -193,13 +196,75 @@ class PyDPlus(object):
         else:
             self._helper_settings = {}
 
-    @staticmethod
+    def _define_legacy_key_material_path(self, _connection_info: Optional[dict] = None) -> str:
+        """Defines the path to the legacy API key material file if the file name and/or path has been configured."""
+        # Initially define variables
+        _key_material_path = ''
+        _legacy_key = const.CONNECTION_INFO.LEGACY
+        _material_file_key = const.CONNECTION_INFO.LEGACY_KEY_MATERIAL_FILE
+        _material_path_key = const.CONNECTION_INFO.LEGACY_KEY_MATERIAL_PATH
+        _helper_conn_key = const.HELPER_SETTINGS.CONNECTION
+        _env_material_file_key = const.ENV_VARIABLES.LEGACY_KEY_MATERIAL_FILE_FIELD
+        _env_material_path_key = const.ENV_VARIABLES.LEGACY_KEY_MATERIAL_PATH_FIELD
+
+        # Attempt to define the full path using the connection_info dictionary if defined
+        if (_connection_info and isinstance(_connection_info.get(_legacy_key), dict)
+                and isinstance(_connection_info[_legacy_key].get(_material_file_key), str)
+                and _connection_info[_legacy_key][_material_file_key]):
+            _key_material_path = _connection_info[_legacy_key][_material_file_key]
+
+            # Check if a path is also defined as part of the connection_info dictionary
+            if (isinstance(_connection_info[_legacy_key].get(_material_path_key), str)
+                    and _connection_info[_legacy_key][_material_path_key]):
+                _path_to_material_file = core_utils.ensure_ending_slash(_connection_info[_legacy_key][_material_path_key])
+                _key_material_path = _path_to_material_file + _key_material_path
+            logger.debug(f"Defined '{_key_material_path}' as the path to the key material file via connection_info")
+
+        # Attempt to define the full path using the helper settings if defined
+        elif (self._helper_settings and _helper_conn_key in self._helper_settings
+              and isinstance(self._helper_settings[_helper_conn_key].get(_legacy_key), dict)
+              and isinstance(self._helper_settings[_helper_conn_key][_legacy_key].get(_material_file_key), str)
+              and self._helper_settings[_helper_conn_key][_legacy_key][_material_file_key]):
+            _key_material_path = self._helper_settings[_helper_conn_key][_legacy_key][_material_file_key]
+
+            # Check if a path is also defined as part of the helper settings
+            if (isinstance(self._helper_settings[_helper_conn_key][_legacy_key].get(_material_path_key), str)
+                    and self._helper_settings[_helper_conn_key][_legacy_key][_material_path_key]):
+                _path_to_material_file = core_utils.ensure_ending_slash(
+                    self._helper_settings[_helper_conn_key][_legacy_key][_material_path_key]
+                )
+                _key_material_path = _path_to_material_file + _key_material_path
+            logger.debug(f"Defined '{_key_material_path}' as the path to the key material file via helper settings")
+
+        # Attempt to define the full path using environment variables if defined
+        elif (self._env_variables and isinstance(self._env_variables.get(_env_material_file_key), str)
+              and self._env_variables[_env_material_file_key]):
+            _key_material_path = self._env_variables[_env_material_file_key]
+
+            # Check if a path is also defined as an environment variable
+            if (isinstance(self._env_variables.get(_env_material_path_key), str)
+                    and self._env_variables[_env_material_path_key]):
+                _path_to_material_file = core_utils.ensure_ending_slash(self._env_variables[_env_material_path_key])
+                _key_material_path = _path_to_material_file + _key_material_path
+            logger.debug(f"Defined '{_key_material_path}' as the path to the key material file via environment variables")
+
+        # Returned the defined (or empty) path to the key material file
+        if not _key_material_path:
+            logger.debug('The key material file path could not be defined and will not be used for authentication')
+        return _key_material_path
+
     def _parse_legacy_key_material(
+            self,
             _legacy_key_material: Union[Optional[str], Optional[Path], Optional[IDPlusLegacyKeyMaterial]] = None,
+            _connection_info: Optional[dict] = None,
     ) -> Optional[IDPlusLegacyKeyMaterial]:
         """Parse and validate the legacy key material if provided."""
+        # Attempt to define the legacy key material file path if not defined via argument
         if _legacy_key_material is None:
-            return None
+            _legacy_key_material = self._define_legacy_key_material_path(_connection_info)
+            if not _legacy_key_material:
+                return None
+
         if isinstance(_legacy_key_material, IDPlusLegacyKeyMaterial):
             _legacy_key_material.validate()
             return _legacy_key_material
@@ -309,38 +374,55 @@ class PyDPlus(object):
         else:
             self.strict_mode = const.DEFAULT_STRICT_MODE
 
+    def _check_for_connection_type_mismatch(self):
+        if self.legacy_key_material and self.connection_type == const.CONNECTION_INFO.OAUTH:
+            _warn_msg = ('Legacy key material was provided but will be ignored as the connection_type was explicitly '
+                         'defined as OAuth')
+            # TODO: Call method for displaying warnings when a related setting is enabled
+            logger.warning(_warn_msg)
+
     def _get_connection_type(self, _connection_type_from_arg: Optional[str]) -> None:
         """Define the connection type that should be used to authenticate to the RSA ID Plus tenant."""
-        # Check if the connection type was passed as an argument
-        if _connection_type_from_arg in const.CONNECTION_INFO.VALID_CONNECTION_TYPES:
+        # Check if the connection type was passed as an argument and leverage it if valid
+        if not self.connection_type and _connection_type_from_arg in const.CONNECTION_INFO.VALID_CONNECTION_TYPES:
             self.connection_type = _connection_type_from_arg
+            self._check_for_connection_type_mismatch()
 
         # Attempt to retrieve the connection type via helper settings if present and populated
-        elif (self._helper_settings and const.HELPER_SETTINGS.CONNECTION_TYPE in self._helper_settings
+        if (not self.connection_type and self._helper_settings
+                and const.HELPER_SETTINGS.CONNECTION_TYPE in self._helper_settings
                 and self._helper_settings[const.HELPER_SETTINGS.CONNECTION_TYPE] is not None):
             if self._helper_settings.get(const.HELPER_SETTINGS.CONNECTION_TYPE) in const.CONNECTION_INFO.VALID_CONNECTION_TYPES:
                 self.connection_type = self._helper_settings.get(const.HELPER_SETTINGS.CONNECTION_TYPE)
+                self._check_for_connection_type_mismatch()
             else:
-                _error_msg = 'The connection_type value in the helper settings in invalid and will be ignored.'
+                _error_msg = 'The connection_type value in the helper settings in invalid and will be ignored'
                 _expected_types = ','.join(const.CONNECTION_INFO.VALID_CONNECTION_TYPES)
                 _error_msg += (f"(Expected: {_expected_types}; "
                                f"Provided: {self._helper_settings.get(const.HELPER_SETTINGS.CONNECTION_TYPE)})")
                 logger.error(_error_msg)
-                self.connection_type = const.CONNECTION_INFO.DEFAULT_CONNECTION_TYPE
 
         # Attempt to retrieve the connection type via environment variable if defined
-        elif (const.ENV_VARIABLES.CONNECTION_TYPE_FIELD in self._env_variables
+        elif (not self.connection_type and self._env_variables
+              and const.ENV_VARIABLES.CONNECTION_TYPE_FIELD in self._env_variables
               and self._env_variables[const.ENV_VARIABLES.CONNECTION_TYPE_FIELD] is not None):
-            if self._env_variables.get(const.ENV_VARIABLES.CONNECTION_TYPE_FIELD) in const.CONNECTION_INFO.VALID_CONNECTION_TYPES:
-                self.connection_type = self._env_variables.get(const.ENV_VARIABLES.CONNECTION_TYPE_FIELD)
+            if self._env_variables[const.ENV_VARIABLES.CONNECTION_TYPE_FIELD] in const.CONNECTION_INFO.VALID_CONNECTION_TYPES:
+                self.connection_type = self._env_variables[const.ENV_VARIABLES.CONNECTION_TYPE_FIELD]
+                self._check_for_connection_type_mismatch()
             else:
-                _error_msg = 'The connection_type environment variable in invalid and the default connection type will be used.'
+                _error_msg = 'The connection_type environment variable in invalid and will be ignored'
                 logger.error(_error_msg)
-                self.connection_type = const.CONNECTION_INFO.DEFAULT_CONNECTION_TYPE
 
-        # Use the default connection type (OAuth) if it hasn't been defined elsewhere
+        # Set the connection type to be Legacy if legacy key material was previously defined
+        if not self.connection_type and self.legacy_key_material:
+            self.connection_type = const.CONNECTION_INFO.LEGACY
+            logger.info("The 'legacy' connection_type will be used because legacy key material has been provided")
+
+        # Use the default connection type (OAuth) if the setting has not been defined
         else:
             self.connection_type = const.CONNECTION_INFO.DEFAULT_CONNECTION_TYPE
+            logger.info(f"The default connection_type '{const.CONNECTION_INFO.DEFAULT_CONNECTION_TYPE}' will be used "
+                        "as the setting was not explicitly defined")
 
     def _get_verify_ssl_setting(self, _verify_ssl_from_arg: Optional[bool]) -> None:
         """Determine the ``verify_ssl`` value from a passed argument, helper setting, or environment variable."""
