@@ -4,7 +4,7 @@
 :Synopsis:          Unit tests for helper configuration functions in pydplus.utils.helper
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff (via GPT-5.3-codex)
-:Modified Date:     16 Mar 2026
+:Modified Date:     20 Mar 2026
 """
 
 from __future__ import annotations
@@ -71,12 +71,17 @@ def test_import_helper_file_raises_file_not_found_for_missing_file(tmp_path: Pat
         ('TRUE', True),
         ('no', False),
         ('false', False),
-        ('something-else', False),
     ],
 )
 def test_convert_yaml_to_bool(yaml_value: str, expected: bool) -> None:
-    """Ensure helper YAML-style boolean conversion returns expected Boolean values."""
+    """Ensure helper YAML-style conversion returns expected Boolean values."""
     assert helper._convert_yaml_to_bool(yaml_value) is expected
+
+
+def test_convert_yaml_to_bool_raises_value_error_for_invalid_value() -> None:
+    """Ensure helper YAML-style conversion raises ValueError for unknown values."""
+    with pytest.raises(ValueError):
+        helper._convert_yaml_to_bool('something-else')
 
 
 def test_get_connection_info_returns_known_nested_connection_fields_only() -> None:
