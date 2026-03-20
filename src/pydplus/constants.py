@@ -4,7 +4,7 @@
 :Synopsis:          Constants that are utilized throughout the package
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     14 Mar 2026
+:Modified Date:     20 Mar 2026
 """
 
 from __future__ import annotations
@@ -12,6 +12,12 @@ from __future__ import annotations
 from dataclasses import dataclass
 from types import MappingProxyType
 from typing import Any, Final, ClassVar, Mapping, Union
+
+
+# --------------------------------------
+# Common and Generic Values
+# --------------------------------------
+UTF8_ENCODING: Final[str] = 'utf-8'
 
 
 # --------------------------------------
@@ -50,6 +56,30 @@ class ArgumentValues:
     })
 
 
+# -------------------------------
+# Credential Parsing / Security
+# -------------------------------
+@dataclass(frozen=True)
+class CredentialValues:
+    """Constants used by secure credential parsing and private-key persistence helpers."""
+    JSON_FIELD_CUSTOMER_NAME: ClassVar[str] = 'customerName'
+    JSON_FIELD_ACCESS_ID: ClassVar[str] = 'accessID'
+    JSON_FIELD_ACCESS_KEY: ClassVar[str] = 'accessKey'
+    JSON_FIELD_ADMIN_REST_API_URL: ClassVar[str] = 'adminRestApiUrl'
+    JSON_FIELD_DESCRIPTION: ClassVar[str] = 'description'
+
+    PEM_BEGIN_MARKER: ClassVar[str] = 'BEGIN RSA PRIVATE KEY'
+
+    DEFAULT_CERT_HOME_DIR: ClassVar[str] = '.pydplus'
+    DEFAULT_CERT_SUBDIR: ClassVar[str] = 'certs'
+    DEFAULT_PEM_BASENAME: ClassVar[str] = 'idplus-legacy'
+    DEFAULT_PEM_EXTENSION: ClassVar[str] = '.pem'
+    DEFAULT_FILENAME_FALLBACK: ClassVar[str] = 'tenant'
+
+    PRIVATE_DIR_MODE: ClassVar[int] = 0o700
+    PRIVATE_FILE_MODE: ClassVar[int] = 0o600
+
+
 # -----------------------------
 # Exception Classes
 # -----------------------------
@@ -74,10 +104,11 @@ class ExceptionClasses:
     _VALUE: ClassVar[str] = 'value'
 
     # Exception messages and message segments
-    _API_CUSTOM_MSG: ClassVar[str] = 'The {type} request failed with the following message:'        # Vars: type
-    _API_DEFAULT_MSG: ClassVar[str] = 'The {type} request did not return a successful response.'    # Vars: type
-    _CANNOT_LOCATE_FILE: ClassVar[str] = 'Unable to locate the following file: {file_path}'         # Vars: file_path
+    _API_CUSTOM_MSG: ClassVar[str] = 'The {type} request failed with the following message:'                # Vars: type
+    _API_DEFAULT_MSG: ClassVar[str] = 'The {type} request did not return a successful response.'            # Vars: type
+    _CANNOT_LOCATE_FILE: ClassVar[str] = 'Unable to locate the following file: {file_path}'                 # Vars: file_path
     _INVALID_HELPER_DEFAULT_MSG: ClassVar[str] = "The helper configuration file can only have the 'yml', 'yaml' or 'json' file type."
+    _PRIVATE_KEY_ALREADY_EXISTS: ClassVar[str] = "The private key file already exists at '{final_path}'"    # Vars: final_path
     _WITH_THE_FOLLOWING_SEGMENT: ClassVar[str] = ' with the following'
 
 
@@ -90,12 +121,16 @@ class FileExtensions:
     # Without delimiter
     JPEG: ClassVar[str] = 'jpeg'
     JSON: ClassVar[str] = 'json'
+    PEM: ClassVar[str] = 'pem'
+    TMP: ClassVar[str] = 'tmp'
     YAML: ClassVar[str] = 'yaml'
     YML: ClassVar[str] = 'yml'
 
     # With delimiter
     DOT_JPEG: ClassVar[str] = f'.{JPEG}'
     DOT_JSON: ClassVar[str] = f'.{JSON}'
+    DOT_PEM: ClassVar[str] = f'.{PEM}'
+    DOT_TMP: ClassVar[str] = f'.{TMP}'
     DOT_YAML: ClassVar[str] = f'.{YAML}'
     DOT_YML: ClassVar[str] = f'.{YML}'
 
@@ -131,6 +166,7 @@ class HelperSettings:
     # Validation criteria
     VALID_HELPER_FILE_TYPES: ClassVar[frozenset[str]] = frozenset({'json', 'yml', 'yaml'})
     VALID_YAML_TRUE_VALUES: ClassVar[frozenset[str]] = frozenset({'yes', 'true'})
+    VALID_YAML_FALSE_VALUES: ClassVar[frozenset[str]] = frozenset({'no', 'false'})
 
     # Root-level helper fields
     ENV_NAME: ClassVar[str] = 'env'
@@ -168,6 +204,9 @@ class HelperSettings:
     ENV_LEGACY_ACCESS_ID: ClassVar[str] = 'legacy_access_id'
     ENV_LEGACY_KEY_PATH: ClassVar[str] = 'legacy_key_path'
     ENV_LEGACY_KEY_FILE: ClassVar[str] = 'legacy_key_file'
+    ENV_LEGACY_KEY_PEM: ClassVar[str] = 'legacy_key_pem'
+    ENV_LEGACY_KEY_MATERIAL_PATH: ClassVar[str] = 'legacy_key_material_path'
+    ENV_LEGACY_KEY_MATERIAL_FILE: ClassVar[str] = 'legacy_key_material_file'
     ENV_OAUTH_ISSUER_URL: ClassVar[str] = 'oauth_issuer_url'
     ENV_OAUTH_CLIENT_ID: ClassVar[str] = 'oauth_client_id'
     ENV_OAUTH_GRANT_TYPE: ClassVar[str] = 'oauth_grant_type'
@@ -185,6 +224,9 @@ class HelperSettings:
     ENV_DEFAULT_LEGACY_ACCESS_ID: ClassVar[str] = 'PYDPLUS_LEGACY_ACCESS_ID'
     ENV_DEFAULT_LEGACY_KEY_PATH: ClassVar[str] = 'PYDPLUS_LEGACY_KEY_PATH'
     ENV_DEFAULT_LEGACY_KEY_FILE: ClassVar[str] = 'PYDPLUS_LEGACY_KEY_FILE'
+    ENV_DEFAULT_LEGACY_KEY_PEM: ClassVar[str] = 'PYDPLUS_LEGACY_KEY_PEM'
+    ENV_DEFAULT_LEGACY_KEY_MATERIAL_PATH: ClassVar[str] = 'PYDPLUS_LEGACY_KEY_MATERIAL_PATH'
+    ENV_DEFAULT_LEGACY_KEY_MATERIAL_FILE: ClassVar[str] = 'PYDPLUS_LEGACY_KEY_MATERIAL_FILE'
     ENV_DEFAULT_OAUTH_ISSUER_URL: ClassVar[str] = 'PYDPLUS_OAUTH_ISSUER_URL'
     ENV_DEFAULT_OAUTH_CLIENT_ID: ClassVar[str] = 'PYDPLUS_OAUTH_CLIENT_ID'
     ENV_DEFAULT_OAUTH_GRANT_TYPE: ClassVar[str] = 'PYDPLUS_OAUTH_GRANT_TYPE'
@@ -203,6 +245,9 @@ class HelperSettings:
         ENV_LEGACY_ACCESS_ID: ENV_DEFAULT_LEGACY_ACCESS_ID,
         ENV_LEGACY_KEY_PATH: ENV_DEFAULT_LEGACY_KEY_PATH,
         ENV_LEGACY_KEY_FILE: ENV_DEFAULT_LEGACY_KEY_FILE,
+        ENV_LEGACY_KEY_PEM: ENV_DEFAULT_LEGACY_KEY_PEM,
+        ENV_LEGACY_KEY_MATERIAL_PATH: ENV_DEFAULT_LEGACY_KEY_MATERIAL_PATH,
+        ENV_LEGACY_KEY_MATERIAL_FILE: ENV_DEFAULT_LEGACY_KEY_MATERIAL_FILE,
         ENV_OAUTH_ISSUER_URL: ENV_DEFAULT_OAUTH_ISSUER_URL,
         ENV_OAUTH_CLIENT_ID: ENV_DEFAULT_OAUTH_CLIENT_ID,
         ENV_OAUTH_GRANT_TYPE: ENV_DEFAULT_OAUTH_GRANT_TYPE,
@@ -216,6 +261,9 @@ class HelperSettings:
         'access_id': ENV_LEGACY_ACCESS_ID,
         'private_key_path': ENV_LEGACY_KEY_PATH,
         'private_key_file': ENV_LEGACY_KEY_FILE,
+        'private_key_pem': ENV_LEGACY_KEY_PEM,
+        'private_key_material_path': ENV_LEGACY_KEY_MATERIAL_PATH,
+        'private_key_material_file': ENV_LEGACY_KEY_MATERIAL_FILE,
     })
     ENV_OAUTH_CONNECTION_MAPPING: ClassVar[Mapping[str, str]] = MappingProxyType({
         'issuer_url': ENV_OAUTH_ISSUER_URL,
@@ -272,6 +320,9 @@ class EnvVariables:
     LEGACY_ACCESS_ID: ClassVar[str] = 'PYDPLUS_LEGACY_ACCESS_ID'
     LEGACY_KEY_PATH: ClassVar[str] = 'PYDPLUS_LEGACY_KEY_PATH'
     LEGACY_KEY_FILE: ClassVar[str] = 'PYDPLUS_LEGACY_KEY_FILE'
+    LEGACY_KEY_PEM: ClassVar[str] = 'PYDPLUS_LEGACY_KEY_PEM'
+    LEGACY_KEY_MATERIAL_PATH: ClassVar[str] = 'PYDPLUS_LEGACY_KEY_MATERIAL_PATH'
+    LEGACY_KEY_MATERIAL_FILE: ClassVar[str] = 'PYDPLUS_LEGACY_KEY_MATERIAL_FILE'
     OAUTH_ISSUER_URL: ClassVar[str] = 'PYDPLUS_OAUTH_ISSUER_URL'
     OAUTH_CLIENT_ID: ClassVar[str] = 'PYDPLUS_OAUTH_CLIENT_ID'
     OAUTH_GRANT_TYPE: ClassVar[str] = 'PYDPLUS_OAUTH_GRANT_TYPE'
@@ -296,6 +347,9 @@ class EnvVariables:
     CUSTOM_LEGACY_ACCESS_ID: ClassVar[str] = 'PYDPLUS_{env_name}_LEGACY_ACCESS_ID'                  # Vars: env_name
     CUSTOM_LEGACY_KEY_PATH: ClassVar[str] = 'PYDPLUS_{env_name}_LEGACY_KEY_PATH'                    # Vars: env_name
     CUSTOM_LEGACY_KEY_FILE: ClassVar[str] = 'PYDPLUS_{env_name}_LEGACY_KEY_FILE'                    # Vars: env_name
+    CUSTOM_LEGACY_KEY_PEM: ClassVar[str] = 'PYDPLUS_{env_name}_LEGACY_KEY_PEM'                      # Vars: env_name
+    CUSTOM_LEGACY_KEY_MATERIAL_PATH: ClassVar[str] = 'PYDPLUS_{env_name}_LEGACY_KEY_MATERIAL_PATH'  # Vars: env_name
+    CUSTOM_LEGACY_KEY_MATERIAL_FILE: ClassVar[str] = 'PYDPLUS_{env_name}_LEGACY_KEY_MATERIAL_FILE'  # Vars: env_name
     CUSTOM_OAUTH_ISSUER_URL: ClassVar[str] = 'PYDPLUS_{env_name}_OAUTH_ISSUER_URL'                  # Vars: env_name
     CUSTOM_OAUTH_CLIENT_ID: ClassVar[str] = 'PYDPLUS_{env_name}_OAUTH_CLIENT_ID'                    # Vars: env_name
     CUSTOM_OAUTH_GRANT_TYPE: ClassVar[str] = 'PYDPLUS_{env_name}_OAUTH_GRANT_TYPE'                  # Vars: env_name
@@ -320,6 +374,9 @@ class EnvVariables:
     PROD_LEGACY_ACCESS_ID: ClassVar[str] = CUSTOM_LEGACY_ACCESS_ID.format(env_name=PROD_ENVIRONMENT)
     PROD_LEGACY_KEY_PATH: ClassVar[str] = CUSTOM_LEGACY_KEY_PATH.format(env_name=PROD_ENVIRONMENT)
     PROD_LEGACY_KEY_FILE: ClassVar[str] = CUSTOM_LEGACY_KEY_FILE.format(env_name=PROD_ENVIRONMENT)
+    PROD_LEGACY_KEY_PEM: ClassVar[str] = CUSTOM_LEGACY_KEY_PEM.format(env_name=PROD_ENVIRONMENT)
+    PROD_LEGACY_KEY_MATERIAL_PATH: ClassVar[str] = CUSTOM_LEGACY_KEY_MATERIAL_PATH.format(env_name=PROD_ENVIRONMENT)
+    PROD_LEGACY_KEY_MATERIAL_FILE: ClassVar[str] = CUSTOM_LEGACY_KEY_MATERIAL_FILE.format(env_name=PROD_ENVIRONMENT)
     PROD_OAUTH_ISSUER_URL: ClassVar[str] = CUSTOM_OAUTH_ISSUER_URL.format(env_name=PROD_ENVIRONMENT)
     PROD_OAUTH_CLIENT_ID: ClassVar[str] = CUSTOM_OAUTH_CLIENT_ID.format(env_name=PROD_ENVIRONMENT)
     PROD_OAUTH_GRANT_TYPE: ClassVar[str] = CUSTOM_OAUTH_GRANT_TYPE.format(env_name=PROD_ENVIRONMENT)
@@ -344,6 +401,9 @@ class EnvVariables:
     DEV_LEGACY_ACCESS_ID: ClassVar[str] = CUSTOM_LEGACY_ACCESS_ID.format(env_name=DEV_ENVIRONMENT)
     DEV_LEGACY_KEY_PATH: ClassVar[str] = CUSTOM_LEGACY_KEY_PATH.format(env_name=DEV_ENVIRONMENT)
     DEV_LEGACY_KEY_FILE: ClassVar[str] = CUSTOM_LEGACY_KEY_FILE.format(env_name=DEV_ENVIRONMENT)
+    DEV_LEGACY_KEY_PEM: ClassVar[str] = CUSTOM_LEGACY_KEY_PEM.format(env_name=DEV_ENVIRONMENT)
+    DEV_LEGACY_KEY_MATERIAL_PATH: ClassVar[str] = CUSTOM_LEGACY_KEY_MATERIAL_PATH.format(env_name=DEV_ENVIRONMENT)
+    DEV_LEGACY_KEY_MATERIAL_FILE: ClassVar[str] = CUSTOM_LEGACY_KEY_MATERIAL_FILE.format(env_name=DEV_ENVIRONMENT)
     DEV_OAUTH_ISSUER_URL: ClassVar[str] = CUSTOM_OAUTH_ISSUER_URL.format(env_name=DEV_ENVIRONMENT)
     DEV_OAUTH_CLIENT_ID: ClassVar[str] = CUSTOM_OAUTH_CLIENT_ID.format(env_name=DEV_ENVIRONMENT)
     DEV_OAUTH_GRANT_TYPE: ClassVar[str] = CUSTOM_OAUTH_GRANT_TYPE.format(env_name=DEV_ENVIRONMENT)
@@ -361,6 +421,9 @@ class EnvVariables:
     LEGACY_ACCESS_ID_FIELD: ClassVar[str] = 'legacy_access_id'
     LEGACY_KEY_PATH_FIELD: ClassVar[str] = 'legacy_key_path'
     LEGACY_KEY_FILE_FIELD: ClassVar[str] = 'legacy_key_file'
+    LEGACY_KEY_PEM_FIELD: ClassVar[str] = 'legacy_key_pem'
+    LEGACY_KEY_MATERIAL_PATH_FIELD: ClassVar[str] = 'legacy_key_material_path'
+    LEGACY_KEY_MATERIAL_FILE_FIELD: ClassVar[str] = 'legacy_key_material_file'
     OAUTH_ISSUER_URL_FIELD: ClassVar[str] = 'oauth_issuer_url'
     OAUTH_CLIENT_ID_FIELD: ClassVar[str] = 'oauth_client_id'
     OAUTH_GRANT_TYPE_FIELD: ClassVar[str] = 'oauth_grant_type'
@@ -379,6 +442,9 @@ class EnvVariables:
             LEGACY_ACCESS_ID_FIELD: LEGACY_ACCESS_ID,
             LEGACY_KEY_PATH_FIELD: LEGACY_KEY_PATH,
             LEGACY_KEY_FILE_FIELD: LEGACY_KEY_FILE,
+            LEGACY_KEY_PEM_FIELD: LEGACY_KEY_PEM,
+            LEGACY_KEY_MATERIAL_PATH_FIELD: LEGACY_KEY_MATERIAL_PATH,
+            LEGACY_KEY_MATERIAL_FILE_FIELD: LEGACY_KEY_MATERIAL_FILE,
             OAUTH_ISSUER_URL_FIELD: OAUTH_ISSUER_URL,
             OAUTH_CLIENT_ID_FIELD: OAUTH_CLIENT_ID,
             OAUTH_GRANT_TYPE_FIELD: OAUTH_GRANT_TYPE,
@@ -394,6 +460,9 @@ class EnvVariables:
             LEGACY_ACCESS_ID_FIELD: PROD_LEGACY_ACCESS_ID,
             LEGACY_KEY_PATH_FIELD: PROD_LEGACY_KEY_PATH,
             LEGACY_KEY_FILE_FIELD: PROD_LEGACY_KEY_FILE,
+            LEGACY_KEY_PEM_FIELD: PROD_LEGACY_KEY_PEM,
+            LEGACY_KEY_MATERIAL_PATH_FIELD: PROD_LEGACY_KEY_MATERIAL_PATH,
+            LEGACY_KEY_MATERIAL_FILE_FIELD: PROD_LEGACY_KEY_MATERIAL_FILE,
             OAUTH_ISSUER_URL_FIELD: PROD_OAUTH_ISSUER_URL,
             OAUTH_CLIENT_ID_FIELD: PROD_OAUTH_CLIENT_ID,
             OAUTH_GRANT_TYPE_FIELD: PROD_OAUTH_GRANT_TYPE,
@@ -409,6 +478,9 @@ class EnvVariables:
             LEGACY_ACCESS_ID_FIELD: DEV_LEGACY_ACCESS_ID,
             LEGACY_KEY_PATH_FIELD: DEV_LEGACY_KEY_PATH,
             LEGACY_KEY_FILE_FIELD: DEV_LEGACY_KEY_FILE,
+            LEGACY_KEY_PEM_FIELD: DEV_LEGACY_KEY_PEM,
+            LEGACY_KEY_MATERIAL_PATH_FIELD: DEV_LEGACY_KEY_MATERIAL_PATH,
+            LEGACY_KEY_MATERIAL_FILE_FIELD: DEV_LEGACY_KEY_MATERIAL_FILE,
             OAUTH_ISSUER_URL_FIELD: DEV_OAUTH_ISSUER_URL,
             OAUTH_CLIENT_ID_FIELD: DEV_OAUTH_CLIENT_ID,
             OAUTH_GRANT_TYPE_FIELD: DEV_OAUTH_GRANT_TYPE,
@@ -424,6 +496,9 @@ class EnvVariables:
             LEGACY_ACCESS_ID_FIELD: CUSTOM_LEGACY_ACCESS_ID,
             LEGACY_KEY_PATH_FIELD: CUSTOM_LEGACY_KEY_PATH,
             LEGACY_KEY_FILE_FIELD: CUSTOM_LEGACY_KEY_FILE,
+            LEGACY_KEY_PEM_FIELD: CUSTOM_LEGACY_KEY_PEM,
+            LEGACY_KEY_MATERIAL_PATH_FIELD: CUSTOM_LEGACY_KEY_MATERIAL_PATH,
+            LEGACY_KEY_MATERIAL_FILE_FIELD: CUSTOM_LEGACY_KEY_MATERIAL_FILE,
             OAUTH_ISSUER_URL_FIELD: CUSTOM_OAUTH_ISSUER_URL,
             OAUTH_CLIENT_ID_FIELD: CUSTOM_OAUTH_CLIENT_ID,
             OAUTH_GRANT_TYPE_FIELD: CUSTOM_OAUTH_GRANT_TYPE,
@@ -451,6 +526,9 @@ class EnvVariables:
         LEGACY_ACCESS_ID_FIELD,
         LEGACY_KEY_PATH_FIELD,
         LEGACY_KEY_FILE_FIELD,
+        LEGACY_KEY_PEM_FIELD,
+        LEGACY_KEY_MATERIAL_PATH_FIELD,
+        LEGACY_KEY_MATERIAL_FILE_FIELD,
         OAUTH_ISSUER_URL_FIELD,
         OAUTH_CLIENT_ID_FIELD,
         OAUTH_GRANT_TYPE_FIELD,
@@ -481,10 +559,16 @@ class ConnectionInfo:
     LEGACY_ACCESS_ID: ClassVar[str] = 'access_id'
     LEGACY_PRIVATE_KEY_FILE: ClassVar[str] = 'private_key_file'
     LEGACY_PRIVATE_KEY_PATH: ClassVar[str] = 'private_key_path'
+    LEGACY_PRIVATE_KEY_PEM: ClassVar[str] = 'private_key_pem'
+    LEGACY_KEY_MATERIAL_PATH: ClassVar[str] = 'private_key_material_path'
+    LEGACY_KEY_MATERIAL_FILE: ClassVar[str] = 'private_key_material_file'
     LEGACY_FIELDS: ClassVar[frozenset[str]] = frozenset({
         LEGACY_ACCESS_ID,
         LEGACY_PRIVATE_KEY_FILE,
         LEGACY_PRIVATE_KEY_PATH,
+        LEGACY_PRIVATE_KEY_PEM,
+        LEGACY_KEY_MATERIAL_PATH,
+        LEGACY_KEY_MATERIAL_FILE,
     })
 
     # OAuth authentication fields
@@ -678,6 +762,8 @@ class Urls:
     # Schemes
     HTTP: ClassVar[str] = 'http://'
     HTTPS: ClassVar[str] = 'https://'
+    HTTP_SCHEME: ClassVar[str] = 'http'
+    HTTPS_SCHEME: ClassVar[str] = 'https'
 
     # General URLs
     BASE_URL: ClassVar[str] = HTTPS + '{tenant_name}.{api_type}.securid.com'                        # Vars: tenant_name, api_type
@@ -775,6 +861,7 @@ class LogMessages:
 # -----------------------------
 # Common (Public)
 ARGUMENT_VALUES: Final[ArgumentValues] = ArgumentValues()
+CREDENTIAL_VALUES: Final[CredentialValues] = CredentialValues()
 FILE_EXTENSIONS: Final[FileExtensions] = FileExtensions()
 URLS: Final[Urls] = Urls()
 

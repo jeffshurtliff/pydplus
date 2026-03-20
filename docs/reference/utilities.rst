@@ -1,6 +1,14 @@
 Utilities
 =========
 
+Credential Utilities
+--------------------
+
+.. automodule:: pydplus.credentials
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Core Utilities
 --------------
 

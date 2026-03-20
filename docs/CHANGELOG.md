@@ -15,12 +15,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added shared pytest fixtures and integration-test controls in `tests/conftest.py`.
 - Added unit tests in `tests/unit/test_logging.py` for `pydplus.utils.log_utils`.
+- Added secure RSA ID Plus legacy credential parsing and explicit PEM persistence helpers in `src/pydplus/credentials.py`.
+- Added `IDPlusCredentialError` in `src/pydplus/errors/exceptions.py` for credential parsing and key-material handling failures.
 
 (unreleased-changed)=
 ### Changed
 
 - Refactored tests into `tests/unit/` and `tests/integration/` with updated testing documentation and default coverage reporting.
 - Updated `pydplus.utils.log_utils` with comprehensive type hints/docstrings and improved handler/level configuration behavior.
+- Updated `pydplus.core.PyDPlus` to accept legacy key material (parsed object or `.key` path) and wire it into legacy connection initialization.
+- Updated legacy auth private-key loading to support in-memory PEM data from connection info in addition to file paths.
 
 ---
 (relnotes-1.0.0)=

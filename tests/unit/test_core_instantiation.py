@@ -4,10 +4,13 @@
 :Synopsis:          Unit tests for client object instantiation and connection-info compilation
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff (via GPT-5.3-codex)
-:Modified Date:     15 Mar 2026
+:Modified Date:     18 Mar 2026
 """
 
 from __future__ import annotations
+
+import json
+from pathlib import Path
 
 import pytest
 
@@ -59,3 +62,32 @@ def test_instantiate_core_object_with_connection_info_and_no_auto_connect(
     assert pydp_object.admin_base_rest_url.endswith('/AdminInterface/restapi')
     assert pydp_object.auth_base_url is None
     assert pydp_object.auth_base_rest_url is None
+
+
+def test_instantiate_core_object_with_legacy_key_material_path(tmp_path: Path) -> None:
+    """Ensure legacy key-material paths are parsed and merged into connection info during initialization."""
+    key_payload = {
+        const.CREDENTIAL_VALUES.JSON_FIELD_CUSTOMER_NAME: 'Example Tenant',
+        const.CREDENTIAL_VALUES.JSON_FIELD_ACCESS_ID: 'legacy-access-id',
+        const.CREDENTIAL_VALUES.JSON_FIELD_ACCESS_KEY: (
+            '-----BEGIN RSA PRIVATE KEY-----\n'
+            'test-private-key\n'
+            '-----END RSA PRIVATE KEY-----\n'
+        ),
+        const.CREDENTIAL_VALUES.JSON_FIELD_ADMIN_REST_API_URL: 'https://example.com/AdminInterface/restapi',
+    }
+    key_file = tmp_path / 'tenant.key'
+    key_file.write_text(json.dumps(key_payload), encoding='utf-8')
+
+    pydp_object = PyDPlus(
+        connection_type=const.CONNECTION_INFO.LEGACY,
+        legacy_key_material=str(key_file),
+        auto_connect=False,
+    )
+
+    assert pydp_object.base_url == 'https://example.com'
+    assert pydp_object.admin_base_url == 'https://example.com'
+    assert pydp_object.connection_info[const.CONNECTION_INFO.LEGACY][const.CONNECTION_INFO.LEGACY_ACCESS_ID] == 'legacy-access-id'
+    assert pydp_object.connection_info[const.CONNECTION_INFO.LEGACY][const.CONNECTION_INFO.LEGACY_PRIVATE_KEY_PEM].startswith(
+        '-----BEGIN RSA PRIVATE KEY-----'
+    )

@@ -3,8 +3,8 @@
 :Module:            pydplus.errors.exceptions
 :Synopsis:          Collection of exception classes relating to the pydplus library
 :Created By:        Jeff Shurtliff
-:Last Modified:     Jeff Shurtliff
-:Modified Date:     07 Mar 2026
+:Last Modified:     Jeff Shurtliff (via GPT-5.3-codex)
+:Modified Date:     17 Mar 2026
 """
 
 from __future__ import annotations
@@ -147,6 +147,15 @@ class UnknownFileTypeError(PyDPlusError):
             custom_msg = (f"{default_msg.split('path')[0]}'{kwargs[_EXCEPTION_CLASSES._FILE]}'"
                           f"{default_msg.split('path')[1]}")
             args = (custom_msg,)
+        super().__init__(*args)
+
+
+class IDPlusCredentialError(PyDPlusError):
+    """Exception used for RSA ID Plus legacy credential parsing and persistence errors."""
+    def __init__(self, *args, **kwargs):
+        default_msg = 'The RSA ID Plus credential material is invalid or could not be processed securely.'
+        if not (args or kwargs):
+            args = (default_msg,)
         super().__init__(*args)
 
 
