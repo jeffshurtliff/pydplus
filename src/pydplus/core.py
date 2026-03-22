@@ -6,7 +6,7 @@
 :Example:           ``pydp = PyDPlus()``
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     20 Mar 2026
+:Modified Date:     21 Mar 2026
 """
 
 from __future__ import annotations
@@ -104,21 +104,21 @@ class PyDPlus(object):
             helper: Union[Optional[str], Optional[tuple], Optional[list], Optional[set], Optional[dict]] = None,
     ):
         """Instantiate the core client object."""
-        # Define the initial settings
+        # Define the initial properties and settings
         self._helper_settings = {}
         self._env_variables = {}
         self.base_headers = {}
         self.connected = False
         self.connection_type = None
+        self.env = None
         self.strict_mode = strict_mode
         self.tenant_name = tenant_name
 
-        # Define the environment if explicitly defined as an argument or environment variable
-        # TODO: Move this method call until after helper settings are defined to get env from helper when applicable
-        self.env = self._get_env_name(env)
-
         # Check for a supplied helper file and extract the configuration settings if found
         self._get_helper_settings(helper)
+
+        # Define the environment if explicitly defined as an argument, helper setting, or environment variable
+        self._get_env_name(env)
 
         # Define the environment variable names to retrieve when defined
         self._define_env_variable_names(env_variables)
@@ -276,18 +276,32 @@ class PyDPlus(object):
         logger.error(_error_msg)
         raise TypeError(_error_msg)
 
-    @staticmethod
-    def _get_env_name(_env: Optional[str] = None) -> Union[str, None]:
+    def _get_env_name(self, _env: Optional[str] = None) -> None:
         """Identify the environment name if defined with an argument or environment variable."""
+        # Attempt to define the environment name using a passed argument
         if _env:
             if not isinstance(_env, str):
                 _error_msg = f"The 'env' argument is an invalid data type (Expected: str, Provided: {type(_env)})"
                 logger.error(_error_msg)
                 raise TypeError(_error_msg)
-            return _env.upper()
-        # TODO: Check the helper settings (will need to change this method to not be static)
-        else:
-            return os.getenv(const.ENV_VARIABLES.ENV_NAME)  # Returns None if not found
+            self.env = _env.upper()
+            logger.debug(f"The environment name has been defined as '{self.env}' from the passed argument")
+
+        # Attempt to define the environment name using helper settings if configured
+        if (not self.env and self._helper_settings
+                and isinstance(self._helper_settings.get(const.HELPER_SETTINGS.ENV_NAME), str)
+                and self._helper_settings[const.HELPER_SETTINGS.ENV_NAME]):
+            self.env = self._helper_settings[const.HELPER_SETTINGS.ENV_NAME].upper()
+            logger.debug(f"The environment name has been defined as '{self.env}' from the helper settings")
+
+        # Define the environment name (or lack thereof) using the environment variable
+        if not self.env:
+            _env = os.getenv(const.ENV_VARIABLES.ENV_NAME)  # Returns None if not found
+            self.env = _env.upper() if _env else None
+            if self.env:
+                logger.debug(f"The environment name has been defined as '{self.env}' from an environment variable")
+            else:
+                logger.debug('The environment name could not be defined as it was not specified anywhere')
 
     def _define_env_variable_names(self, _env_variables_from_arg: Optional[dict]) -> None:
         """Define the environment variable names to use based on an explicit argument or helper settings."""
