@@ -3,22 +3,21 @@
 :Module:            pydplus.api
 :Synopsis:          Defines the basic functions associated with the RSA ID Plus API
 :Created By:        Jeff Shurtliff
-:Last Modified:     Jeff Shurtliff
-:Modified Date:     14 Mar 2026
+:Last Modified:     Jeff Shurtliff (via GPT-5.3-codex)
+:Modified Date:     21 Mar 2026
 """
 
 from __future__ import annotations
 
+import logging
 from typing import Optional, Union
 
 import requests
 
 from . import errors
 from . import constants as const
-from .utils import log_utils
 
-# Initialize logging
-logger = log_utils.initialize_logging(__name__)
+logger = logging.getLogger(__name__)
 
 
 def get(

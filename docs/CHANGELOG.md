@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated `pydplus.utils.log_utils` with comprehensive type hints/docstrings and improved handler/level configuration behavior.
 - Updated `pydplus.core.PyDPlus` to accept legacy key material (parsed object or `.key` path) and wire it into legacy connection initialization.
 - Updated legacy auth private-key loading to support in-memory PEM data from connection info in addition to file paths.
+- Refactored package-module logging to use `logging.getLogger(__name__)` without import-time self-configuration and updated development logging guidance/helpers accordingly.
 
 ---
 (relnotes-1.0.0)=

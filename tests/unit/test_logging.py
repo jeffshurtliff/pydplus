@@ -4,11 +4,13 @@
 :Synopsis:          Unit tests for pydplus.utils.log_utils
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff (via GPT-5.3-codex)
-:Modified Date:     16 Mar 2026
+:Modified Date:     21 Mar 2026
 """
 
 from __future__ import annotations
 
+import importlib
+import importlib.util
 import logging
 import sys
 from pathlib import Path
@@ -34,6 +36,17 @@ def _get_clean_logger() -> logging.Logger:
     return logger
 
 
+def _load_dev_logging_setup_func():
+    """Load setup_dev_logging from dev/dev_logging.py without requiring dev on PYTHONPATH."""
+    module_path = Path(__file__).resolve().parents[2] / 'dev' / 'dev_logging.py'
+    spec = importlib.util.spec_from_file_location('pydplus_dev_logging_for_tests', module_path)
+    if not spec or not spec.loader:
+        raise RuntimeError('Unable to load dev/dev_logging.py for testing')
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.setup_dev_logging
+
+
 def test_initialize_logging_adds_null_handler_by_default_and_is_idempotent() -> None:
     """Ensure default initialization adds only one null handler across repeated calls."""
     logger_name = f'tests.unit.log_utils.default.{uuid4().hex}'
@@ -43,6 +56,67 @@ def test_initialize_logging_adds_null_handler_by_default_and_is_idempotent() -> 
     assert logger.level == logging.INFO
     assert len(logger.handlers) == 1
     assert isinstance(logger.handlers[0], logging.NullHandler)
+
+
+def test_package_module_logger_has_no_handlers_when_imported() -> None:
+    """Ensure importing package modules does not self-configure managed handlers."""
+    import pydplus.api as api_module
+
+    module_logger = logging.getLogger(api_module.__name__)
+    for handler in list(module_logger.handlers):
+        module_logger.removeHandler(handler)
+        handler.close()
+
+    reloaded_module = importlib.reload(api_module)
+    assert reloaded_module.logger is logging.getLogger(reloaded_module.__name__)
+    assert reloaded_module.logger.name == reloaded_module.__name__
+    assert reloaded_module.logger.handlers == []
+
+
+def test_initialize_logging_for_package_logger_enables_child_logger_output(capsys) -> None:
+    """Ensure package-level logger configuration makes child package logs visible."""
+    logger_name = f'pydplus.tests.visibility.{uuid4().hex}'
+    package_logger = logging.getLogger('pydplus')
+    initial_level = package_logger.level
+    try:
+        log_utils.initialize_logging(
+            logger_name='pydplus',
+            debug=True,
+            console_output=True,
+        )
+        logging.getLogger(logger_name).debug('package-logger-visible-output')
+        captured = capsys.readouterr()
+        assert 'package-logger-visible-output' in (captured.out + captured.err)
+    finally:
+        log_utils._remove_managed_handlers(package_logger)
+        package_logger.setLevel(initial_level)
+
+
+def test_setup_dev_logging_configures_root_logger_for_package_visibility(capsys) -> None:
+    """Ensure dev helper can configure global output for package logs."""
+    setup_dev_logging = _load_dev_logging_setup_func()
+    root_logger = logging.getLogger()
+    package_logger = logging.getLogger('pydplus')
+    initial_level = root_logger.level
+    initial_package_level = package_logger.level
+    logger_name = f'tests.dev.logging.{uuid4().hex}'
+    try:
+        package_logger.setLevel(logging.NOTSET)
+        configured_logger = setup_dev_logging(
+            logger_name=logger_name,
+            debug=True,
+            console=True,
+            file=False,
+            configure_root=True,
+        )
+        logging.getLogger(f'pydplus.tests.dev.{uuid4().hex}').debug('dev-helper-visible-output')
+        captured = capsys.readouterr()
+        assert configured_logger.name == logger_name
+        assert 'dev-helper-visible-output' in (captured.out + captured.err)
+    finally:
+        log_utils._remove_managed_handlers(root_logger)
+        root_logger.setLevel(initial_level)
+        package_logger.setLevel(initial_package_level)
 
 
 def test_initialize_logging_replaces_managed_handlers_without_removing_user_handlers() -> None:

@@ -5,25 +5,24 @@
 :Usage:             ``from pydplus.utils import core_utils``
 :Example:           ``encoded_string = core_utils.encode_url(decoded_string)``
 :Created By:        Jeff Shurtliff
-:Last Modified:     Jeff Shurtliff
-:Modified Date:     12 Mar 2026
+:Last Modified:     Jeff Shurtliff (via GPT-5.3-codex)
+:Modified Date:     21 Mar 2026
 """
 
 from __future__ import annotations
 
+import logging
 import os
 import random
 import string
 import urllib.parse
 from typing import Optional, Tuple
 
-from . import log_utils
 from .. import errors
 from .. import constants as const
 from ..errors.handlers import get_exception_type
 
-# Initialize the logger for this module
-logger = log_utils.initialize_logging(__name__)
+logger = logging.getLogger(__name__)
 
 
 def url_encode(raw_string: str) -> str:

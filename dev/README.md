@@ -25,11 +25,19 @@ and applies sensible defaults for development scenarios.
 
 ## Why use this helper?
 
-By default, the `pydplus` logging utility attaches a `NullHandler` unless output is explicitly enabled. 
-This is ideal for library usage, but it can make development confusing because no logs appear in the console.
+Package modules use the standard library pattern:
+
+```python
+import logging
+logger = logging.getLogger(__name__)
+```
+
+This keeps library imports side-effect free, but it also means visible output depends on external logging
+configuration.
 
 The `setup_dev_logging()` helper solves this by:
 
+- Configuring logging externally (root logger by default) so package-wide logs are visible
 - Enabling console logging by default
 - Enabling debug-level logging across all handlers
 - Optionally enabling file logging
@@ -47,7 +55,9 @@ from dev.dev_logging import setup_dev_logging
 logger = setup_dev_logging(__name__)
 ```
 
-You can then use the logger as usual:
+This also enables logs emitted by package modules such as `pydplus.core`, `pydplus.api`, and `pydplus.users`.
+
+You can then use your script logger as usual:
 
 ```python
 logger.debug("Debug message")
@@ -108,19 +118,21 @@ setup_dev_logging(
     file: bool = False,
     log_file: Optional[str] = None,
     overwrite: bool = True,
+    configure_root: bool = True,
 )
 ```
 
 ### Parameters
 
-| Parameter     | Description                                   |
-|---------------|-----------------------------------------------|
-| `logger_name` | Logger name (typically `__name__`)            |
-| `debug`       | Enables debug-level logging for all handlers  |
-| `console`     | Enables console output (stdout/stderr)        |
-| `file`        | Enables file logging                          |
-| `log_file`    | Path to the log file (optional)               |
-| `overwrite`   | Whether to overwrite the log file on each run |
+| Parameter        | Description                                                   |
+|------------------|---------------------------------------------------------------|
+| `logger_name`    | Logger name (typically `__name__`)                            |
+| `debug`          | Enables debug-level logging for all handlers                  |
+| `console`        | Enables console output (stdout/stderr)                        |
+| `file`           | Enables file logging                                          |
+| `log_file`       | Path to the log file (optional)                               |
+| `overwrite`      | Whether to overwrite the log file on each run                 |
+| `configure_root` | Configures root logging so all package loggers inherit output |
 
 ---
 
@@ -142,14 +154,12 @@ logger = setup_dev_logging(
 )
 ```
 
-### Quiet Mode (Library Behavior)
+### Script-Only Logger Configuration
 
-If you want to disable development logging and revert to library-style behavior:
+If you only want to configure the calling script logger (and not root):
 
 ```python
-from pydplus.utils import log_utils
-
-logger = log_utils.initialize_logging(__name__)
+logger = setup_dev_logging(__name__, configure_root=False)
 ```
 
 ---

@@ -5,12 +5,13 @@
 :Usage:             ``from pydplus import auth``
 :Example:           ``jwt_string = auth.get_legacy_jwt_string(base_url, connection_info)``
 :Created By:        Jeff Shurtliff
-:Last Modified:     Jeff Shurtliff (via GPT-5.3-codex)
-:Modified Date:     18 Mar 2026
+:Last Modified:     Jeff Shurtliff
+:Modified Date:     22 Mar 2026
 """
 
 from __future__ import annotations
 
+import logging
 import datetime
 from typing import Optional, Tuple
 
@@ -21,10 +22,9 @@ from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey
 
 from . import errors
 from . import constants as const
-from .utils import core_utils, log_utils
+from .utils import core_utils
 
-# Initialize logging
-logger = log_utils.initialize_logging(__name__)
+logger = logging.getLogger(__name__)
 
 
 def get_legacy_jwt_string(base_url: str, connection_info: dict) -> str:

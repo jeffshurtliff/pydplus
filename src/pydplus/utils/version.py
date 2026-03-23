@@ -3,12 +3,13 @@
 :Module:            pydplus.utils.version
 :Synopsis:          This module contains the package version information
 :Created By:        Jeff Shurtliff
-:Last Modified:     Jeff Shurtliff
-:Modified Date:     07 Mar 2026
+:Last Modified:     Jeff Shurtliff (via GPT-5.3-codex)
+:Modified Date:     21 Mar 2026
 """
 
 from __future__ import annotations
 
+import logging
 from pathlib import Path
 from typing import Optional
 from importlib.metadata import version, PackageNotFoundError
@@ -17,10 +18,7 @@ try:
 except ModuleNotFoundError:  # pragma: no cover
     import tomli as tomllib  # type: ignore[import-not-found]
 
-from . import log_utils
-
-# Initialize logging
-logger = log_utils.initialize_logging(__name__)
+logger = logging.getLogger(__name__)
 
 
 def get_full_version() -> str:
@@ -36,7 +34,7 @@ def get_full_version() -> str:
     except PackageNotFoundError:
         # This can happen if the package is not installed in the environment
         # (e.g. running from a source checkout without an editable install)
-        logger.debug('Package is not installed and version will be retrieved from pyproject.toml file')
+        logger.debug('Package is not installed and version will be retrieved from the pyproject.toml file')
         return get_version_from_pyproject()
 
 
