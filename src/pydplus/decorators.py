@@ -4,14 +4,17 @@
 :Synopsis:          Decorators that can be used to include additional functionality with functions and methods
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     07 Mar 2026
+:Modified Date:     22 Mar 2026
 """
 
 from __future__ import annotations
 
-import functools
+import logging
 import warnings
+import functools
 from typing import Any, Callable, Optional, Type, TypeVar
+
+logger = logging.getLogger(__name__)
 
 # Define the function Type bound to Callable
 F = TypeVar("F", bound=Callable[..., Any])
@@ -48,6 +51,7 @@ def deprecated(
 
         @functools.wraps(func)
         def wrapper(*args: Any, **kwargs: Any):
+            logger.warning(message)
             warnings.warn(message, category=category, stacklevel=stacklevel)
             return func(*args, **kwargs)
 
