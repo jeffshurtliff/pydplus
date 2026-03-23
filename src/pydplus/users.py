@@ -3,14 +3,14 @@
 :Module:            pydplus.users
 :Synopsis:          Defines the user-related functions associated with the RSA ID Plus API
 :Created By:        Jeff Shurtliff
-:Last Modified:     Jeff Shurtliff (via GPT-5.3-codex)
-:Modified Date:     21 Mar 2026
+:Last Modified:     Jeff Shurtliff
+:Modified Date:     22 Mar 2026
 """
 
 from __future__ import annotations
 
 import logging
-from typing import Optional
+from typing import Optional, Union
 
 from . import api, errors
 from . import constants as const
@@ -52,7 +52,7 @@ def get_user_details(
              :py:exc:`errors.exceptions.InvalidFieldError`
     """
     # Define the payload
-    payload = {
+    payload: dict[str, Union[str, bool]] = {
         const.QUERY_PARAMS.EMAIL: email,
     }
     if search_unsynced is not None:
@@ -60,7 +60,6 @@ def get_user_details(
             error_msg = f'The value of the search_unsynced parameter must be Boolean. (Provided: {type(search_unsynced)})'
             logger.error(error_msg)
             raise TypeError(error_msg)
-        # noinspection PyTypeChecker
         payload[const.QUERY_PARAMS.SEARCH_UNSYNCED] = search_unsynced
 
     # Perform the API call and return the response in JSON format
@@ -127,7 +126,7 @@ def _update_user_status(
         _return_json: bool = True,
         _allow_failed_response: Optional[bool] = None,
 ):
-    """Enabl or disable a user by calling the User Status API.
+    """Enable or disable a user by calling the User Status API.
 
     :param _pydp_object: The instantiated pydplus object
     :type _pydp_object: class[pydplus.PyDPlus]
@@ -300,8 +299,8 @@ def _update_mark_deleted(
 ):
     """Mark (or unmark) a specific user as deleted."""
     # Define the API endpoint to call and other API details
-    _endpoint = const.REST_PATHS.USER_MARK_DELETED.format(user_id=_user_id)
-    _payload = {const.QUERY_PARAMS.MARK_DELETED: _mark_deleted}
+    _endpoint: str = const.REST_PATHS.USER_MARK_DELETED.format(user_id=_user_id)
+    _payload: dict[str, bool] = {const.QUERY_PARAMS.MARK_DELETED: _mark_deleted}
     
     # Perform the API call and return the response
     return api.put(pydp_object=_pydp_object, endpoint=_endpoint, payload=_payload, api_type=const.ADMIN_API_TYPE,
