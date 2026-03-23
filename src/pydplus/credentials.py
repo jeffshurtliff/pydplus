@@ -3,13 +3,14 @@
 :Module:            pydplus.credentials
 :Synopsis:          Secure parsing and handling for RSA ID Plus legacy key material
 :Created By:        Jeff Shurtliff
-:Last Modified:     Jeff Shurtliff
-:Modified Date:     18 Mar 2026
+:Last Modified:     Jeff Shurtliff (via GPT-5.3-codex)
+:Modified Date:     21 Mar 2026
 """
 
 from __future__ import annotations
 
 import json
+import logging
 import os
 import re
 import sys
@@ -20,11 +21,9 @@ from typing import Any, Mapping, Optional, Union, cast
 from urllib.parse import urlparse
 
 from . import constants as const
-from .utils import log_utils
 from .errors.exceptions import IDPlusCredentialError
 
-# Initialize logging
-logger = log_utils.initialize_logging(__name__)
+logger = logging.getLogger(__name__)
 
 # Define the _slots_dataclass property based on the python version
 if sys.version_info >= (3, 10):

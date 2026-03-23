@@ -5,24 +5,23 @@
 :Usage:             ``from pydplus.utils import helper``
 :Example:           ``helper_settings = helper.get_settings('/tmp/helper.yml', 'yaml')``
 :Created By:        Jeff Shurtliff
-:Last Modified:     Jeff Shurtliff
-:Modified Date:     20 Mar 2026
+:Last Modified:     Jeff Shurtliff (via GPT-5.3-codex)
+:Modified Date:     21 Mar 2026
 """
 
 from __future__ import annotations
 
 import json
+import logging
 from typing import Optional, Union
 
 import yaml
 
-from . import log_utils
 from .core_utils import get_file_type
 from .. import errors
 from .. import constants as const
 
-# Initialize logging within the module
-logger = log_utils.initialize_logging(__name__)
+logger = logging.getLogger(__name__)
 
 
 def import_helper_file(file_path: str, file_type: str) -> dict:

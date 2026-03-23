@@ -5,12 +5,13 @@
 :Usage:             ``from pydplus import PyDPlus``
 :Example:           ``pydp = PyDPlus()``
 :Created By:        Jeff Shurtliff
-:Last Modified:     Jeff Shurtliff
+:Last Modified:     Jeff Shurtliff (via GPT-5.3-codex)
 :Modified Date:     21 Mar 2026
 """
 
 from __future__ import annotations
 
+import logging
 import os
 from pathlib import Path
 from typing import Any, Optional, Union, Tuple
@@ -20,11 +21,10 @@ from . import auth, api, errors
 from . import constants as const
 from .credentials import IDPlusLegacyKeyMaterial
 from . import users as users_module
-from .utils import core_utils, log_utils
+from .utils import core_utils
 from .utils.helper import get_helper_settings
 
-# Initialize logging
-logger = log_utils.initialize_logging(__name__)
+logger = logging.getLogger(__name__)
 
 
 class PyDPlus(object):
