@@ -5,8 +5,8 @@
 :Usage:             ``from pydplus.utils import core_utils``
 :Example:           ``encoded_string = core_utils.encode_url(decoded_string)``
 :Created By:        Jeff Shurtliff
-:Last Modified:     Jeff Shurtliff (via GPT-5.3-codex)
-:Modified Date:     21 Mar 2026
+:Last Modified:     Jeff Shurtliff
+:Modified Date:     22 Mar 2026
 """
 
 from __future__ import annotations
@@ -120,6 +120,7 @@ def get_file_type(file_path: str) -> str:
                             file_type = const.FILE_EXTENSIONS.JSON
                             break
         if file_type == 'unknown':
+            logger.error(f'The file type of {file_path} could not be identified')
             raise errors.exceptions.UnknownFileTypeError(file=file_path)
     else:
         error_msg = const._EXCEPTION_CLASSES._CANNOT_LOCATE_FILE.format(file_path=file_path)
