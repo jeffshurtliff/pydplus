@@ -17,6 +17,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added unit tests in `tests/unit/test_logging.py` for `pydplus.utils.log_utils`.
 - Added secure RSA ID Plus legacy credential parsing and explicit PEM persistence helpers in `src/pydplus/credentials.py`.
 - Added `IDPlusCredentialError` in `src/pydplus/errors/exceptions.py` for credential parsing and key-material handling failures.
+- Added OAuth Private Key JWT support for Administration API connections in `src/pydplus/auth.py`.
+- Added OAuth token caching and one-time 401 refresh/retry handling in `src/pydplus/api.py`.
+- Added OAuth unit coverage in `tests/unit/test_auth.py` and `tests/unit/test_api_oauth.py`.
 
 (unreleased-changed)=
 ### Changed
@@ -26,6 +29,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated `pydplus.core.PyDPlus` to accept legacy key material (parsed object or `.key` path) and wire it into legacy connection initialization.
 - Updated legacy auth private-key loading to support in-memory PEM data from connection info in addition to file paths.
 - Refactored package-module logging to use `logging.getLogger(__name__)` without import-time self-configuration and updated development logging guidance/helpers accordingly.
+- Updated `pydplus.core.PyDPlus` and `compile_connection_info()` to support OAuth private-key JWK configuration via arguments, helper settings, and environment variables.
+- Updated connection-type resolution to preserve explicit values and auto-detect complete OAuth/Legacy credential sets before defaulting.
+- Updated helper/environment constant mappings to include OAuth private-key path, file, and inline JWK fields.
 
 ---
 (relnotes-1.0.0)=

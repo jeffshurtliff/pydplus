@@ -6,8 +6,8 @@
     "admin": "https://example-company.access.securid.com",
     "auth": "https://example-company.auth.securid.com"
   },
-  "connection_type": "legacy",
-  "strict_mode": false,
+  "connection_type": "oauth",
+  "strict_mode": true,
   "connection": {
     "legacy": {
       "access_id": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
@@ -20,7 +20,9 @@
       "issuer_url": "https://example-company.auth.securid.com/oauth",
       "client_id": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
       "grant_type": "Client Credentials",
-      "client_authentication": "Private Key JWT"
+      "client_authentication": "Private Key JWT",
+      "private_key_path": "/Users/johndoe/Development/pydplus/local",
+      "private_key_file": "prod_oauth_private_key.jwk"
     }
   },
   "verify_ssl": true,
@@ -39,6 +41,10 @@
     "legacy_key_material_file": "PYDPLUS_LEGACY_KEY_MATERIAL_FILE",
     "oauth_issuer_url": "PYDPLUS_OAUTH_ISSUER_URL",
     "oauth_client_id": "PYDPLUS_OAUTH_CLIENT_ID",
-    "oauth_grant_type": "PYDPLUS_OAUTH_GRANT_TYPE"
+    "oauth_grant_type": "PYDPLUS_OAUTH_GRANT_TYPE",
+    "oauth_client_authentication": "PYDPLUS_OAUTH_CLIENT_AUTH",
+    "oauth_private_key_path": "PYDPLUS_OAUTH_PRIVATE_KEY_PATH",
+    "oauth_private_key_file": "PYDPLUS_OAUTH_PRIVATE_KEY_FILE",
+    "oauth_private_key_jwk": "PYDPLUS_OAUTH_PRIVATE_KEY_JWK"
   }
 }

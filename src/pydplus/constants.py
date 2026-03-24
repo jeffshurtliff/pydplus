@@ -4,7 +4,7 @@
 :Synopsis:          Constants that are utilized throughout the package
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     20 Mar 2026
+:Modified Date:     24 Mar 2026
 """
 
 from __future__ import annotations
@@ -47,6 +47,13 @@ class ArgumentValues:
     FILE: ClassVar[str] = 'file'
     URL: ClassVar[str] = 'url'
 
+    # Methods that settings are provided
+    PROVIDED_METHODS: ClassVar[tuple] = (
+        'passed argument',
+        'helper settings',
+        'environment variable',
+    )
+
     # User status actions
     ENABLE: ClassVar[str] = 'enable'
     DISABLE: ClassVar[str] = 'disable'
@@ -78,6 +85,33 @@ class CredentialValues:
 
     PRIVATE_DIR_MODE: ClassVar[int] = 0o700
     PRIVATE_FILE_MODE: ClassVar[int] = 0o600
+
+
+# -----------------------------
+# Log Messages
+# -----------------------------
+@dataclass(frozen=True)
+class LogMessages:
+    """Common log messages that are utilized in multiple locations throughout the package."""
+    # Generic argument messages
+    _INVALID_ARG_IGNORE: ClassVar[str] = 'The {arg} argument is invalid and will be ignored'                            # Vars: arg
+
+    # Generic parameter value messages
+    _INVALID_PARAM_VALUE_DEFAULT: ClassVar[str] = "The {param} value is not valid and will default to '{default}'"      # Vars: param, default
+    _INVALID_PARAM_VALUE_IGNORE: ClassVar[str] = "The {param} value '{value}' is not valid and will be ignored"         # Vars: param, value
+    _MUST_BE_DATA_TYPE_ERROR: ClassVar[str] = "The data type of the {param} parameter must be '{data_type}'"            # Vars: param, data_type
+    _PARAM_EXCEEDS_MAX_VALUE: ClassVar[str] = 'The {param} value exceeds the maximum and will default to {default}'     # Vars: param, default
+
+    # Generic data messages
+    _MISSING_REQUIRED_DATA: ClassVar[str] = '{data} is missing and must be provided as it is required'                  # Vars: data
+    _MUST_BE_PROVIDED_ERROR: ClassVar[str] = 'The {data} must be provided.'                                             # Vars: data
+
+    # Client instantiation messages
+    _CLIENT_SETTING_CONFIGURED: ClassVar[str] = "The {setting} setting was configured as '{value}' via {method}"        # Vars: setting, value, method
+    _WILL_USE_DEFAULT_VALUE: ClassVar[str] = (                                                                          # Vars: setting, value
+        "The {setting} setting was not defined and will use "
+        "the default value '{value}'"
+    )
 
 
 # -----------------------------
@@ -143,11 +177,19 @@ class ClientSettings:
     """Fields, values, and other constants relating to the :py:class:`pydplus.PyDPlus`
     client configuration settings.
     """
+    # Client properties
+    BASE_URL: ClassVar[str] = 'base_url'
+    CONNECTION_INFO: ClassVar[str] = 'connection_info'
+    CONNECTION_TYPE: ClassVar[str] = 'connection_type'
+    STRICT_MODE: ClassVar[str] = 'strict_mode'
+    VERIFY_SSL: ClassVar[str] = 'verify_ssl'
+
     # Connection types
     CONNECTION_TYPE_LEGACY: ClassVar[str] = 'legacy'
     CONNECTION_TYPE_OAUTH: ClassVar[str] = 'oauth'
 
     # Default values
+    DEFAULT_AUTO_CONNECT_VALUE = True
     DEFAULT_VERIFY_SSL_VALUE = True
 
 
@@ -195,11 +237,11 @@ class HelperSettings:
     API_BASE_URL: ClassVar[str] = '{type}_base_url'                                                 # Vars: type
 
     # Environment variable fields
-    ENV_ENV_NAME: ClassVar[str] = 'env',
-    ENV_TENANT_NAME: ClassVar[str] = 'tenant_name',
-    ENV_BASE_URL: ClassVar[str] = 'base_url',
-    ENV_ADMIN_BASE_URL: ClassVar[str] = 'admin_base_url',
-    ENV_AUTH_BASE_URL: ClassVar[str] = 'auth_base_url',
+    ENV_ENV_NAME: ClassVar[str] = 'env'
+    ENV_TENANT_NAME: ClassVar[str] = 'tenant_name'
+    ENV_BASE_URL: ClassVar[str] = 'base_url'
+    ENV_ADMIN_BASE_URL: ClassVar[str] = 'admin_base_url'
+    ENV_AUTH_BASE_URL: ClassVar[str] = 'auth_base_url'
     ENV_CONNECTION_TYPE: ClassVar[str] = 'connection_type'
     ENV_LEGACY_ACCESS_ID: ClassVar[str] = 'legacy_access_id'
     ENV_LEGACY_KEY_PATH: ClassVar[str] = 'legacy_key_path'
@@ -211,6 +253,9 @@ class HelperSettings:
     ENV_OAUTH_CLIENT_ID: ClassVar[str] = 'oauth_client_id'
     ENV_OAUTH_GRANT_TYPE: ClassVar[str] = 'oauth_grant_type'
     ENV_OAUTH_CLIENT_AUTH: ClassVar[str] = 'oauth_client_authentication'
+    ENV_OAUTH_PRIVATE_KEY_PATH: ClassVar[str] = 'oauth_private_key_path'
+    ENV_OAUTH_PRIVATE_KEY_FILE: ClassVar[str] = 'oauth_private_key_file'
+    ENV_OAUTH_PRIVATE_KEY_JWK: ClassVar[str] = 'oauth_private_key_jwk'
     ENV_STRICT_MODE: ClassVar[str] = 'strict_mode'
     ENV_VERIFY_SSL: ClassVar[str] = 'verify_ssl'
 
@@ -231,6 +276,9 @@ class HelperSettings:
     ENV_DEFAULT_OAUTH_CLIENT_ID: ClassVar[str] = 'PYDPLUS_OAUTH_CLIENT_ID'
     ENV_DEFAULT_OAUTH_GRANT_TYPE: ClassVar[str] = 'PYDPLUS_OAUTH_GRANT_TYPE'
     ENV_DEFAULT_OAUTH_CLIENT_AUTH: ClassVar[str] = 'PYDPLUS_OAUTH_CLIENT_AUTH'
+    ENV_DEFAULT_OAUTH_PRIVATE_KEY_PATH: ClassVar[str] = 'PYDPLUS_OAUTH_PRIVATE_KEY_PATH'
+    ENV_DEFAULT_OAUTH_PRIVATE_KEY_FILE: ClassVar[str] = 'PYDPLUS_OAUTH_PRIVATE_KEY_FILE'
+    ENV_DEFAULT_OAUTH_PRIVATE_KEY_JWK: ClassVar[str] = 'PYDPLUS_OAUTH_PRIVATE_KEY_JWK'
     ENV_DEFAULT_STRICT_MODE: ClassVar[str] = 'PYDPLUS_STRICT_MODE'
     ENV_DEFAULT_VERIFY_SSL: ClassVar[str] = 'PYDPLUS_VERIFY_SSL'
 
@@ -252,6 +300,9 @@ class HelperSettings:
         ENV_OAUTH_CLIENT_ID: ENV_DEFAULT_OAUTH_CLIENT_ID,
         ENV_OAUTH_GRANT_TYPE: ENV_DEFAULT_OAUTH_GRANT_TYPE,
         ENV_OAUTH_CLIENT_AUTH: ENV_DEFAULT_OAUTH_CLIENT_AUTH,
+        ENV_OAUTH_PRIVATE_KEY_PATH: ENV_DEFAULT_OAUTH_PRIVATE_KEY_PATH,
+        ENV_OAUTH_PRIVATE_KEY_FILE: ENV_DEFAULT_OAUTH_PRIVATE_KEY_FILE,
+        ENV_OAUTH_PRIVATE_KEY_JWK: ENV_DEFAULT_OAUTH_PRIVATE_KEY_JWK,
         ENV_STRICT_MODE: ENV_DEFAULT_STRICT_MODE,
         ENV_VERIFY_SSL: ENV_DEFAULT_VERIFY_SSL,
     })
@@ -270,6 +321,9 @@ class HelperSettings:
         'client_id': ENV_OAUTH_CLIENT_ID,
         'grant_type': ENV_OAUTH_GRANT_TYPE,
         'client_authentication': ENV_OAUTH_CLIENT_AUTH,
+        'private_key_path': ENV_OAUTH_PRIVATE_KEY_PATH,
+        'private_key_file': ENV_OAUTH_PRIVATE_KEY_FILE,
+        'private_key_jwk': ENV_OAUTH_PRIVATE_KEY_JWK,
     })
 
     # Other default values
@@ -327,6 +381,9 @@ class EnvVariables:
     OAUTH_CLIENT_ID: ClassVar[str] = 'PYDPLUS_OAUTH_CLIENT_ID'
     OAUTH_GRANT_TYPE: ClassVar[str] = 'PYDPLUS_OAUTH_GRANT_TYPE'
     OAUTH_CLIENT_AUTH: ClassVar[str] = 'PYDPLUS_OAUTH_CLIENT_AUTH'
+    OAUTH_PRIVATE_KEY_PATH: ClassVar[str] = 'PYDPLUS_OAUTH_PRIVATE_KEY_PATH'
+    OAUTH_PRIVATE_KEY_FILE: ClassVar[str] = 'PYDPLUS_OAUTH_PRIVATE_KEY_FILE'
+    OAUTH_PRIVATE_KEY_JWK: ClassVar[str] = 'PYDPLUS_OAUTH_PRIVATE_KEY_JWK'
 
     # --------------------------------
     # Custom Environment Variables
@@ -354,6 +411,9 @@ class EnvVariables:
     CUSTOM_OAUTH_CLIENT_ID: ClassVar[str] = 'PYDPLUS_{env_name}_OAUTH_CLIENT_ID'                    # Vars: env_name
     CUSTOM_OAUTH_GRANT_TYPE: ClassVar[str] = 'PYDPLUS_{env_name}_OAUTH_GRANT_TYPE'                  # Vars: env_name
     CUSTOM_OAUTH_CLIENT_AUTH: ClassVar[str] = 'PYDPLUS_{env_name}_OAUTH_CLIENT_AUTH'                # Vars: env_name
+    CUSTOM_OAUTH_PRIVATE_KEY_PATH: ClassVar[str] = 'PYDPLUS_{env_name}_OAUTH_PRIVATE_KEY_PATH'      # Vars: env_name
+    CUSTOM_OAUTH_PRIVATE_KEY_FILE: ClassVar[str] = 'PYDPLUS_{env_name}_OAUTH_PRIVATE_KEY_FILE'      # Vars: env_name
+    CUSTOM_OAUTH_PRIVATE_KEY_JWK: ClassVar[str] = 'PYDPLUS_{env_name}_OAUTH_PRIVATE_KEY_JWK'        # Vars: env_name
 
     # ------------------------------------
     # Production Environment Variables
@@ -381,6 +441,9 @@ class EnvVariables:
     PROD_OAUTH_CLIENT_ID: ClassVar[str] = CUSTOM_OAUTH_CLIENT_ID.format(env_name=PROD_ENVIRONMENT)
     PROD_OAUTH_GRANT_TYPE: ClassVar[str] = CUSTOM_OAUTH_GRANT_TYPE.format(env_name=PROD_ENVIRONMENT)
     PROD_OAUTH_CLIENT_AUTH: ClassVar[str] = CUSTOM_OAUTH_CLIENT_AUTH.format(env_name=PROD_ENVIRONMENT)
+    PROD_OAUTH_PRIVATE_KEY_PATH: ClassVar[str] = CUSTOM_OAUTH_PRIVATE_KEY_PATH.format(env_name=PROD_ENVIRONMENT)
+    PROD_OAUTH_PRIVATE_KEY_FILE: ClassVar[str] = CUSTOM_OAUTH_PRIVATE_KEY_FILE.format(env_name=PROD_ENVIRONMENT)
+    PROD_OAUTH_PRIVATE_KEY_JWK: ClassVar[str] = CUSTOM_OAUTH_PRIVATE_KEY_JWK.format(env_name=PROD_ENVIRONMENT)
 
     # -------------------------------------
     # Development Environment Variables
@@ -408,6 +471,9 @@ class EnvVariables:
     DEV_OAUTH_CLIENT_ID: ClassVar[str] = CUSTOM_OAUTH_CLIENT_ID.format(env_name=DEV_ENVIRONMENT)
     DEV_OAUTH_GRANT_TYPE: ClassVar[str] = CUSTOM_OAUTH_GRANT_TYPE.format(env_name=DEV_ENVIRONMENT)
     DEV_OAUTH_CLIENT_AUTH: ClassVar[str] = CUSTOM_OAUTH_CLIENT_AUTH.format(env_name=DEV_ENVIRONMENT)
+    DEV_OAUTH_PRIVATE_KEY_PATH: ClassVar[str] = CUSTOM_OAUTH_PRIVATE_KEY_PATH.format(env_name=DEV_ENVIRONMENT)
+    DEV_OAUTH_PRIVATE_KEY_FILE: ClassVar[str] = CUSTOM_OAUTH_PRIVATE_KEY_FILE.format(env_name=DEV_ENVIRONMENT)
+    DEV_OAUTH_PRIVATE_KEY_JWK: ClassVar[str] = CUSTOM_OAUTH_PRIVATE_KEY_JWK.format(env_name=DEV_ENVIRONMENT)
 
     # --------------------------------
     # Environment Variable Mapping
@@ -427,7 +493,10 @@ class EnvVariables:
     OAUTH_ISSUER_URL_FIELD: ClassVar[str] = 'oauth_issuer_url'
     OAUTH_CLIENT_ID_FIELD: ClassVar[str] = 'oauth_client_id'
     OAUTH_GRANT_TYPE_FIELD: ClassVar[str] = 'oauth_grant_type'
-    OAUTH_CLIENT_AUTH_FIELD: ClassVar[str] = 'oauth_client_auth'
+    OAUTH_CLIENT_AUTH_FIELD: ClassVar[str] = 'oauth_client_authentication'
+    OAUTH_PRIVATE_KEY_PATH_FIELD: ClassVar[str] = 'oauth_private_key_path'
+    OAUTH_PRIVATE_KEY_FILE_FIELD: ClassVar[str] = 'oauth_private_key_file'
+    OAUTH_PRIVATE_KEY_JWK_FIELD: ClassVar[str] = 'oauth_private_key_jwk'
     STRICT_MODE_FIELD: ClassVar[str] = 'strict_mode'
     VERIFY_SSL_FIELD: ClassVar[str] = 'verify_ssl'
 
@@ -449,6 +518,9 @@ class EnvVariables:
             OAUTH_CLIENT_ID_FIELD: OAUTH_CLIENT_ID,
             OAUTH_GRANT_TYPE_FIELD: OAUTH_GRANT_TYPE,
             OAUTH_CLIENT_AUTH_FIELD: OAUTH_CLIENT_AUTH,
+            OAUTH_PRIVATE_KEY_PATH_FIELD: OAUTH_PRIVATE_KEY_PATH,
+            OAUTH_PRIVATE_KEY_FILE_FIELD: OAUTH_PRIVATE_KEY_FILE,
+            OAUTH_PRIVATE_KEY_JWK_FIELD: OAUTH_PRIVATE_KEY_JWK,
             STRICT_MODE_FIELD: STRICT_MODE,
             VERIFY_SSL_FIELD: VERIFY_SSL,
         },
@@ -467,6 +539,9 @@ class EnvVariables:
             OAUTH_CLIENT_ID_FIELD: PROD_OAUTH_CLIENT_ID,
             OAUTH_GRANT_TYPE_FIELD: PROD_OAUTH_GRANT_TYPE,
             OAUTH_CLIENT_AUTH_FIELD: PROD_OAUTH_CLIENT_AUTH,
+            OAUTH_PRIVATE_KEY_PATH_FIELD: PROD_OAUTH_PRIVATE_KEY_PATH,
+            OAUTH_PRIVATE_KEY_FILE_FIELD: PROD_OAUTH_PRIVATE_KEY_FILE,
+            OAUTH_PRIVATE_KEY_JWK_FIELD: PROD_OAUTH_PRIVATE_KEY_JWK,
             STRICT_MODE_FIELD: PROD_STRICT_MODE,
             VERIFY_SSL_FIELD: PROD_VERIFY_SSL,
         },
@@ -485,6 +560,9 @@ class EnvVariables:
             OAUTH_CLIENT_ID_FIELD: DEV_OAUTH_CLIENT_ID,
             OAUTH_GRANT_TYPE_FIELD: DEV_OAUTH_GRANT_TYPE,
             OAUTH_CLIENT_AUTH_FIELD: DEV_OAUTH_CLIENT_AUTH,
+            OAUTH_PRIVATE_KEY_PATH_FIELD: DEV_OAUTH_PRIVATE_KEY_PATH,
+            OAUTH_PRIVATE_KEY_FILE_FIELD: DEV_OAUTH_PRIVATE_KEY_FILE,
+            OAUTH_PRIVATE_KEY_JWK_FIELD: DEV_OAUTH_PRIVATE_KEY_JWK,
             STRICT_MODE_FIELD: DEV_STRICT_MODE,
             VERIFY_SSL_FIELD: DEV_VERIFY_SSL,
         },
@@ -503,6 +581,9 @@ class EnvVariables:
             OAUTH_CLIENT_ID_FIELD: CUSTOM_OAUTH_CLIENT_ID,
             OAUTH_GRANT_TYPE_FIELD: CUSTOM_OAUTH_GRANT_TYPE,
             OAUTH_CLIENT_AUTH_FIELD: CUSTOM_OAUTH_CLIENT_AUTH,
+            OAUTH_PRIVATE_KEY_PATH_FIELD: CUSTOM_OAUTH_PRIVATE_KEY_PATH,
+            OAUTH_PRIVATE_KEY_FILE_FIELD: CUSTOM_OAUTH_PRIVATE_KEY_FILE,
+            OAUTH_PRIVATE_KEY_JWK_FIELD: CUSTOM_OAUTH_PRIVATE_KEY_JWK,
             STRICT_MODE_FIELD: CUSTOM_STRICT_MODE,
             VERIFY_SSL_FIELD: CUSTOM_VERIFY_SSL,
         },
@@ -533,6 +614,9 @@ class EnvVariables:
         OAUTH_CLIENT_ID_FIELD,
         OAUTH_GRANT_TYPE_FIELD,
         OAUTH_CLIENT_AUTH_FIELD,
+        OAUTH_PRIVATE_KEY_PATH_FIELD,
+        OAUTH_PRIVATE_KEY_FILE_FIELD,
+        OAUTH_PRIVATE_KEY_JWK_FIELD,
         STRICT_MODE_FIELD,
         VERIFY_SSL_FIELD,
     })
@@ -576,16 +660,39 @@ class ConnectionInfo:
     OAUTH_CLIENT_ID: ClassVar[str] = 'client_id'
     OAUTH_GRANT_TYPE: ClassVar[str] = 'grant_type'
     OAUTH_CLIENT_AUTHENTICATION: ClassVar[str] = 'client_authentication'
+    OAUTH_PRIVATE_KEY_PATH: ClassVar[str] = 'private_key_path'
+    OAUTH_PRIVATE_KEY_FILE: ClassVar[str] = 'private_key_file'
+    OAUTH_PRIVATE_KEY_JWK: ClassVar[str] = 'private_key_jwk'
     OAUTH_FIELDS: ClassVar[frozenset[str]] = frozenset({
         OAUTH_ISSUER_URL,
         OAUTH_CLIENT_ID,
         OAUTH_GRANT_TYPE,
         OAUTH_CLIENT_AUTHENTICATION,
+        OAUTH_PRIVATE_KEY_PATH,
+        OAUTH_PRIVATE_KEY_FILE,
+        OAUTH_PRIVATE_KEY_JWK,
     })
 
     # OAuth default values
     OAUTH_DEFAULT_GRANT_TYPE: ClassVar[str] = 'Client Credentials'
     OAUTH_DEFAULT_CLIENT_AUTH: ClassVar[str] = 'Private Key JWT'
+    OAUTH_GRANT_TYPE_CLIENT_CREDENTIALS: ClassVar[str] = 'client_credentials'
+    OAUTH_CLIENT_AUTH_PRIVATE_KEY_JWT: ClassVar[str] = 'private_key_jwt'
+    OAUTH_CLIENT_AUTH_CLIENT_SECRET_BASIC: ClassVar[str] = 'client_secret_basic'
+    OAUTH_GRANT_TYPE_MAPPING: ClassVar[Mapping[str, str]] = MappingProxyType({
+        OAUTH_DEFAULT_GRANT_TYPE.lower(): OAUTH_GRANT_TYPE_CLIENT_CREDENTIALS,
+        OAUTH_GRANT_TYPE_CLIENT_CREDENTIALS: OAUTH_GRANT_TYPE_CLIENT_CREDENTIALS,
+        'client credentials': OAUTH_GRANT_TYPE_CLIENT_CREDENTIALS,
+    })
+    OAUTH_CLIENT_AUTH_MAPPING: ClassVar[Mapping[str, str]] = MappingProxyType({
+        OAUTH_DEFAULT_CLIENT_AUTH.lower(): OAUTH_CLIENT_AUTH_PRIVATE_KEY_JWT,
+        OAUTH_CLIENT_AUTH_PRIVATE_KEY_JWT: OAUTH_CLIENT_AUTH_PRIVATE_KEY_JWT,
+        'private key jwt': OAUTH_CLIENT_AUTH_PRIVATE_KEY_JWT,
+        'private-key-jwt': OAUTH_CLIENT_AUTH_PRIVATE_KEY_JWT,
+        'client_secret_basic': OAUTH_CLIENT_AUTH_CLIENT_SECRET_BASIC,
+        'client secret basic': OAUTH_CLIENT_AUTH_CLIENT_SECRET_BASIC,
+        'client-secret-basic': OAUTH_CLIENT_AUTH_CLIENT_SECRET_BASIC,
+    })
 
     # Connection fields
     EMPTY_CONNECTION_INFO: ClassVar[Mapping[str, Mapping[str, Any]]] = MappingProxyType({
@@ -605,11 +712,18 @@ class ConnectionInfo:
 ADMIN_API_TYPE: Final[str] = 'admin'
 AUTH_API_TYPE: Final[str] = 'auth'
 
+# JSON Web Key Set (JWK)
+EC_KEY_TYPE: Final[str] = 'EC'
+RSA_KEY_TYPE: Final[str] = 'RSA'
+EC_KEY_ALGORITHM: Final[str] = 'ES256'
+RSA_KEY_ALGORITHM: Final[str] = 'RS256'
+
 # Default values
 DEFAULT_API_TIMEOUT_SECONDS: Final[int] = 30
 DEFAULT_API_MAX_RETRIES: Final[int] = 3
 DEFAULT_API_TYPE: Final[str] = ADMIN_API_TYPE
 DEFAULT_STRICT_MODE: Final[bool] = True
+DEFAULT_VERIFY_SSL: Final[bool] = True
 DEFAULT_HEADER_TYPE: Final[str] = 'default'
 
 # Validation criteria
@@ -632,11 +746,113 @@ class AuthFields:
     LEGACY: ClassVar[str] = 'legacy'
     OAUTH: ClassVar[str] = 'oauth'
 
-    # JWT Claims fields
+    # OAuth payload parameters
+    OAUTH_ACCESS_TOKEN: ClassVar[str] = 'access_token'
+    OAUTH_CLIENT_ASSERTION: ClassVar[str] = 'client_assertion'
+    OAUTH_CLIENT_ASSERTION_TYPE: ClassVar[str] = 'client_assertion_type'
+    OAUTH_EXPIRES_AT: ClassVar[str] = 'expires_at'
+    OAUTH_EXPIRES_IN: ClassVar[str] = 'expires_in'
+    OAUTH_TOKEN_TYPE: ClassVar[str] = 'token_type'
+
+    # JWT Claims fields (RFC 7519 and RFC 7523)
+    JWT_ISS: ClassVar[str] = 'iss'
     JWT_SUB: ClassVar[str] = 'sub'
+    JWT_AUD: ClassVar[str] = 'aud'
     JWT_IAT: ClassVar[str] = 'iat'
     JWT_EXP: ClassVar[str] = 'exp'
-    JWT_AUD: ClassVar[str] = 'aud'
+    JWT_NBF: ClassVar[str] = 'nbf'
+    JWT_JTI: ClassVar[str] = 'jti'
+
+    JWT_ISSUER: ClassVar[str] = JWT_ISS         # Also a header parameter
+    JWT_SUBJECT: ClassVar[str] = JWT_SUB        # Also a header parameter
+    JWT_AUDIENCE: ClassVar[str] = JWT_AUD       # Also a header parameter
+    JWT_ISSUED_AT: ClassVar[str] = JWT_IAT
+    JWT_EXPIRATION: ClassVar[str] = JWT_EXP
+    JWT_NOT_BEFORE: ClassVar[str] = JWT_NBF
+    JWT_ID: ClassVar[str] = JWT_JTI
+
+    # JWT Header Parameters (RFC 7519)
+    JWT_TYP: ClassVar[str] = 'typ'
+    JWT_CTY: ClassVar[str] = 'cty'
+    JWT_ALG: ClassVar[str] = 'alg'
+    JWT_ENC: ClassVar[str] = 'enc'
+
+    JWT_CONTENT_TYPE: ClassVar[str] = JWT_CTY
+    JWT_TYPE: ClassVar[str] = JWT_TYP
+    JWT_ALGORITHM: ClassVar[str] = JWT_ALG
+    JWT_ENCRYPTION: ClassVar[str] = JWT_ENC
+
+    # JSON Web Key Set (JWK) properties (RFC 7515 and RFC 7518)
+    JWK_ALG: ClassVar[str] = 'alg'
+    JWK_JKU: ClassVar[str] = 'jku'
+    JWK_JWK: ClassVar[str] = 'jwk'
+    JWK_KID: ClassVar[str] = 'kid'
+    JWK_X5U: ClassVar[str] = 'x5u'
+    JWK_X5C: ClassVar[str] = 'x5c'
+    JWK_TYP: ClassVar[str] = 'typ'
+    JWK_CTY: ClassVar[str] = 'cty'
+    JWK_CRIT: ClassVar[str] = 'crit'
+
+    JWK_ALGORITHM: ClassVar[str] = JWK_ALG
+    JWK_SET_URL: ClassVar[str] = JWK_JKU
+    JWK_WEB_KEY: ClassVar[str] = JWK_JWK
+    JWK_KEY_ID: ClassVar[str] = JWK_KID
+    JWK_X509_URL: ClassVar[str] = JWK_X5U
+    JWK_X509_CERT_CHAIN: ClassVar[str] = JWK_X5C
+    JWK_TYPE: ClassVar[str] = JWK_TYP
+    JWK_CONTENT_TYPE: ClassVar[str] = JWK_CTY
+    JWK_CRITICAL: ClassVar[str] = JWK_CRIT
+
+    # JSON Web Encryption (JWE) Properties (RFC 7516)
+    JWE_ALG: ClassVar[str] = 'alg'
+    JWE_ENC: ClassVar[str] = 'enc'
+    JWE_ZIP: ClassVar[str] = 'zip'
+
+    JWE_ALGORITHM: ClassVar[str] = JWE_ALG
+    JWE_ENCRYPTION_ALGORITHM: ClassVar[str] = JWE_ENC
+    JWE_COMPRESSION_ALGORITHM: ClassVar[str] = JWE_ZIP
+
+    # JSON Web Algorithm (JWA) Properties (RFC 7518)
+    JWA_KTY: ClassVar[str] = 'kty'
+
+    JWA_KEY_TYPE: ClassVar[str] = JWA_KTY
+
+    # JSON Web Algorithms - Elliptic Curve Key Parameters
+    JWA_EC_CRV: ClassVar[str] = 'crv'
+    JWA_EC_X: ClassVar[str] = 'x'
+    JWA_EC_Y: ClassVar[str] = 'y'
+    JWA_EC_D: ClassVar[str] = 'd'
+
+    JWA_EC_CURVE: ClassVar[str] = JWA_EC_CRV
+    JWA_EC_X_COORDINATE: ClassVar[str] = JWA_EC_X
+    JWA_EC_Y_COORDINATE: ClassVar[str] = JWA_EC_Y
+    JWA_EC_PRIVATE_KEY: ClassVar[str] = JWA_EC_D
+
+    # JSON Web Algorithms - RSA Key Parameters
+    JWA_RSA_N: ClassVar[str] = 'n'
+    JWA_RSA_E: ClassVar[str] = 'e'
+    JWA_RSA_D: ClassVar[str] = 'd'
+    JWA_RSA_P: ClassVar[str] = 'p'
+    JWA_RSA_Q: ClassVar[str] = 'q'
+    JWA_RSA_DP: ClassVar[str] = 'dp'
+    JWA_RSA_DQ: ClassVar[str] = 'dq'
+    JWA_RSA_QI: ClassVar[str] = 'qi'
+    JWA_RSA_OTH: ClassVar[str] = 'oth'
+    JWA_RSA_R: ClassVar[str] = 'r'
+    JWA_RSA_T: ClassVar[str] = 't'
+
+    JWA_RSA_MODULUS: ClassVar[str] = JWA_RSA_N
+    JWA_RSA_EXPONENT: ClassVar[str] = JWA_RSA_E
+    JWA_RSA_PRIVATE_EXPONENT: ClassVar[str] = JWA_RSA_D
+    JWA_RSA_FIRST_PRIME_FACTOR: ClassVar[str] = JWA_RSA_P
+    JWA_RSA_SECOND_PRIME_FACTOR: ClassVar[str] = JWA_RSA_Q
+    JWA_RSA_FIRST_FACTOR_CRT_EXPONENT: ClassVar[str] = JWA_RSA_DP
+    JWA_RSA_SECOND_FACTOR_CRT_EXPONENT: ClassVar[str] = JWA_RSA_DQ
+    JWA_RSA_FIRST_CRT_COEFFICIENT: ClassVar[str] = JWA_RSA_QI
+    JWA_RSA_OTHER_PRIMES_INFO: ClassVar[str] = JWA_RSA_OTH
+    JWA_RSA_PRIME_FACTOR: ClassVar[str] = JWA_RSA_R
+    JWA_RSA_FACTOR_CRT_EXPONENT: ClassVar[str] = JWA_RSA_D
+    JWA_RSA_FACTOR_CRT_COEFFICIENT: ClassVar[str] = JWA_RSA_T
 
 
 # -----------------------------
@@ -646,11 +862,22 @@ class AuthFields:
 class AuthValues:
     """Field/Parameter values relating to API authentication."""
     # Legacy default values
-    LEGACY_KEY_ALGORITHM = 'RS256'
+    LEGACY_KEY_ALGORITHM: ClassVar[str] = RSA_KEY_ALGORITHM
 
     # OAuth default values
     OAUTH_DEFAULT_GRANT_TYPE: ClassVar[str] = 'Client Credentials'
     OAUTH_DEFAULT_CLIENT_AUTH: ClassVar[str] = 'Private Key JWT'
+    OAUTH_CLIENT_ASSERT_TYPE_JWT_BEARER: ClassVar[str] = 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer'
+    OAUTH_TOKEN_TYPE_BEARER: ClassVar[str] = 'Bearer'
+    OAUTH_DEFAULT_FORCE_REFRESH: ClassVar[bool] = False
+    OAUTH_DEFAULT_TOKEN_EXPIRATION: ClassVar[int] = 3600
+    _OAUTH_TOKEN_EXPIRY_BUFFER_SECONDS: ClassVar[int] = 30
+    _OAUTH_ASSERTION_LIFETIME_SECONDS: ClassVar[int] = 300
+
+    # JSON Web Algorithm (JWA) Property Values (RFC 7518)
+    JWA_EC: ClassVar[str] = 'EC'       # DSS
+    JWA_RSA: ClassVar[str] = 'RSA'     # RFC 3447
+    JWA_OCT: ClassVar[str] = 'oct'     # Used to represent symmetric keys
 
 
 # -----------------------------
@@ -770,6 +997,7 @@ class Urls:
     BASE_ADMIN_URL: ClassVar[str] = HTTPS + '{tenant_name}.access.securid.com'                      # Vars: tenant_name
     BASE_AUTH_URL: ClassVar[str] = HTTPS + '{tenant_name}.auth.securid.com'                         # Vars: tenant_name
     OAUTH: ClassVar[str] = '{base_url}/oauth'                                                       # Vars: base_url
+    OAUTH_TOKEN: ClassVar[str] = '{issuer_url}/token'                                               # Vars: issuer_url
 
 
 # -------------------------------
@@ -841,19 +1069,7 @@ class ResponseKeys:
     """Standard and common keys / fields for RSA ID Plus REST API responses."""
     # Common keys / fields
     ID: ClassVar[str] = 'id'
-
-
-# -----------------------------
-# Log Messages
-# -----------------------------
-@dataclass(frozen=True)
-class LogMessages:
-    """Common log messages that are utilized in multiple locations throughout the package."""
-    _INVALID_PARAM_VALUE_DEFAULT: ClassVar[str] = 'The {param} value is not valid and will default to {default}'        # Vars: param, default
-    _INVALID_PARAM_VALUE_IGNORE: ClassVar[str] = "The {param} value '{value}' is not valid and will be ignored"         # Vars: param, value
-    _MISSING_REQUIRED_DATA: ClassVar[str] = '{data} is missing and must be provided as it is required'                  # Vars: data
-    _MUST_BE_PROVIDED_ERROR: ClassVar[str] = 'The {data} must be provided.'                                             # Vars: data
-    _PARAM_EXCEEDS_MAX_VALUE: ClassVar[str] = 'The {param} value exceeds the maximum and will default to {default}'     # Vars: param, default
+    STATUS_CODE: ClassVar[str] = 'status_code'
 
 
 # -----------------------------
