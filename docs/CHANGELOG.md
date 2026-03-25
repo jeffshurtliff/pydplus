@@ -33,6 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated connection-type resolution to preserve explicit values and auto-detect complete OAuth/Legacy credential sets before defaulting.
 - Updated helper/environment constant mappings to include OAuth private-key path, file, and inline JWK fields.
 - Added explicit `oauth_issuer_url` support and updated OAuth issuer inference defaults to prefer Authentication API hosts for `/oauth/token` requests, while retaining `oauth_api_type` overrides.
+- Updated `pydplus.utils.core_utils.get_random_string()` to use the `secrets` module for cryptographically secure random string generation.
 
 ---
 (relnotes-1.0.0)=

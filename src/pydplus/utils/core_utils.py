@@ -5,15 +5,15 @@
 :Usage:             ``from pydplus.utils import core_utils``
 :Example:           ``encoded_string = core_utils.encode_url(decoded_string)``
 :Created By:        Jeff Shurtliff
-:Last Modified:     Jeff Shurtliff
-:Modified Date:     22 Mar 2026
+:Last Modified:     Jeff Shurtliff (via GPT-5.3-codex)
+:Modified Date:     25 Mar 2026
 """
 
 from __future__ import annotations
 
 import logging
 import os
-import random
+import secrets
 import string
 import urllib.parse
 from typing import Optional, Tuple
@@ -185,7 +185,9 @@ def get_random_string(length: int = 32, prefix_string: str = '') -> str:
     :type prefix_string: str
     :returns: The randomized alphanumeric string
     """
-    return f"{prefix_string}{''.join([random.choice(string.ascii_letters + string.digits) for _ in range(length)])}"
+    chars = string.ascii_letters + string.digits
+    randomized_segment = ''.join(secrets.choice(chars) for _ in range(length))
+    return f'{prefix_string}{randomized_segment}'
 
 
 def get_env_variable_name_by_environment(field: str, env: Optional[str] = None) -> str:

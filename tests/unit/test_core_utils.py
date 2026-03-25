@@ -4,12 +4,13 @@
 :Synopsis:          Unit tests for utility functions in pydplus.utils.core_utils
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff (via GPT-5.3-codex)
-:Modified Date:     16 Mar 2026
+:Modified Date:     25 Mar 2026
 """
 
 from __future__ import annotations
 
 import os
+import string
 
 import pytest
 
@@ -134,6 +135,7 @@ def test_get_random_string_returns_expected_length_and_prefix() -> None:
     generated = core_utils.get_random_string(length=12, prefix_string='pre_')
     assert generated.startswith('pre_')
     assert len(generated) == 16
+    assert all(char in string.ascii_letters + string.digits for char in generated[4:])
 
 
 def test_get_env_variable_name_by_environment_raises_value_error_for_invalid_field() -> None:
