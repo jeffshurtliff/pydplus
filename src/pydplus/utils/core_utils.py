@@ -5,7 +5,7 @@
 :Usage:             ``from pydplus.utils import core_utils``
 :Example:           ``encoded_string = core_utils.encode_url(decoded_string)``
 :Created By:        Jeff Shurtliff
-:Last Modified:     Jeff Shurtliff (via GPT-5.3-codex)
+:Last Modified:     Jeff Shurtliff
 :Modified Date:     25 Mar 2026
 """
 
@@ -16,7 +16,8 @@ import os
 import secrets
 import string
 import urllib.parse
-from typing import Optional, Tuple
+from collections.abc import Iterable
+from typing import Any, Optional, Tuple
 
 from .. import errors
 from .. import constants as const
@@ -225,3 +226,69 @@ def get_env_variable_name_by_environment(field: str, env: Optional[str] = None) 
         logger.exception(error_msg)
         raise RuntimeError(error_msg)
     return var_name
+
+
+def normalize_oauth_scope(scope_value: Any, required: bool = False) -> Optional[str]:
+    """Normalize and validate OAuth scope values into canonical ``+``-delimited format.
+
+    :param scope_value: Scope value defined as a ``+``-delimited string or iterable of scope strings
+    :param required: Indicates whether a scope value is mandatory (``False`` by default)
+    :returns: The normalized ``+``-delimited scope string when defined
+    :raises: :py:exc:`TypeError`,
+             :py:exc:`ValueError`,
+             :py:exc:`pydplus.errors.exceptions.MissingRequiredDataError`
+    """
+    if scope_value is None:
+        if required:
+            error_msg = f"The '{const.CONNECTION_INFO.OAUTH_SCOPE}' value is needed to connect to the tenant via OAuth"
+            logger.error(error_msg)
+            raise errors.exceptions.MissingRequiredDataError(error_msg)
+        return None
+
+    parsed_scopes: list[str] = []
+
+    if isinstance(scope_value, str):
+        parsed_scopes = [segment.strip() for segment in scope_value.split('+')]
+    elif isinstance(scope_value, Iterable) and not isinstance(scope_value, (bytes, bytearray, dict)):
+        for scope in scope_value:
+            if not isinstance(scope, str):
+                error_msg = (
+                    f"The OAuth '{const.CONNECTION_INFO.OAUTH_SCOPE}' values must be strings "
+                    f"(provided element type: {type(scope)})"
+                )
+                logger.error(error_msg)
+                raise TypeError(error_msg)
+            parsed_scopes.append(scope.strip())
+    else:
+        error_msg = (
+            f"The OAuth '{const.CONNECTION_INFO.OAUTH_SCOPE}' value must be provided as a string or iterable "
+            f"(provided: {type(scope_value)})"
+        )
+        logger.error(error_msg)
+        raise TypeError(error_msg)
+
+    parsed_scopes = [scope for scope in parsed_scopes if scope]
+    if not parsed_scopes:
+        if required:
+            error_msg = f"The '{const.CONNECTION_INFO.OAUTH_SCOPE}' value is needed to connect to the tenant via OAuth"
+            logger.error(error_msg)
+            raise errors.exceptions.MissingRequiredDataError(error_msg)
+        return None
+
+    normalized_scopes: list[str] = []
+    seen_scopes: set[str] = set()
+    for scope in parsed_scopes:
+        if scope not in seen_scopes:
+            seen_scopes.add(scope)
+            normalized_scopes.append(scope)
+
+    unknown_scopes = sorted(set(normalized_scopes).difference(const.OAUTH_SCOPES.ALL_SCOPES))
+    if unknown_scopes:
+        error_msg = (
+            f"The OAuth '{const.CONNECTION_INFO.OAUTH_SCOPE}' value(s) are invalid: {', '.join(unknown_scopes)} "
+            '(Only values defined in const.OAUTH_SCOPES are supported)'
+        )
+        logger.error(error_msg)
+        raise ValueError(error_msg)
+
+    return '+'.join(normalized_scopes)

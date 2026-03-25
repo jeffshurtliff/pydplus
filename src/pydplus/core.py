@@ -28,19 +28,6 @@ from .utils.helper import get_helper_settings
 logger = logging.getLogger(__name__)
 
 
-def _infer_auth_base_url_from_admin_base_url(_admin_base_url: Optional[str]) -> Optional[str]:
-    """Infer an Authentication API base URL from a matching Administration API base URL."""
-    if not isinstance(_admin_base_url, str) or not _admin_base_url:
-        return None
-    try:
-        _normalized_admin_base_url = core_utils.get_base_url(_admin_base_url)
-    except Exception:
-        return None
-    if '.access.' not in _normalized_admin_base_url:
-        return None
-    return _normalized_admin_base_url.replace('.access.', '.auth.', 1)
-
-
 class PyDPlus(object):
     """Class for the core client object.
 
@@ -87,6 +74,9 @@ class PyDPlus(object):
     :type oauth_private_key: str, None
     :param oauth_private_key_jwk: The OAuth private-key JWK payload used for Private Key JWT authentication
     :type oauth_private_key_jwk: dict, str, None
+    :param oauth_scope: One or more OAuth scopes to request in token requests
+                        (``+``-delimited string or iterable of scope strings)
+    :type oauth_scope: str, tuple, list, set, frozenset, None
     :param oauth_api_type: Defines which API base URL should be used when inferring the OAuth issuer URL
                            (``auth`` by default; ``admin`` supported when configured)
     :type oauth_api_type: str, None
@@ -123,6 +113,7 @@ class PyDPlus(object):
             oauth_client_id: Optional[str] = None,
             oauth_private_key: Optional[str] = None,
             oauth_private_key_jwk: Union[Optional[dict], Optional[str]] = None,
+            oauth_scope: Union[Optional[str], Optional[tuple], Optional[list], Optional[set], Optional[frozenset]] = None,
             verify_ssl: Optional[bool] = None,
             auto_connect: bool = const.CLIENT_SETTINGS.DEFAULT_AUTO_CONNECT_VALUE,
             strict_mode: Optional[bool] = None,
@@ -197,6 +188,7 @@ class PyDPlus(object):
             oauth_issuer_url,
             oauth_private_key,
             oauth_private_key_jwk,
+            oauth_scope,
             self.legacy_key_material,
         )
 
@@ -471,11 +463,12 @@ class PyDPlus(object):
             return False
         _has_issuer_url = bool(_oauth_info.get(const.CONNECTION_INFO.OAUTH_ISSUER_URL))
         _has_client_id = bool(_oauth_info.get(const.CONNECTION_INFO.OAUTH_CLIENT_ID))
+        _has_scope = bool(_oauth_info.get(const.CONNECTION_INFO.OAUTH_SCOPE))
         _has_private_key = bool(
             _oauth_info.get(const.CONNECTION_INFO.OAUTH_PRIVATE_KEY_FILE)
             or _oauth_info.get(const.CONNECTION_INFO.OAUTH_PRIVATE_KEY_JWK)
         )
-        return _has_issuer_url and _has_client_id and _has_private_key
+        return _has_issuer_url and _has_client_id and _has_scope and _has_private_key
 
     def _get_connection_type(self, _connection_type_from_arg: Optional[str]) -> None:
         """Define the connection type that should be used to authenticate to the RSA ID Plus tenant."""
@@ -747,6 +740,7 @@ class PyDPlus(object):
             _oauth_issuer_url: Optional[str] = None,
             _oauth_private_key: Optional[str] = None,
             _oauth_private_key_jwk: Union[Optional[dict], Optional[str]] = None,
+            _oauth_scope: Union[Optional[str], Optional[tuple], Optional[list], Optional[set], Optional[frozenset]] = None,
             _legacy_key_material: Optional[IDPlusLegacyKeyMaterial] = None,
     ) -> None:
         """Check for provided connection info and define the class object attribute."""
@@ -766,6 +760,7 @@ class PyDPlus(object):
                 oauth_issuer_url=_oauth_issuer_url,
                 oauth_private_key=_oauth_private_key,
                 oauth_private_key_jwk=_oauth_private_key_jwk,
+                oauth_scope=_oauth_scope,
             )
 
             # Check for defined helper settings
@@ -1399,6 +1394,7 @@ def compile_connection_info(
         oauth_client_id: Optional[str] = None,
         oauth_private_key: Optional[str] = None,
         oauth_private_key_jwk: Union[Optional[dict], Optional[str]] = None,
+        oauth_scope: Union[Optional[str], Optional[tuple], Optional[list], Optional[set], Optional[frozenset]] = None,
         auth_base_url: Optional[str] = None,
         oauth_api_type: Optional[str] = None,
         oauth_issuer_url: Optional[str] = None,
@@ -1419,6 +1415,9 @@ def compile_connection_info(
     :type oauth_private_key: str, None
     :param oauth_private_key_jwk: The OAuth private-key JWK payload used for Private Key JWT authentication
     :type oauth_private_key_jwk: dict, str, None
+    :param oauth_scope: One or more OAuth scopes to request in token requests
+                        (``+``-delimited string or iterable of scope strings)
+    :type oauth_scope: str, tuple, list, set, frozenset, None
     :param auth_base_url: The base URL for the Authentication API
     :type auth_base_url: str, None
     :param oauth_api_type: The API type to use when inferring OAuth issuer URL values (``auth`` by default)
@@ -1447,6 +1446,7 @@ def compile_connection_info(
                       f"(provided: {type(oauth_private_key_jwk)})")
         logger.error(_error_msg)
         raise TypeError(_error_msg)
+    oauth_scope = core_utils.normalize_oauth_scope(oauth_scope)
 
     # Prepare the admin_base_url value in order to construct the issuer_url value
     if base_url and admin_base_url:
@@ -1511,6 +1511,7 @@ def compile_connection_info(
         const.CONNECTION_INFO.OAUTH: {
             const.CONNECTION_INFO.OAUTH_ISSUER_URL: issuer_url,
             const.CONNECTION_INFO.OAUTH_CLIENT_ID: oauth_client_id,
+            const.CONNECTION_INFO.OAUTH_SCOPE: oauth_scope,
             const.CONNECTION_INFO.OAUTH_GRANT_TYPE: const.CONNECTION_INFO.OAUTH_DEFAULT_GRANT_TYPE,
             const.CONNECTION_INFO.OAUTH_CLIENT_AUTHENTICATION: const.CONNECTION_INFO.OAUTH_DEFAULT_CLIENT_AUTH,
             const.CONNECTION_INFO.OAUTH_PRIVATE_KEY_PATH: oauth_private_key_path,
@@ -1519,3 +1520,20 @@ def compile_connection_info(
         }
     }
     return connection_info
+
+
+def _infer_auth_base_url_from_admin_base_url(_admin_base_url: Optional[str]) -> Optional[str]:
+    """Infer an Authentication API base URL from a matching Administration API base URL."""
+    if not isinstance(_admin_base_url, str) or not _admin_base_url:
+        return None
+    try:
+        _normalized_admin_base_url = core_utils.get_base_url(_admin_base_url)
+    except Exception as _exc:
+        _exc_type = core_utils.get_exception_type(_exc)
+        _error_msg = (f'Failed to infer Authentication API base URL from the Administration due to {_exc_type} '
+                      f'exception: {_exc}')
+        logger.error(_error_msg)
+        return None
+    if '.access.' not in _normalized_admin_base_url:
+        return None
+    return _normalized_admin_base_url.replace('.access.', '.auth.', 1)

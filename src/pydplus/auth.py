@@ -6,7 +6,7 @@
 :Example:           ``jwt_string = auth.get_legacy_jwt_string(base_url, connection_info)``
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     24 Mar 2026
+:Modified Date:     25 Mar 2026
 """
 
 from __future__ import annotations
@@ -102,7 +102,9 @@ def get_oauth_headers(
     :param timeout: The timeout period in seconds to use for token endpoint requests (``30`` by default)
     :type timeout: int
     :returns: A tuple containing the headers dictionary and token metadata
-    :raises: :py:exc:`errors.exceptions.APIConnectionError`,
+    :raises: :py:exc:`TypeError`,
+             :py:exc:`ValueError`,
+             :py:exc:`errors.exceptions.APIConnectionError`,
              :py:exc:`errors.exceptions.FeatureNotConfiguredError`,
              :py:exc:`errors.exceptions.MissingRequiredDataError`
     """
@@ -153,18 +155,22 @@ def get_oauth_access_token(
     :param timeout: The timeout period in seconds to use for token endpoint requests (``30`` by default)
     :type timeout: int
     :returns: OAuth token metadata containing token and expiration values
-    :raises: :py:exc:`errors.exceptions.APIConnectionError`,
+    :raises: :py:exc:`TypeError`,
+             :py:exc:`ValueError`,
+             :py:exc:`errors.exceptions.APIConnectionError`,
              :py:exc:`errors.exceptions.FeatureNotConfiguredError`,
              :py:exc:`errors.exceptions.MissingRequiredDataError`
     """
-    if not force_refresh and _is_oauth_token_valid(token_data):
+    oauth_connection_info = _extract_oauth_connection_info(connection_info)
+    requested_scope = oauth_connection_info[const.CONNECTION_INFO.OAUTH_SCOPE]
+
+    if not force_refresh and _is_oauth_token_valid(token_data, expected_scope=requested_scope):
         return token_data
     elif force_refresh:
-        logger.debug("The OAuth access token is being force-refreshed")
+        logger.debug('The OAuth access token is being force-refreshed')
     else:
-        logger.debug("The OAuth access token is no longer valid and will be refreshed")
+        logger.debug('The OAuth access token is no longer valid and will be refreshed')
 
-    oauth_connection_info = _extract_oauth_connection_info(connection_info)
     return _request_oauth_access_token(
         oauth_connection_info=oauth_connection_info,
         verify_ssl=verify_ssl,
@@ -193,8 +199,8 @@ def _extract_legacy_connection_info(_connection_info: dict) -> Tuple[str, Option
         if not _access_id:
             _missing_var = const.CONNECTION_INFO.LEGACY_ACCESS_ID
         else:
-            _missing_var = (f"{const.CONNECTION_INFO.LEGACY_PRIVATE_KEY_FILE} or "
-                            f"{const.CONNECTION_INFO.LEGACY_PRIVATE_KEY_PEM}")
+            _missing_var = (f'{const.CONNECTION_INFO.LEGACY_PRIVATE_KEY_FILE} or '
+                            f'{const.CONNECTION_INFO.LEGACY_PRIVATE_KEY_PEM}')
         _error_msg = f'The {_missing_var} value is needed to connect to the tenant'
         logger.error(_error_msg)
         raise errors.exceptions.MissingRequiredDataError(_error_msg)
@@ -211,6 +217,7 @@ def _extract_oauth_connection_info(_connection_info: dict) -> dict[str, Any]:
 
     issuer_url = _oauth_info.get(const.CONNECTION_INFO.OAUTH_ISSUER_URL)
     client_id = _oauth_info.get(const.CONNECTION_INFO.OAUTH_CLIENT_ID)
+    scope = core_utils.normalize_oauth_scope(_oauth_info.get(const.CONNECTION_INFO.OAUTH_SCOPE), required=True)
     grant_type = _normalize_oauth_grant_type(_oauth_info.get(const.CONNECTION_INFO.OAUTH_GRANT_TYPE))
     client_auth = _normalize_oauth_client_auth(_oauth_info.get(const.CONNECTION_INFO.OAUTH_CLIENT_AUTHENTICATION))
 
@@ -258,6 +265,7 @@ def _extract_oauth_connection_info(_connection_info: dict) -> dict[str, Any]:
     return {
         const.CONNECTION_INFO.OAUTH_ISSUER_URL: issuer_url,
         const.CONNECTION_INFO.OAUTH_CLIENT_ID: client_id,
+        const.CONNECTION_INFO.OAUTH_SCOPE: scope,
         const.CONNECTION_INFO.OAUTH_GRANT_TYPE: grant_type,
         const.CONNECTION_INFO.OAUTH_CLIENT_AUTHENTICATION: client_auth,
         const.CONNECTION_INFO.OAUTH_PRIVATE_KEY_PATH: private_key_path,
@@ -275,10 +283,11 @@ def _define_jwt_claims(_access_id: str, _base_url: str) -> dict:
     :type _base_url: str
     :returns: Compiled JWT claims data in a dictionary
     """
+    _lifespan = const.AUTH_VALUES.LEGACY_DEFAULT_EXPIRATION
     _claims_data = {
         const.AUTH_FIELDS.JWT_SUB: _access_id,
         const.AUTH_FIELDS.JWT_IAT: datetime.datetime.now(datetime.timezone.utc),
-        const.AUTH_FIELDS.JWT_EXP: datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(seconds=3600),
+        const.AUTH_FIELDS.JWT_EXP: datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(seconds=_lifespan),
         const.AUTH_FIELDS.JWT_AUD: _base_url,
     }
     return _claims_data
@@ -537,6 +546,7 @@ def _request_oauth_access_token(
     """Request an OAuth access token from the configured token endpoint."""
     _issuer_url = oauth_connection_info[const.CONNECTION_INFO.OAUTH_ISSUER_URL]
     _client_id = oauth_connection_info[const.CONNECTION_INFO.OAUTH_CLIENT_ID]
+    _scope = oauth_connection_info[const.CONNECTION_INFO.OAUTH_SCOPE]
     _grant_type = oauth_connection_info[const.CONNECTION_INFO.OAUTH_GRANT_TYPE]
     _client_auth = oauth_connection_info[const.CONNECTION_INFO.OAUTH_CLIENT_AUTHENTICATION]
     _token_endpoint = _get_oauth_token_endpoint(_issuer_url)
@@ -544,6 +554,7 @@ def _request_oauth_access_token(
     _request_data = {
         const.CONNECTION_INFO.OAUTH_GRANT_TYPE: _grant_type,
         const.CONNECTION_INFO.OAUTH_CLIENT_ID: _client_id,
+        const.CONNECTION_INFO.OAUTH_SCOPE: _scope,
     }
 
     if _client_auth == const.CONNECTION_INFO.OAUTH_CLIENT_AUTH_PRIVATE_KEY_JWT:
@@ -594,7 +605,9 @@ def _request_oauth_access_token(
         logger.error(_error_msg)
         raise errors.exceptions.APIConnectionError(_error_msg)
 
-    return _parse_oauth_token_response(_response_data)
+    _token_data = _parse_oauth_token_response(_response_data)
+    _token_data[const.AUTH_FIELDS.OAUTH_SCOPE] = _scope
+    return _token_data
 
 
 def _parse_oauth_token_response(_response_data: dict[str, Any]) -> dict[str, Any]:
@@ -627,16 +640,28 @@ def _parse_oauth_token_response(_response_data: dict[str, Any]) -> dict[str, Any
     }
 
 
-def _is_oauth_token_valid(_token_data: Optional[dict[str, Any]]) -> bool:
+def _is_oauth_token_valid(
+        _token_data: Optional[dict[str, Any]],
+        _expected_scope: Optional[str] = None,
+) -> bool:
     """Return whether cached OAuth token data is still valid."""
     if not isinstance(_token_data, dict):
+        logger.error(f'The OAuth token data is an invalid type (Expected: dict, Provided: {type(_token_data)})')
         return False
 
     _access_token = _token_data.get(const.AUTH_FIELDS.OAUTH_ACCESS_TOKEN)
     _expires_at = _token_data.get(const.AUTH_FIELDS.OAUTH_EXPIRES_AT)
+    _cached_scope = _token_data.get(const.AUTH_FIELDS.OAUTH_SCOPE)
     if not isinstance(_access_token, str) or not _access_token:
+        logger.error('The OAuth access token is not a string or is missing')
         return False
     if not isinstance(_expires_at, (int, float)):
+        _error_msg = f"The '{const.AUTH_FIELDS.OAUTH_EXPIRES_AT}' value is an invalid type "
+        _error_msg += f"(Expected: int, float; Provided: {type(_expires_at)})"
+        logger.error(_error_msg)
+        return False
+    if _expected_scope is not None and _cached_scope != _expected_scope:
+        logger.error(f"The cached '{const.AUTH_FIELDS.OAUTH_SCOPE}' does not match the expected value")
         return False
 
     _now = int(datetime.datetime.now(datetime.timezone.utc).timestamp())

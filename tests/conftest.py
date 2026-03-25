@@ -4,7 +4,7 @@
 :Synopsis:          Shared pytest fixtures and test-session hooks
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff (via GPT-5.3-codex)
-:Modified Date:     09 Mar 2026
+:Modified Date:     25 Mar 2026
 """
 
 from __future__ import annotations
@@ -47,6 +47,7 @@ def sample_connection_info(sample_base_url: str) -> dict:
         const.CONNECTION_INFO.OAUTH: {
             const.CONNECTION_INFO.OAUTH_ISSUER_URL: const.URLS.OAUTH.format(base_url=sample_base_url),
             const.CONNECTION_INFO.OAUTH_CLIENT_ID: 'oauth-client-id',
+            const.CONNECTION_INFO.OAUTH_SCOPE: const.OAUTH_SCOPES.USER_READ,
             const.CONNECTION_INFO.OAUTH_GRANT_TYPE: const.CONNECTION_INFO.OAUTH_DEFAULT_GRANT_TYPE,
             const.CONNECTION_INFO.OAUTH_CLIENT_AUTHENTICATION: const.CONNECTION_INFO.OAUTH_DEFAULT_CLIENT_AUTH,
         },
@@ -69,6 +70,7 @@ def sample_helper_config(sample_base_url: str) -> dict:
             },
             const.CONNECTION_INFO.OAUTH: {
                 const.CONNECTION_INFO.OAUTH_CLIENT_ID: 'oauth-client-id',
+                const.CONNECTION_INFO.OAUTH_SCOPE: const.OAUTH_SCOPES.USER_READ,
             },
         },
     }
@@ -99,6 +101,7 @@ def helper_yaml_file(tmp_path: Path) -> Path:
             '    private_key_file: private.pem',
             '  oauth:',
             '    client_id: oauth-client-id',
+            f'    scope: {const.OAUTH_SCOPES.USER_READ}',
         ]),
         encoding='utf-8',
     )

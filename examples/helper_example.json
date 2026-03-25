@@ -19,6 +19,7 @@
     "oauth": {
       "issuer_url": "https://example-company.auth.securid.com/oauth",
       "client_id": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
+      "scope": "rsa.user.read+rsa.user.manage",
       "grant_type": "Client Credentials",
       "client_authentication": "Private Key JWT",
       "private_key_path": "/Users/johndoe/Development/pydplus/local",
@@ -41,6 +42,7 @@
     "legacy_key_material_file": "PYDPLUS_LEGACY_KEY_MATERIAL_FILE",
     "oauth_issuer_url": "PYDPLUS_OAUTH_ISSUER_URL",
     "oauth_client_id": "PYDPLUS_OAUTH_CLIENT_ID",
+    "oauth_scope": "PYDPLUS_OAUTH_SCOPE",
     "oauth_grant_type": "PYDPLUS_OAUTH_GRANT_TYPE",
     "oauth_client_authentication": "PYDPLUS_OAUTH_CLIENT_AUTH",
     "oauth_private_key_path": "PYDPLUS_OAUTH_PRIVATE_KEY_PATH",

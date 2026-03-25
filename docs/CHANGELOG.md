@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added OAuth Private Key JWT support for Administration API connections in `src/pydplus/auth.py`.
 - Added OAuth token caching and one-time 401 refresh/retry handling in `src/pydplus/api.py`.
 - Added OAuth unit coverage in `tests/unit/test_auth.py` and `tests/unit/test_api_oauth.py`.
+- Added OAuth scope normalization helpers and strict scope-validation coverage in `tests/unit/test_core_utils.py`.
 
 (unreleased-changed)=
 ### Changed
@@ -33,6 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated connection-type resolution to preserve explicit values and auto-detect complete OAuth/Legacy credential sets before defaulting.
 - Updated helper/environment constant mappings to include OAuth private-key path, file, and inline JWK fields.
 - Added explicit `oauth_issuer_url` support and updated OAuth issuer inference defaults to prefer Authentication API hosts for `/oauth/token` requests, while retaining `oauth_api_type` overrides.
+- Updated OAuth client-credentials handling to require explicit scopes, normalize them to `+`-delimited values, validate against `const.OAUTH_SCOPES`, and include scope-aware token caching behavior.
 - Updated `pydplus.utils.core_utils.get_random_string()` to use the `secrets` module for cryptographically secure random string generation.
 
 ---
