@@ -6,13 +6,14 @@
 :Example:           ``pydp = PyDPlus()``
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     24 Mar 2026
+:Modified Date:     25 Mar 2026
 """
 
 from __future__ import annotations
 
 import logging
 import os
+import urllib.parse
 from pathlib import Path
 from typing import Any, Optional, Union, Tuple
 from collections.abc import Mapping
@@ -25,6 +26,19 @@ from .utils import core_utils
 from .utils.helper import get_helper_settings
 
 logger = logging.getLogger(__name__)
+
+
+def _infer_auth_base_url_from_admin_base_url(_admin_base_url: Optional[str]) -> Optional[str]:
+    """Infer an Authentication API base URL from a matching Administration API base URL."""
+    if not isinstance(_admin_base_url, str) or not _admin_base_url:
+        return None
+    try:
+        _normalized_admin_base_url = core_utils.get_base_url(_admin_base_url)
+    except Exception:
+        return None
+    if '.access.' not in _normalized_admin_base_url:
+        return None
+    return _normalized_admin_base_url.replace('.access.', '.auth.', 1)
 
 
 class PyDPlus(object):
@@ -67,10 +81,15 @@ class PyDPlus(object):
     :type legacy_key_material: str, pathlib.Path, pydplus.credentials.IDPlusLegacyKeyMaterial, None
     :param oauth_client_id: The Client ID associated with the OAuth API connection
     :type oauth_client_id: str, None
+    :param oauth_issuer_url: The explicit OAuth issuer URL to use for token requests (e.g. ``https://<tenant>.auth.securid.com/oauth``)
+    :type oauth_issuer_url: str, None
     :param oauth_private_key: The file path to the OAuth private-key JWK file used for Private Key JWT authentication
     :type oauth_private_key: str, None
     :param oauth_private_key_jwk: The OAuth private-key JWK payload used for Private Key JWT authentication
     :type oauth_private_key_jwk: dict, str, None
+    :param oauth_api_type: Defines which API base URL should be used when inferring the OAuth issuer URL
+                           (``auth`` by default; ``admin`` supported when configured)
+    :type oauth_api_type: str, None
     :param verify_ssl: Determines if SSL connections should be verified (``True`` by default)
     :type verify_ssl: bool, None
     :param auto_connect: Determines if an API connection should be established when the object is instantiated
@@ -85,6 +104,7 @@ class PyDPlus(object):
     :type helper: str, tuple, list, set, dict, None
     :returns: The instantiated PyDPlus object
     :raises: :py:exc:`TypeError`,
+             :py:exc:`ValueError`,
              :py:exc:`pydplus.errors.exceptions.MissingRequiredDataError`,
              :py:exc:`pydplus.errors.exceptions.APIConnectionError`
     """
@@ -108,6 +128,8 @@ class PyDPlus(object):
             strict_mode: Optional[bool] = None,
             env_variables: Optional[dict] = None,
             helper: Union[Optional[str], Optional[tuple], Optional[list], Optional[set], Optional[dict]] = None,
+            oauth_api_type: Optional[str] = None,
+            oauth_issuer_url: Optional[str] = None,
     ):
         """Instantiate the core client object."""
         # Define the initial properties and settings
@@ -119,6 +141,7 @@ class PyDPlus(object):
         self.connection_type = None
         self.env = None
         self._oauth_token_data = None
+        self.oauth_api_type = const.AUTH_API_TYPE
         self.strict_mode = strict_mode
         self.tenant_name = tenant_name
 
@@ -162,12 +185,16 @@ class PyDPlus(object):
         # Define the Authentication API base URL to use in API calls
         self.auth_base_rest_url = self.auth_base_url + const.REST_PATHS.AUTH_BASE if self.auth_base_url else None
 
+        # Define which API type should be used when inferring OAuth issuer URL values
+        self._define_oauth_api_type(oauth_api_type)                    # Defines self.oauth_api_type
+
         # Check for provided connection info and define the class object attribute
         self._validate_connection_info(
             connection_info,
             private_key,
             legacy_access_id,
             oauth_client_id,
+            oauth_issuer_url,
             oauth_private_key,
             oauth_private_key_jwk,
             self.legacy_key_material,
@@ -551,6 +578,37 @@ class PyDPlus(object):
             self.verify_ssl = const.CLIENT_SETTINGS.DEFAULT_VERIFY_SSL_VALUE
             logger.debug(default_debug_msg.format(setting=setting, value=self.verify_ssl))
 
+    def _define_oauth_api_type(self, _oauth_api_type_from_arg: Optional[str]) -> None:
+        """Define which API type should be used for OAuth issuer URL inference."""
+        setting = const.CLIENT_SETTINGS.OAUTH_API_TYPE
+        methods = const.ARGUMENT_VALUES.PROVIDED_METHODS  # arg, helper, or env
+        debug_msg = const._LOG_MESSAGES._CLIENT_SETTING_CONFIGURED
+        default_debug_msg = const._LOG_MESSAGES._WILL_USE_DEFAULT_VALUE
+
+        if _oauth_api_type_from_arg is not None:
+            if not isinstance(_oauth_api_type_from_arg, str):
+                _error_msg = (
+                    f"The '{setting}' argument is an invalid data type "
+                    f"(Expected: str, Provided: {type(_oauth_api_type_from_arg)})"
+                )
+                logger.error(_error_msg)
+                raise TypeError(_error_msg)
+            _oauth_api_type = _oauth_api_type_from_arg.strip().lower()
+            if _oauth_api_type not in const.VALID_API_TYPES:
+                _valid_values = ','.join(sorted(const.VALID_API_TYPES))
+                _error_msg = (
+                    f"The '{setting}' value '{_oauth_api_type_from_arg}' is invalid "
+                    f"(Expected one of: {_valid_values})"
+                )
+                logger.error(_error_msg)
+                raise ValueError(_error_msg)
+            self.oauth_api_type = _oauth_api_type
+            logger.debug(debug_msg.format(setting=setting, value=self.oauth_api_type, method=methods[0]))
+            return
+
+        self.oauth_api_type = const.AUTH_API_TYPE
+        logger.debug(default_debug_msg.format(setting=setting, value=self.oauth_api_type))
+
     def _construct_base_url_with_tenant_name(self, _api_type: str, _tenant_name: Optional[str] = None) -> str:
         """Construct the base URL for a given API type using a tenant name."""
         # Ensure the tenant name is defined
@@ -665,6 +723,13 @@ class PyDPlus(object):
         if not self.auth_base_url and self.tenant_name:
             self.auth_base_url = self._construct_base_url_with_tenant_name(const.AUTH_API_TYPE)
 
+        # Attempt to infer the auth base URL from a known admin base URL pattern if still undefined
+        if not self.auth_base_url and self.admin_base_url:
+            _inferred_auth_base_url = _infer_auth_base_url_from_admin_base_url(self.admin_base_url)
+            if _inferred_auth_base_url:
+                self.auth_base_url = _inferred_auth_base_url
+                logger.debug('The auth_base_url value was inferred from the admin_base_url setting')
+
         # Log a warning if the Authentication API base URL could not be defined but do not raise an exception
         if not self.auth_base_url:
             _warn_msg = 'The base URL for the Authentication API could not be defined and calls to that API will fail.'
@@ -679,6 +744,7 @@ class PyDPlus(object):
             _private_key: Optional[str] = None,
             _legacy_access_id: Optional[str] = None,
             _oauth_client_id: Optional[str] = None,
+            _oauth_issuer_url: Optional[str] = None,
             _oauth_private_key: Optional[str] = None,
             _oauth_private_key_jwk: Union[Optional[dict], Optional[str]] = None,
             _legacy_key_material: Optional[IDPlusLegacyKeyMaterial] = None,
@@ -692,9 +758,12 @@ class PyDPlus(object):
             _connection_info = compile_connection_info(
                 base_url=self.base_url,
                 admin_base_url=self.admin_base_url,
+                auth_base_url=self.auth_base_url,
+                oauth_api_type=self.oauth_api_type,
                 private_key=_private_key,
                 legacy_access_id=_legacy_access_id,
                 oauth_client_id=_oauth_client_id,
+                oauth_issuer_url=_oauth_issuer_url,
                 oauth_private_key=_oauth_private_key,
                 oauth_private_key_jwk=_oauth_private_key_jwk,
             )
@@ -794,7 +863,12 @@ class PyDPlus(object):
         _oauth_key = const.CONNECTION_INFO.OAUTH
         _grant_type_key = const.CONNECTION_INFO.OAUTH_GRANT_TYPE
         _client_auth_key = const.CONNECTION_INFO.OAUTH_CLIENT_AUTHENTICATION
-        _issuer_base_url = self.admin_base_url if self.admin_base_url else self.base_url
+        if self.oauth_api_type == const.AUTH_API_TYPE:
+            _issuer_base_url = self.auth_base_url if self.auth_base_url else self.admin_base_url
+        else:
+            _issuer_base_url = self.admin_base_url if self.admin_base_url else self.auth_base_url
+        if not _issuer_base_url:
+            _issuer_base_url = self.base_url
 
         # Populate the Issuer URL value for OAuth connections if not defined
         if ((_issuer_url_key not in _partial_connection_info[_oauth_key]
@@ -1325,6 +1399,9 @@ def compile_connection_info(
         oauth_client_id: Optional[str] = None,
         oauth_private_key: Optional[str] = None,
         oauth_private_key_jwk: Union[Optional[dict], Optional[str]] = None,
+        auth_base_url: Optional[str] = None,
+        oauth_api_type: Optional[str] = None,
+        oauth_issuer_url: Optional[str] = None,
 ) -> dict:
     """Compile the connection_info dictionary to use when authenticating to the API.
 
@@ -1342,8 +1419,15 @@ def compile_connection_info(
     :type oauth_private_key: str, None
     :param oauth_private_key_jwk: The OAuth private-key JWK payload used for Private Key JWT authentication
     :type oauth_private_key_jwk: dict, str, None
+    :param auth_base_url: The base URL for the Authentication API
+    :type auth_base_url: str, None
+    :param oauth_api_type: The API type to use when inferring OAuth issuer URL values (``auth`` by default)
+    :type oauth_api_type: str, None
+    :param oauth_issuer_url: The explicit OAuth issuer URL to use for token requests
+    :type oauth_issuer_url: str, None
     :returns: The compiled connection_info dictionary
-    :raises: :py:exc:`TypeError`
+    :raises: :py:exc:`TypeError`,
+             :py:exc:`ValueError`
     """
     # Define the two private key variables if defined
     if private_key and isinstance(private_key, str):
@@ -1373,9 +1457,51 @@ def compile_connection_info(
         admin_base_url = core_utils.get_base_url(admin_base_url)
     elif base_url and not admin_base_url:
         admin_base_url = core_utils.get_base_url(base_url)
+    elif admin_base_url:
+        admin_base_url = core_utils.get_base_url(admin_base_url)
 
-    # Define the issuer URL and compile the connection info
-    issuer_url = const.URLS.OAUTH.format(base_url=admin_base_url) if admin_base_url else None
+    # Normalize the auth_base_url value for OAuth issuer inference if defined
+    if auth_base_url:
+        auth_base_url = core_utils.get_base_url(auth_base_url)
+
+    # Normalize and validate oauth_api_type when provided
+    if oauth_api_type is None:
+        oauth_api_type = const.AUTH_API_TYPE
+    if not isinstance(oauth_api_type, str):
+        _error_msg = f"The 'oauth_api_type' parameter must be a string (provided: {type(oauth_api_type)})"
+        logger.error(_error_msg)
+        raise TypeError(_error_msg)
+    oauth_api_type = oauth_api_type.strip().lower()
+    if oauth_api_type not in const.VALID_API_TYPES:
+        _valid_values = ','.join(sorted(const.VALID_API_TYPES))
+        _error_msg = f"The 'oauth_api_type' value '{oauth_api_type}' is invalid (Expected one of: {_valid_values})"
+        logger.error(_error_msg)
+        raise ValueError(_error_msg)
+
+    # Validate and normalize an explicitly provided OAuth issuer URL if defined
+    if oauth_issuer_url is not None and not isinstance(oauth_issuer_url, str):
+        _error_msg = f"The 'oauth_issuer_url' parameter must be a string (provided: {type(oauth_issuer_url)})"
+        logger.error(_error_msg)
+        raise TypeError(_error_msg)
+    oauth_issuer_url = oauth_issuer_url.strip() if isinstance(oauth_issuer_url, str) else None
+    if oauth_issuer_url:
+        _parsed_issuer_url = urllib.parse.urlparse(oauth_issuer_url)
+        if not _parsed_issuer_url.netloc or not _parsed_issuer_url.scheme:
+            _error_msg = f"The provided OAuth issuer URL '{oauth_issuer_url}' is invalid"
+            logger.error(_error_msg)
+            raise ValueError(_error_msg)
+        issuer_url = core_utils.remove_ending_slash(oauth_issuer_url)
+    else:
+        # Infer an auth base URL from the admin base URL when the auth URL is not explicitly defined
+        if not auth_base_url and admin_base_url:
+            auth_base_url = _infer_auth_base_url_from_admin_base_url(admin_base_url)
+
+        # Define the issuer URL and compile the connection info
+        if oauth_api_type == const.AUTH_API_TYPE:
+            issuer_base_url = auth_base_url if auth_base_url else admin_base_url
+        else:
+            issuer_base_url = admin_base_url if admin_base_url else auth_base_url
+        issuer_url = const.URLS.OAUTH.format(base_url=issuer_base_url) if issuer_base_url else None
     connection_info = {
         const.CONNECTION_INFO.LEGACY: {
             const.CONNECTION_INFO.LEGACY_ACCESS_ID: legacy_access_id,

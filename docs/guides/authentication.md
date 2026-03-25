@@ -45,7 +45,8 @@ OAuth (Private Key JWT) requires:
 
 - `oauth_client_id`
 - `oauth_private_key` (path to `.jwk`) or `oauth_private_key_jwk` (inline JWK)
-- `issuer_url` in `connection_info["oauth"]` or inferable tenant/admin base URL
+- `issuer_url` (`oauth_issuer_url` argument, `connection_info["oauth"]["issuer_url"]`, or inferred from base URLs)
+- Optional: `oauth_api_type` (`auth` by default, `admin` supported)
 
 Token endpoint defaults to: `{issuer_url}/token`
 
@@ -62,6 +63,20 @@ pydp = PyDPlus(
 )
 ```
 
+### Explicit Issuer URL Example
+
+```python
+from pydplus import PyDPlus
+
+pydp = PyDPlus(
+    connection_type="oauth",
+    base_admin_url="https://example-company.access.securid.com",
+    oauth_issuer_url="https://example-company.auth.securid.com/oauth",
+    oauth_client_id="XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
+    oauth_private_key="/path/to/oauth-private-key.jwk",
+)
+```
+
 ### Helper File Example
 
 ```json
@@ -72,7 +87,7 @@ pydp = PyDPlus(
   },
   "connection": {
     "oauth": {
-      "issuer_url": "https://example-company.access.securid.com/oauth",
+      "issuer_url": "https://example-company.auth.securid.com/oauth",
       "client_id": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
       "grant_type": "Client Credentials",
       "client_authentication": "Private Key JWT",
@@ -88,7 +103,7 @@ pydp = PyDPlus(
 ```bash
 PYDPLUS_CONNECTION_TYPE=oauth
 PYDPLUS_ADMIN_BASE_URL=https://example-company.access.securid.com
-PYDPLUS_OAUTH_ISSUER_URL=https://example-company.access.securid.com/oauth
+PYDPLUS_OAUTH_ISSUER_URL=https://example-company.auth.securid.com/oauth
 PYDPLUS_OAUTH_CLIENT_ID=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
 PYDPLUS_OAUTH_PRIVATE_KEY_FILE=oauth-private-key.jwk
 PYDPLUS_OAUTH_PRIVATE_KEY_PATH=/path/to/keys
@@ -107,3 +122,14 @@ For OAuth Admin API requests:
 - Current OAuth support in PyDPlus is scoped to **Administration API** usage.
 - `Client Credentials` and `client_credentials` are both accepted.
 - `Private Key JWT` and `private_key_jwt` are both accepted.
+- OAuth issuer inference defaults to the Authentication base URL (`auth` mode).
+- When only `base_admin_url` is provided and it matches `*.access.*`, PyDPlus attempts to infer `base_auth_url`.
+- Use `oauth_api_type="admin"` to force issuer inference from `base_admin_url`.
+
+## OAuth 403 Troubleshooting
+
+If token requests fail with `403 Forbidden` at `/oauth/token`:
+
+- Verify the configured token issuer host for your tenant.
+- Set `oauth_issuer_url` directly from the tenant UI issuer value when available.
+- If you rely on inferred URLs, provide both `base_admin_url` and `base_auth_url` explicitly.

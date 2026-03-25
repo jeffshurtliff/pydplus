@@ -4,7 +4,7 @@
 :Synopsis:          Defines the user-related functions associated with the RSA ID Plus API
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     22 Mar 2026
+:Modified Date:     25 Mar 2026
 """
 
 from __future__ import annotations
@@ -114,6 +114,7 @@ def get_user_id(
     if not user_details or not isinstance(user_details, dict) or const.RESPONSE_KEYS.ID not in user_details:
         error_msg = 'Failed to retrieve the user ID for the queried user. An empty string will be returned for the ID.'
         logger.error(error_msg)
+        return ''
     return user_details.get(const.RESPONSE_KEYS.ID, '')
 
 

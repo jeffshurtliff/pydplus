@@ -4,7 +4,7 @@
 :Synopsis:          Constants that are utilized throughout the package
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     24 Mar 2026
+:Modified Date:     25 Mar 2026
 """
 
 from __future__ import annotations
@@ -181,6 +181,7 @@ class ClientSettings:
     BASE_URL: ClassVar[str] = 'base_url'
     CONNECTION_INFO: ClassVar[str] = 'connection_info'
     CONNECTION_TYPE: ClassVar[str] = 'connection_type'
+    OAUTH_API_TYPE: ClassVar[str] = 'oauth_api_type'
     STRICT_MODE: ClassVar[str] = 'strict_mode'
     VERIFY_SSL: ClassVar[str] = 'verify_ssl'
 

@@ -4,7 +4,7 @@
 :Synopsis:          Unit tests for client object instantiation and connection-info compilation
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff (via GPT-5.3-codex)
-:Modified Date:     23 Mar 2026
+:Modified Date:     24 Mar 2026
 """
 
 from __future__ import annotations
@@ -60,6 +60,72 @@ def test_compile_connection_info_adds_oauth_private_key_fields(sample_base_url: 
     )
 
 
+def test_compile_connection_info_defaults_to_auth_base_url_for_oauth_issuer(sample_base_url: str) -> None:
+    """Ensure OAuth issuer_url defaults to auth_base_url when both admin and auth URLs are defined."""
+    connection_info = compile_connection_info(
+        base_url=sample_base_url,
+        admin_base_url='https://example-admin.com',
+        auth_base_url='https://example-auth.com',
+        oauth_client_id='oauth-client-id',
+    )
+
+    assert connection_info[const.CONNECTION_INFO.OAUTH][const.CONNECTION_INFO.OAUTH_ISSUER_URL] == (
+        'https://example-auth.com/oauth'
+    )
+
+
+def test_compile_connection_info_uses_admin_base_url_when_oauth_api_type_is_admin(sample_base_url: str) -> None:
+    """Ensure OAuth issuer_url uses admin_base_url when oauth_api_type is explicitly set to admin."""
+    connection_info = compile_connection_info(
+        base_url=sample_base_url,
+        admin_base_url='https://example-admin.com',
+        auth_base_url='https://example-auth.com',
+        oauth_api_type=const.ADMIN_API_TYPE,
+        oauth_client_id='oauth-client-id',
+    )
+
+    assert connection_info[const.CONNECTION_INFO.OAUTH][const.CONNECTION_INFO.OAUTH_ISSUER_URL] == (
+        'https://example-admin.com/oauth'
+    )
+
+
+def test_compile_connection_info_infers_auth_base_url_from_admin_url() -> None:
+    """Ensure OAuth issuer_url can be inferred from an access-domain admin base URL."""
+    connection_info = compile_connection_info(
+        admin_base_url='https://example-company.access.securid.com',
+        oauth_client_id='oauth-client-id',
+    )
+
+    assert connection_info[const.CONNECTION_INFO.OAUTH][const.CONNECTION_INFO.OAUTH_ISSUER_URL] == (
+        'https://example-company.auth.securid.com/oauth'
+    )
+
+
+def test_compile_connection_info_uses_explicit_oauth_issuer_url(sample_base_url: str) -> None:
+    """Ensure explicit oauth_issuer_url takes precedence over inferred issuer values."""
+    connection_info = compile_connection_info(
+        base_url=sample_base_url,
+        admin_base_url='https://example-admin.com',
+        auth_base_url='https://example-auth.com',
+        oauth_client_id='oauth-client-id',
+        oauth_issuer_url='https://issuer.example.com/oauth/',
+    )
+
+    assert connection_info[const.CONNECTION_INFO.OAUTH][const.CONNECTION_INFO.OAUTH_ISSUER_URL] == (
+        'https://issuer.example.com/oauth'
+    )
+
+
+def test_compile_connection_info_raises_for_invalid_oauth_api_type(sample_base_url: str) -> None:
+    """Ensure invalid oauth_api_type values raise ValueError."""
+    with pytest.raises(ValueError):
+        compile_connection_info(
+            base_url=sample_base_url,
+            oauth_api_type='unsupported',
+            oauth_client_id='oauth-client-id',
+        )
+
+
 def test_instantiate_core_object_with_connection_info_and_no_auto_connect(
     sample_base_url: str,
     sample_connection_info: dict,
@@ -90,6 +156,68 @@ def test_connection_type_auto_detects_oauth_when_oauth_credentials_are_complete(
     )
 
     assert pydp_object.connection_type == const.CONNECTION_INFO.OAUTH
+
+
+def test_oauth_issuer_url_defaults_to_base_auth_url_when_present() -> None:
+    """Ensure inferred OAuth issuer_url defaults to base_auth_url when both base URLs are defined."""
+    pydp_object = PyDPlus(
+        base_admin_url='https://example-admin.access.securid.com',
+        base_auth_url='https://example-auth.auth.securid.com',
+        oauth_client_id='oauth-client-id',
+        oauth_private_key_jwk='{"kty":"RSA","n":"abc","e":"AQAB","d":"xyz"}',
+        auto_connect=False,
+    )
+
+    assert pydp_object.connection_info[const.CONNECTION_INFO.OAUTH][const.CONNECTION_INFO.OAUTH_ISSUER_URL] == (
+        'https://example-auth.auth.securid.com/oauth'
+    )
+
+
+def test_oauth_issuer_url_uses_base_admin_url_when_oauth_api_type_is_admin() -> None:
+    """Ensure inferred OAuth issuer_url uses base_admin_url when oauth_api_type is explicitly set to admin."""
+    pydp_object = PyDPlus(
+        base_admin_url='https://example-admin.access.securid.com',
+        base_auth_url='https://example-auth.auth.securid.com',
+        oauth_api_type=const.ADMIN_API_TYPE,
+        oauth_client_id='oauth-client-id',
+        oauth_private_key_jwk='{"kty":"RSA","n":"abc","e":"AQAB","d":"xyz"}',
+        auto_connect=False,
+    )
+
+    assert pydp_object.connection_info[const.CONNECTION_INFO.OAUTH][const.CONNECTION_INFO.OAUTH_ISSUER_URL] == (
+        'https://example-admin.access.securid.com/oauth'
+    )
+
+
+def test_oauth_issuer_url_is_inferred_from_admin_base_url_when_auth_url_is_missing() -> None:
+    """Ensure OAuth issuer_url is inferred from access-domain admin_base_url when auth_base_url is omitted."""
+    pydp_object = PyDPlus(
+        base_admin_url='https://example-company.access.securid.com',
+        oauth_client_id='oauth-client-id',
+        oauth_private_key_jwk='{"kty":"RSA","n":"abc","e":"AQAB","d":"xyz"}',
+        auto_connect=False,
+    )
+
+    assert pydp_object.connection_info[const.CONNECTION_INFO.OAUTH][const.CONNECTION_INFO.OAUTH_ISSUER_URL] == (
+        'https://example-company.auth.securid.com/oauth'
+    )
+    assert pydp_object.auth_base_url == 'https://example-company.auth.securid.com'
+
+
+def test_oauth_issuer_url_uses_explicit_value_when_defined() -> None:
+    """Ensure explicit oauth_issuer_url is retained even when base URLs are available."""
+    pydp_object = PyDPlus(
+        base_admin_url='https://example-admin.access.securid.com',
+        base_auth_url='https://example-auth.auth.securid.com',
+        oauth_client_id='oauth-client-id',
+        oauth_issuer_url='https://issuer.example.com/oauth',
+        oauth_private_key_jwk='{"kty":"RSA","n":"abc","e":"AQAB","d":"xyz"}',
+        auto_connect=False,
+    )
+
+    assert pydp_object.connection_info[const.CONNECTION_INFO.OAUTH][const.CONNECTION_INFO.OAUTH_ISSUER_URL] == (
+        'https://issuer.example.com/oauth'
+    )
 
 
 def test_explicit_connection_type_takes_precedence_over_auto_detect(sample_base_url: str) -> None:
