@@ -716,10 +716,18 @@ class OauthScopes:
     # Agent permissions (Cloud Administration API)
     AGENT_READ: ClassVar[str] = 'rsa.agent.read'                                           # Retrieve Agent details
     AGENT_CERT: ClassVar[str] = 'rsa.agent.cert'                                           # Agent Certificate Provisioning
+    AGENT_SCOPES: ClassVar[frozenset] = frozenset({
+        AGENT_READ,
+        AGENT_CERT,
+    })
 
     # Audit permissions (Cloud Administration API)
     AUDIT_ADMIN: ClassVar[str] = 'rsa.audit.admin'                                         # Retrieve admin event logs from the Cloud Access Service (audit microservice)
     AUDIT_USER: ClassVar[str] = 'rsa.audit.user'                                           # Retrieve RSA authentication audit and user event logs
+    AUDIT_SCOPES: ClassVar[frozenset] = frozenset({
+        AUDIT_ADMIN,
+        AUDIT_USER,
+    })
 
     # Authenticator permissions (Cloud Administration API)
     AUTHENTICATOR_MOBILE_DELETE: ClassVar[str] = 'rsa.authenticator.mobile.delete'         # Delete a device for individual users
@@ -736,22 +744,54 @@ class OauthScopes:
     AUTHENTICATOR_DS100_MANAGE: ClassVar[str] = 'rsa.authenticator.ds100.manage'           # Enable, disable, and clear pin for a SecurID DS100 OTP
     AUTHENTICATOR_DS100_DELETE: ClassVar[str] = 'rsa.authenticator.ds100.delete'           # Delete user's SecurID DS100 OTP credential
     AUTHENTICATOR_DS100_READ: ClassVar[str] = 'rsa.authenticator.ds100.read'               # Retrieve user's RSA DS100 OTP credential
+    AUTHENTICATOR_SCOPES: ClassVar[frozenset] = frozenset({
+        AUTHENTICATOR_MOBILE_DELETE,
+        AUTHENTICATOR_MOBILE_READ,
+        AUTHENTICATOR_MOBILE_MANAGE,
+        AUTHENTICATOR_DEVICE_DELETE,
+        AUTHENTICATOR_EMERGENCY_MANAGE,
+        AUTHENTICATOR_FIDO_READ,
+        AUTHENTICATOR_FIDO_DELETE,
+        AUTHENTICATOR_FIDO_MANAGE,
+        AUTHENTICATOR_SIDTOKEN_READ,
+        AUTHENTICATOR_SIDTOKEN_MANAGE,
+        AUTHENTICATOR_SIDTOKEN_DELETE,
+        AUTHENTICATOR_DS100_MANAGE,
+        AUTHENTICATOR_DS100_DELETE,
+        AUTHENTICATOR_DS100_READ,
+    })
 
     # FIDO configuration permissions (Cloud Administration API)
     FIDO_CONFIGURATION_MANAGE: ClassVar[str] = 'rsa.fido.configuration.manage'             # Manage configuration of FIDO authenticators
     FIDO_CONFIGURATION_READ: ClassVar[str] = 'rsa.fido.configuration.read'                 # Retrieve current configuration of FIDO authenticators
+    FIDO_CONFIGURATION_SCOPES: ClassVar[frozenset] = frozenset({
+        FIDO_CONFIGURATION_MANAGE,
+        FIDO_CONFIGURATION_READ,
+    })
 
     # Local group permissions (Cloud Administration API)
     GROUP_MANAGE: ClassVar[str] = 'rsa.group.manage'                                       # Local group management actions (create, update, delete)
     GROUP_READ: ClassVar[str] = 'rsa.group.read'                                           # Retrieve local group(s) details
     GROUP_USERS_MANAGE: ClassVar[str] = 'rsa.group.users.manage'                           # Local group membership actions (add/remove users)
     GROUPS_USERS_READ: ClassVar[str] = 'rsa.group.users.read'                              # Retrieve local group user details
+    GROUPS_SCOPES: ClassVar[frozenset] = frozenset({
+        GROUP_MANAGE,
+        GROUP_READ,
+        GROUP_USERS_MANAGE,
+        GROUPS_USERS_READ,
+    })
 
     # Report permissions (Cloud Administration API)
     REPORT_HEALTH: ClassVar[str] = 'rsa.report.health'                                     # Retrieve report on CAS availability
     REPORT_LICENSE_USAGE: ClassVar[str] = 'rsa.report.license.usage'                       # Retrieve MFA license usage to monitor license compliance
     REPORT_READ: ClassVar[str] = 'rsa.report.read'                                         # Generate and download users, hardware tokens, and MFA clients report
     REPORT_USER_RISKY: ClassVar[str] = 'rsa.report.user.risky'                             # Retrieve a list of users who exhibit anomalous behavior
+    REPORT_SCOPES: ClassVar[frozenset] = frozenset({
+        REPORT_HEALTH,
+        REPORT_LICENSE_USAGE,
+        REPORT_READ,
+        REPORT_USER_RISKY,
+    })
 
     # User permissions (Cloud Administration API)
     USER_READ: ClassVar[str] = 'rsa.user.read'                                             # Retrieve user information from the identity source
@@ -762,10 +802,24 @@ class OauthScopes:
     USER_FACTOR_MANAGE: ClassVar[str] = 'rsa.user.factor.manage'                           # Unlock, update, reset, and generate codes for users' authentication factors
     USER_RISKY_MANAGE: ClassVar[str] = 'rsa.user.risky.manage'                             # Add or remove one or more users from the high-risk user lisT
     USER_RISKY_READ: ClassVar[str] = 'rsa.user.risky.read'                                 # Retrieve a list of users who are identified as high risk
+    USER_SCOPES: ClassVar[frozenset] = frozenset({
+        USER_READ,
+        USER_SYNC,
+        USER_DELETE_SOFT,
+        USER_DELETE,
+        USER_MANAGE,
+        USER_FACTOR_MANAGE,
+        USER_RISKY_MANAGE,
+        USER_RISKY_READ,
+    })
 
     # MFA permissions (Cloud Authentication API)
     MFA_AUTHN: ClassVar[str] = 'rsa.mfa.authn'                                             # For multifactor, multistep authentications with CAS
     MFA_IDENTITY_CONFIDENCE: ClassVar[str] = 'rsa.mfa.identityconfidence'                  # View and update the identity confidence score of a user
+    MFA_SCOPES: ClassVar[frozenset] = frozenset({
+        MFA_AUTHN,
+        MFA_IDENTITY_CONFIDENCE,
+    })
 
 
 # -----------------------------
