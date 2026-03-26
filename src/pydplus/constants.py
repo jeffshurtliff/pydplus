@@ -839,6 +839,22 @@ class OauthScopes:
         MFA_IDENTITY_CONFIDENCE,
     })
 
+    # Collection of scopes relating to the Cloud Administration API
+    ADMIN_API_SCOPES: ClassVar[frozenset[str]] = frozenset().union(
+        AGENT_SCOPES,
+        AUDIT_SCOPES,
+        AUTHENTICATOR_SCOPES,
+        FIDO_CONFIGURATION_SCOPES,
+        GROUPS_SCOPES,
+        REPORT_SCOPES,
+        USER_SCOPES,
+    )
+
+    # Collection of scopes relating to the Cloud Authentication API
+    AUTH_API_SCOPES: ClassVar[frozenset[str]] = frozenset().union(
+        MFA_SCOPES,
+    )
+
     # Collection of all scopes
     ALL_SCOPES: ClassVar[frozenset[str]] = frozenset().union(
         AGENT_SCOPES,
