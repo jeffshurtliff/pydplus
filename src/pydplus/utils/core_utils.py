@@ -6,7 +6,7 @@
 :Example:           ``encoded_string = core_utils.encode_url(decoded_string)``
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     25 Mar 2026
+:Modified Date:     26 Mar 2026
 """
 
 from __future__ import annotations
@@ -238,11 +238,13 @@ def normalize_oauth_scope(scope_value: Any, required: bool = False) -> Optional[
              :py:exc:`ValueError`,
              :py:exc:`pydplus.errors.exceptions.MissingRequiredDataError`
     """
+    missing_scope_error_msg = const._EXCEPTION_CLASSES._VALUE_NEEDED_TO_CONNECT_OAUTH.format(
+        field=const.CONNECTION_INFO.OAUTH_SCOPE,
+    )
     if scope_value is None:
         if required:
-            error_msg = f"The '{const.CONNECTION_INFO.OAUTH_SCOPE}' value is needed to connect to the tenant via OAuth"
-            logger.error(error_msg)
-            raise errors.exceptions.MissingRequiredDataError(error_msg)
+            logger.error(missing_scope_error_msg)
+            raise errors.exceptions.MissingRequiredDataError(missing_scope_error_msg)
         return None
 
     parsed_scopes: list[str] = []
@@ -270,9 +272,8 @@ def normalize_oauth_scope(scope_value: Any, required: bool = False) -> Optional[
     parsed_scopes = [scope for scope in parsed_scopes if scope]
     if not parsed_scopes:
         if required:
-            error_msg = f"The '{const.CONNECTION_INFO.OAUTH_SCOPE}' value is needed to connect to the tenant via OAuth"
-            logger.error(error_msg)
-            raise errors.exceptions.MissingRequiredDataError(error_msg)
+            logger.error(missing_scope_error_msg)
+            raise errors.exceptions.MissingRequiredDataError(missing_scope_error_msg)
         return None
 
     normalized_scopes: list[str] = []

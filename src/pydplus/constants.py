@@ -4,7 +4,7 @@
 :Synopsis:          Constants that are utilized throughout the package
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     25 Mar 2026
+:Modified Date:     26 Mar 2026
 """
 
 from __future__ import annotations
@@ -138,11 +138,12 @@ class ExceptionClasses:
     _VALUE: ClassVar[str] = 'value'
 
     # Exception messages and message segments
-    _API_CUSTOM_MSG: ClassVar[str] = 'The {type} request failed with the following message:'                # Vars: type
-    _API_DEFAULT_MSG: ClassVar[str] = 'The {type} request did not return a successful response.'            # Vars: type
-    _CANNOT_LOCATE_FILE: ClassVar[str] = 'Unable to locate the following file: {file_path}'                 # Vars: file_path
+    _API_CUSTOM_MSG: ClassVar[str] = 'The {type} request failed with the following message:'                            # Vars: type
+    _API_DEFAULT_MSG: ClassVar[str] = 'The {type} request did not return a successful response.'                        # Vars: type
+    _CANNOT_LOCATE_FILE: ClassVar[str] = 'Unable to locate the following file: {file_path}'                             # Vars: file_path
     _INVALID_HELPER_DEFAULT_MSG: ClassVar[str] = "The helper configuration file can only have the 'yml', 'yaml' or 'json' file type."
-    _PRIVATE_KEY_ALREADY_EXISTS: ClassVar[str] = "The private key file already exists at '{final_path}'"    # Vars: final_path
+    _PRIVATE_KEY_ALREADY_EXISTS: ClassVar[str] = "The private key file already exists at '{final_path}'"                # Vars: final_path
+    _VALUE_NEEDED_TO_CONNECT_OAUTH: ClassVar[str] = "The '{field}' value is needed to connect to the tenant via OAuth"  # Vars: field
     _WITH_THE_FOLLOWING_SEGMENT: ClassVar[str] = ' with the following'
 
 
