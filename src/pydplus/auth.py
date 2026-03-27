@@ -6,7 +6,7 @@
 :Example:           ``jwt_string = auth.get_legacy_jwt_string(base_url, connection_info)``
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     25 Mar 2026
+:Modified Date:     27 Mar 2026
 """
 
 from __future__ import annotations
@@ -164,7 +164,7 @@ def get_oauth_access_token(
     oauth_connection_info = _extract_oauth_connection_info(connection_info)
     requested_scope = oauth_connection_info[const.CONNECTION_INFO.OAUTH_SCOPE]
 
-    if not force_refresh and _is_oauth_token_valid(token_data, expected_scope=requested_scope):
+    if not force_refresh and _is_oauth_token_valid(token_data, _expected_scope=requested_scope):
         return token_data
     elif force_refresh:
         logger.debug('The OAuth access token is being force-refreshed')
@@ -645,7 +645,10 @@ def _is_oauth_token_valid(
         _expected_scope: Optional[str] = None,
 ) -> bool:
     """Return whether cached OAuth token data is still valid."""
-    if not isinstance(_token_data, dict):
+    if not _token_data:
+        logger.debug('No OAauth token data was provided when checking if the token is valid')
+        return False
+    elif not isinstance(_token_data, dict):
         logger.error(f'The OAuth token data is an invalid type (Expected: dict, Provided: {type(_token_data)})')
         return False
 
