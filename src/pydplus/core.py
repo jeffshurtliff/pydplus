@@ -5,14 +5,15 @@
 :Usage:             ``from pydplus import PyDPlus``
 :Example:           ``pydp = PyDPlus()``
 :Created By:        Jeff Shurtliff
-:Last Modified:     Jeff Shurtliff (via GPT-5.3-codex)
-:Modified Date:     21 Mar 2026
+:Last Modified:     Jeff Shurtliff
+:Modified Date:     25 Mar 2026
 """
 
 from __future__ import annotations
 
 import logging
 import os
+import urllib.parse
 from pathlib import Path
 from typing import Any, Optional, Union, Tuple
 from collections.abc import Mapping
@@ -59,7 +60,7 @@ class PyDPlus(object):
                    is instantiated. (e.g. ``PYDPLUS_PROD_BASE_URL`` rather than ``PYDPLUS_BASE_URL``)
 
     :type env: str, None
-    :param private_key: The file path to the private key used for API authentication (OAuth or Legacy)
+    :param private_key: The file path to the private key used for legacy API authentication
     :type private_key: str, None
     :param legacy_access_id: The Access ID associated with the Legacy API connection
     :type legacy_access_id: str, None
@@ -67,6 +68,18 @@ class PyDPlus(object):
     :type legacy_key_material: str, pathlib.Path, pydplus.credentials.IDPlusLegacyKeyMaterial, None
     :param oauth_client_id: The Client ID associated with the OAuth API connection
     :type oauth_client_id: str, None
+    :param oauth_issuer_url: The explicit OAuth issuer URL to use for token requests (e.g. ``https://<tenant>.auth.securid.com/oauth``)
+    :type oauth_issuer_url: str, None
+    :param oauth_private_key: The file path to the OAuth private-key JWK file used for Private Key JWT authentication
+    :type oauth_private_key: str, None
+    :param oauth_private_key_jwk: The OAuth private-key JWK payload used for Private Key JWT authentication
+    :type oauth_private_key_jwk: dict, str, None
+    :param oauth_scope: One or more OAuth scopes to request in token requests
+                        (``+``-delimited string or iterable of scope strings)
+    :type oauth_scope: str, tuple, list, set, frozenset, None
+    :param oauth_api_type: Defines which API base URL should be used when inferring the OAuth issuer URL
+                           (``auth`` by default; ``admin`` supported when configured)
+    :type oauth_api_type: str, None
     :param verify_ssl: Determines if SSL connections should be verified (``True`` by default)
     :type verify_ssl: bool, None
     :param auto_connect: Determines if an API connection should be established when the object is instantiated
@@ -81,6 +94,7 @@ class PyDPlus(object):
     :type helper: str, tuple, list, set, dict, None
     :returns: The instantiated PyDPlus object
     :raises: :py:exc:`TypeError`,
+             :py:exc:`ValueError`,
              :py:exc:`pydplus.errors.exceptions.MissingRequiredDataError`,
              :py:exc:`pydplus.errors.exceptions.APIConnectionError`
     """
@@ -97,20 +111,28 @@ class PyDPlus(object):
             legacy_access_id: Optional[str] = None,
             legacy_key_material: Union[Optional[str], Optional[Path], Optional[IDPlusLegacyKeyMaterial]] = None,
             oauth_client_id: Optional[str] = None,
+            oauth_private_key: Optional[str] = None,
+            oauth_private_key_jwk: Union[Optional[dict], Optional[str]] = None,
+            oauth_scope: Union[Optional[str], Optional[tuple], Optional[list], Optional[set], Optional[frozenset]] = None,
             verify_ssl: Optional[bool] = None,
-            auto_connect: bool = True,
+            auto_connect: bool = const.CLIENT_SETTINGS.DEFAULT_AUTO_CONNECT_VALUE,
             strict_mode: Optional[bool] = None,
             env_variables: Optional[dict] = None,
             helper: Union[Optional[str], Optional[tuple], Optional[list], Optional[set], Optional[dict]] = None,
+            oauth_api_type: Optional[str] = None,
+            oauth_issuer_url: Optional[str] = None,
     ):
         """Instantiate the core client object."""
         # Define the initial properties and settings
         self._helper_settings = {}
         self._env_variables = {}
         self.base_headers = {}
+        self.auto_connect = auto_connect
         self.connected = False
         self.connection_type = None
         self.env = None
+        self._oauth_token_data = None
+        self.oauth_api_type = const.AUTH_API_TYPE
         self.strict_mode = strict_mode
         self.tenant_name = tenant_name
 
@@ -142,9 +164,6 @@ class PyDPlus(object):
             if not base_admin_url:
                 base_admin_url = self.legacy_key_material.admin_rest_api_url      # Base Admin URL will be parsed below
 
-        # Define the connection type that should be used to authenticate
-        self._get_connection_type(connection_type)                      # Defines self.connection_type
-
         # Define the base_url value or raise an exception if it cannot be defined
         self._define_base_url(base_url)                                 # Defines self.base_url
 
@@ -157,17 +176,27 @@ class PyDPlus(object):
         # Define the Authentication API base URL to use in API calls
         self.auth_base_rest_url = self.auth_base_url + const.REST_PATHS.AUTH_BASE if self.auth_base_url else None
 
+        # Define which API type should be used when inferring OAuth issuer URL values
+        self._define_oauth_api_type(oauth_api_type)                    # Defines self.oauth_api_type
+
         # Check for provided connection info and define the class object attribute
         self._validate_connection_info(
             connection_info,
             private_key,
             legacy_access_id,
             oauth_client_id,
+            oauth_issuer_url,
+            oauth_private_key,
+            oauth_private_key_jwk,
+            oauth_scope,
             self.legacy_key_material,
         )
 
+        # Define the connection type that should be used to authenticate
+        self._get_connection_type(connection_type)                      # Defines self.connection_type
+
         # Connect to the tenant (if auto-connect is enabled) and retrieve the base API headers
-        if auto_connect:
+        if self.auto_connect:
             self.connected, self.base_headers = self.connect()
             # TODO: Figure out how to connect after instantiation and update self.connected and self.base_headers
 
@@ -189,12 +218,14 @@ class PyDPlus(object):
             elif isinstance(_helper, dict):
                 _helper_file_path, _helper_file_type = _helper.values()
             else:
-                _error_msg = "The 'helper' argument can only be supplied as string, tuple, list, set or dict."
+                _error_msg = "The 'helper' argument can only be supplied as string, tuple, list, set or dict"
                 logger.error(_error_msg)
                 raise TypeError(_error_msg)
             self.helper_path = _helper_file_path
             self._helper_settings = get_helper_settings(_helper_file_path, _helper_file_type)
+            logger.info('The helper configuration settings have been loaded successfully')
         else:
+            logger.debug('No helper configuration settings were found and therefore none have been configured')
             self._helper_settings = {}
 
     def _define_legacy_key_material_path(self, _connection_info: Optional[dict] = None) -> str:
@@ -272,12 +303,16 @@ class PyDPlus(object):
         if isinstance(_legacy_key_material, (str, Path)):
             return IDPlusLegacyKeyMaterial.from_file(_legacy_key_material)
         _error_msg = ("The 'legacy_key_material' parameter must be a string path, pathlib.Path value, "
-                      "or IDPlusLegacyKeyMaterial object.")
+                      "or IDPlusLegacyKeyMaterial object")
         logger.error(_error_msg)
         raise TypeError(_error_msg)
 
     def _get_env_name(self, _env: Optional[str] = None) -> None:
         """Identify the environment name if defined with an argument or environment variable."""
+        setting = 'environment name'
+        methods = const.ARGUMENT_VALUES.PROVIDED_METHODS                # arg, helper, or env
+        debug_msg = const._LOG_MESSAGES._CLIENT_SETTING_CONFIGURED
+
         # Attempt to define the environment name using a passed argument
         if _env:
             if not isinstance(_env, str):
@@ -285,21 +320,21 @@ class PyDPlus(object):
                 logger.error(_error_msg)
                 raise TypeError(_error_msg)
             self.env = _env.upper()
-            logger.debug(f"The environment name has been defined as '{self.env}' from the passed argument")
+            logger.debug(debug_msg.format(setting=setting, value=self.env, method=methods[0]))
 
         # Attempt to define the environment name using helper settings if configured
         if (not self.env and self._helper_settings
                 and isinstance(self._helper_settings.get(const.HELPER_SETTINGS.ENV_NAME), str)
                 and self._helper_settings[const.HELPER_SETTINGS.ENV_NAME]):
             self.env = self._helper_settings[const.HELPER_SETTINGS.ENV_NAME].upper()
-            logger.debug(f"The environment name has been defined as '{self.env}' from the helper settings")
+            logger.debug(debug_msg.format(setting=setting, value=self.env, method=methods[1]))
 
         # Define the environment name (or lack thereof) using the environment variable
         if not self.env:
             _env = os.getenv(const.ENV_VARIABLES.ENV_NAME)  # Returns None if not found
             self.env = _env.upper() if _env else None
             if self.env:
-                logger.debug(f"The environment name has been defined as '{self.env}' from an environment variable")
+                logger.debug(debug_msg.format(setting=setting, value=self.env, method=methods[2]))
             else:
                 logger.debug('The environment name could not be defined as it was not specified anywhere')
 
@@ -308,7 +343,7 @@ class PyDPlus(object):
         # Check for custom environment variable names passed as an argument (or environment-specific)
         if _env_variables_from_arg:
             if not isinstance(_env_variables_from_arg, dict):
-                logger.error("The 'env_variables' parameter must be a dictionary and will be ignored.")
+                logger.error("The 'env_variables' parameter must be a dictionary and will be ignored")
             else:
                 self._get_env_variable_names(_env_variables_from_arg)
 
@@ -345,13 +380,16 @@ class PyDPlus(object):
 
         # Update the dictionary to use any defined custom names instead of the default (or env-specific) names
         if _custom_dict and not isinstance(_custom_dict, Mapping):
-            _error_msg = 'Unable to parse custom environment variable names because variable is not a dictionary.'
+            _error_msg = 'Unable to parse custom environment variable names because variable is not a dictionary'
             logger.error(_error_msg)
             raise TypeError(_error_msg)
         if _custom_dict:
             for _name_key, _name_value in _custom_dict.items():
                 if _name_key in _env_variable_names:
                     _env_variable_names[_name_key] = _name_value
+                else:
+                    _warn_msg = f"'{_name_key}' is not a recognized environment variable identifier and will be ignored"
+                    logger.warning(_warn_msg)
 
         # Return the finalized dictionary with the mapped environment variable names
         self._env_variable_names = _env_variable_names
@@ -366,29 +404,38 @@ class PyDPlus(object):
 
     def _define_strict_mode(self, _strict_mode_from_arg: Optional[bool]) -> None:
         """Define the strict_mode setting using a passed argument, helper setting, or environment variable."""
+        setting = const.CLIENT_SETTINGS.STRICT_MODE
+        methods = const.ARGUMENT_VALUES.PROVIDED_METHODS  # arg, helper, or env
+        debug_msg = const._LOG_MESSAGES._CLIENT_SETTING_CONFIGURED
+        default_debug_msg = const._LOG_MESSAGES._WILL_USE_DEFAULT_VALUE
+
         # Check if the strict_mode value was passed as an argument
         if _strict_mode_from_arg is not None:
             if not isinstance(_strict_mode_from_arg, bool):
-                _error_msg = 'The value of the strict_mode parameter must be Boolean.'
+                _error_msg = const._LOG_MESSAGES._MUST_BE_DATA_TYPE_ERROR.format(param=setting, data_type='bool')
                 logger.error(_error_msg)
                 raise TypeError(_error_msg)
             self.strict_mode = _strict_mode_from_arg
+            logger.debug(debug_msg.format(setting=setting, value=self.strict_mode, method=methods[0]))
 
         # Check the helper settings to see if strict mode was defined
         elif (self._helper_settings and const.HELPER_SETTINGS.STRICT_MODE in self._helper_settings
                 and isinstance(self._helper_settings[const.HELPER_SETTINGS.STRICT_MODE], bool)
                 and self._helper_settings[const.HELPER_SETTINGS.STRICT_MODE] is not None):
             self.strict_mode = self._helper_settings.get(const.HELPER_SETTINGS.STRICT_MODE)
+            logger.debug(debug_msg.format(setting=setting, value=self.strict_mode, method=methods[1]))
 
         # Check the environment variables to see if strict mode was defined
         elif (const.ENV_VARIABLES.STRICT_MODE_FIELD in self._env_variables
               and isinstance(self._env_variables[const.ENV_VARIABLES.STRICT_MODE_FIELD], bool)
               and self._env_variables[const.ENV_VARIABLES.STRICT_MODE_FIELD] is not None):
             self.strict_mode = self._env_variables.get(const.ENV_VARIABLES.STRICT_MODE_FIELD)
+            logger.debug(debug_msg.format(setting=setting, value=self.strict_mode, method=methods[2]))
 
         # Use the default value (True) if not strict mode was not explicitly defined
         else:
             self.strict_mode = const.DEFAULT_STRICT_MODE
+            logger.debug(default_debug_msg.format(setting=setting, value=self.strict_mode))
 
     def _check_for_connection_type_mismatch(self):
         if self.legacy_key_material and self.connection_type == const.CONNECTION_INFO.OAUTH:
@@ -397,54 +444,109 @@ class PyDPlus(object):
             # TODO: Call method for displaying warnings when a related setting is enabled
             logger.warning(_warn_msg)
 
+    def _has_complete_legacy_connection_info(self) -> bool:
+        """Return whether current connection info has the required legacy credentials."""
+        _legacy_info = self.connection_info.get(const.CONNECTION_INFO.LEGACY, {})
+        if not isinstance(_legacy_info, dict):
+            return False
+        _has_access_id = bool(_legacy_info.get(const.CONNECTION_INFO.LEGACY_ACCESS_ID))
+        _has_private_key = bool(
+            _legacy_info.get(const.CONNECTION_INFO.LEGACY_PRIVATE_KEY_FILE)
+            or _legacy_info.get(const.CONNECTION_INFO.LEGACY_PRIVATE_KEY_PEM)
+        )
+        return _has_access_id and _has_private_key
+
+    def _has_complete_oauth_connection_info(self) -> bool:
+        """Return whether current connection info has the required OAuth credentials."""
+        _oauth_info = self.connection_info.get(const.CONNECTION_INFO.OAUTH, {})
+        if not isinstance(_oauth_info, dict):
+            return False
+        _has_issuer_url = bool(_oauth_info.get(const.CONNECTION_INFO.OAUTH_ISSUER_URL))
+        _has_client_id = bool(_oauth_info.get(const.CONNECTION_INFO.OAUTH_CLIENT_ID))
+        _has_scope = bool(_oauth_info.get(const.CONNECTION_INFO.OAUTH_SCOPE))
+        _has_private_key = bool(
+            _oauth_info.get(const.CONNECTION_INFO.OAUTH_PRIVATE_KEY_FILE)
+            or _oauth_info.get(const.CONNECTION_INFO.OAUTH_PRIVATE_KEY_JWK)
+        )
+        return _has_issuer_url and _has_client_id and _has_scope and _has_private_key
+
     def _get_connection_type(self, _connection_type_from_arg: Optional[str]) -> None:
         """Define the connection type that should be used to authenticate to the RSA ID Plus tenant."""
+        self.connection_type = None
+        setting = const.CLIENT_SETTINGS.CONNECTION_TYPE
+        methods = const.ARGUMENT_VALUES.PROVIDED_METHODS                    # arg, helper, or env
+        debug_msg = const._LOG_MESSAGES._CLIENT_SETTING_CONFIGURED
+
         # Check if the connection type was passed as an argument and leverage it if valid
-        if not self.connection_type and _connection_type_from_arg in const.CONNECTION_INFO.VALID_CONNECTION_TYPES:
-            self.connection_type = _connection_type_from_arg
-            self._check_for_connection_type_mismatch()
+        if _connection_type_from_arg is not None:
+            if _connection_type_from_arg in const.CONNECTION_INFO.VALID_CONNECTION_TYPES:
+                self.connection_type = _connection_type_from_arg
+                logger.debug(debug_msg.format(setting=setting, value=self.connection_type, method=methods[0]))
+            else:
+                _error_msg = const._LOG_MESSAGES._INVALID_ARG_IGNORE.format(arg=setting)
+                _expected_types = ','.join(const.CONNECTION_INFO.VALID_CONNECTION_TYPES)
+                _error_msg += f' (Expected: {_expected_types}; Provided: {_connection_type_from_arg})'
+                logger.error(_error_msg)
 
         # Attempt to retrieve the connection type via helper settings if present and populated
         if (not self.connection_type and self._helper_settings
                 and const.HELPER_SETTINGS.CONNECTION_TYPE in self._helper_settings
                 and self._helper_settings[const.HELPER_SETTINGS.CONNECTION_TYPE] is not None):
-            if self._helper_settings.get(const.HELPER_SETTINGS.CONNECTION_TYPE) in const.CONNECTION_INFO.VALID_CONNECTION_TYPES:
-                self.connection_type = self._helper_settings.get(const.HELPER_SETTINGS.CONNECTION_TYPE)
-                self._check_for_connection_type_mismatch()
+            _helper_connection_type = self._helper_settings.get(const.HELPER_SETTINGS.CONNECTION_TYPE)
+            if _helper_connection_type in const.CONNECTION_INFO.VALID_CONNECTION_TYPES:
+                self.connection_type = _helper_connection_type
+                logger.debug(debug_msg.format(setting=setting, value=self.connection_type, method=methods[1]))
             else:
-                _error_msg = 'The connection_type value in the helper settings in invalid and will be ignored'
+                _error_msg = 'The connection_type value in the helper settings is invalid and will be ignored'
                 _expected_types = ','.join(const.CONNECTION_INFO.VALID_CONNECTION_TYPES)
-                _error_msg += (f"(Expected: {_expected_types}; "
-                               f"Provided: {self._helper_settings.get(const.HELPER_SETTINGS.CONNECTION_TYPE)})")
+                _error_msg += f" (Expected: {_expected_types}; Provided: {_helper_connection_type})"
                 logger.error(_error_msg)
 
         # Attempt to retrieve the connection type via environment variable if defined
-        elif (not self.connection_type and self._env_variables
-              and const.ENV_VARIABLES.CONNECTION_TYPE_FIELD in self._env_variables
-              and self._env_variables[const.ENV_VARIABLES.CONNECTION_TYPE_FIELD] is not None):
-            if self._env_variables[const.ENV_VARIABLES.CONNECTION_TYPE_FIELD] in const.CONNECTION_INFO.VALID_CONNECTION_TYPES:
-                self.connection_type = self._env_variables[const.ENV_VARIABLES.CONNECTION_TYPE_FIELD]
-                self._check_for_connection_type_mismatch()
+        if (not self.connection_type and self._env_variables
+                and const.ENV_VARIABLES.CONNECTION_TYPE_FIELD in self._env_variables
+                and self._env_variables[const.ENV_VARIABLES.CONNECTION_TYPE_FIELD] is not None):
+            _env_connection_type = self._env_variables[const.ENV_VARIABLES.CONNECTION_TYPE_FIELD]
+            if _env_connection_type in const.CONNECTION_INFO.VALID_CONNECTION_TYPES:
+                self.connection_type = _env_connection_type
+                logger.debug(debug_msg.format(setting=setting, value=self.connection_type, method=methods[2]))
             else:
-                _error_msg = 'The connection_type environment variable in invalid and will be ignored'
+                _error_msg = 'The connection_type environment variable is invalid and will be ignored'
+                _expected_types = ','.join(const.CONNECTION_INFO.VALID_CONNECTION_TYPES)
+                _error_msg += f' (Expected: {_expected_types}; Provided: {_env_connection_type})'
                 logger.error(_error_msg)
 
-        # Set the connection type to be Legacy if legacy key material was previously defined
-        if not self.connection_type and self.legacy_key_material:
-            self.connection_type = const.CONNECTION_INFO.LEGACY
-            logger.info("The 'legacy' connection_type will be used because legacy key material has been provided")
+        # Explicit/declared connection type wins over auto-detection
+        if self.connection_type:
+            self._check_for_connection_type_mismatch()
+            return
 
-        # Use the default connection type (OAuth) if the setting has not been defined
-        else:
-            self.connection_type = const.CONNECTION_INFO.DEFAULT_CONNECTION_TYPE
-            logger.info(f"The default connection_type '{const.CONNECTION_INFO.DEFAULT_CONNECTION_TYPE}' will be used "
-                        "as the setting was not explicitly defined")
+        # Auto-detect connection type based on complete credential sets
+        if self._has_complete_oauth_connection_info():
+            self.connection_type = const.CONNECTION_INFO.OAUTH
+            logger.info("The 'oauth' connection_type was selected automatically based on provided OAuth credentials")
+            return
+        if self._has_complete_legacy_connection_info():
+            self.connection_type = const.CONNECTION_INFO.LEGACY
+            logger.info("The 'legacy' connection_type was selected automatically based on provided legacy credentials")
+            return
+
+        # Fallback to default when no complete credential set is detected.
+        self.connection_type = const.CONNECTION_INFO.DEFAULT_CONNECTION_TYPE
+        logger.info(f"The default connection_type '{const.CONNECTION_INFO.DEFAULT_CONNECTION_TYPE}' will be used "
+                    "as a complete credential set could not be auto-detected")
 
     def _get_verify_ssl_setting(self, _verify_ssl_from_arg: Optional[bool]) -> None:
         """Determine the ``verify_ssl`` value from a passed argument, helper setting, or environment variable."""
+        setting = const.CLIENT_SETTINGS.VERIFY_SSL
+        methods = const.ARGUMENT_VALUES.PROVIDED_METHODS                            # arg, helper, or env
+        debug_msg = const._LOG_MESSAGES._CLIENT_SETTING_CONFIGURED
+        default_debug_msg = const._LOG_MESSAGES._WILL_USE_DEFAULT_VALUE
+
         # Define the verify_ssl value using the argument if defined
         if _verify_ssl_from_arg is not None and isinstance(_verify_ssl_from_arg, bool):
             self.verify_ssl = _verify_ssl_from_arg
+            logger.debug(debug_msg.format(setting=setting, value=self.verify_ssl, method=methods[0]))
 
         # Attempt to define the verify_ssl value using Helper Settings if present and populated
         elif (self._helper_settings and const.HELPER_SETTINGS.VERIFY_SSL in self._helper_settings
@@ -453,6 +555,7 @@ class PyDPlus(object):
                 const.HELPER_SETTINGS.VERIFY_SSL,
                 const.CLIENT_SETTINGS.DEFAULT_VERIFY_SSL_VALUE      # Fallback value
             )
+            logger.debug(debug_msg.format(setting=setting, value=self.verify_ssl, method=methods[1]))
 
         # Attempt to define the verify_ssl value using an environment variable if defined
         elif (self._env_variables and const.ENV_VARIABLES.VERIFY_SSL_FIELD in self._env_variables
@@ -461,10 +564,43 @@ class PyDPlus(object):
                 const.ENV_VARIABLES.VERIFY_SSL_FIELD,
                 const.CLIENT_SETTINGS.DEFAULT_VERIFY_SSL_VALUE      # Fallback value
             )
+            logger.debug(debug_msg.format(setting=setting, value=self.verify_ssl, method=methods[2]))
 
         # Use the default value (True) if not defined elsewhere
         else:
             self.verify_ssl = const.CLIENT_SETTINGS.DEFAULT_VERIFY_SSL_VALUE
+            logger.debug(default_debug_msg.format(setting=setting, value=self.verify_ssl))
+
+    def _define_oauth_api_type(self, _oauth_api_type_from_arg: Optional[str]) -> None:
+        """Define which API type should be used for OAuth issuer URL inference."""
+        setting = const.CLIENT_SETTINGS.OAUTH_API_TYPE
+        methods = const.ARGUMENT_VALUES.PROVIDED_METHODS  # arg, helper, or env
+        debug_msg = const._LOG_MESSAGES._CLIENT_SETTING_CONFIGURED
+        default_debug_msg = const._LOG_MESSAGES._WILL_USE_DEFAULT_VALUE
+
+        if _oauth_api_type_from_arg is not None:
+            if not isinstance(_oauth_api_type_from_arg, str):
+                _error_msg = (
+                    f"The '{setting}' argument is an invalid data type "
+                    f"(Expected: str, Provided: {type(_oauth_api_type_from_arg)})"
+                )
+                logger.error(_error_msg)
+                raise TypeError(_error_msg)
+            _oauth_api_type = _oauth_api_type_from_arg.strip().lower()
+            if _oauth_api_type not in const.VALID_API_TYPES:
+                _valid_values = ','.join(sorted(const.VALID_API_TYPES))
+                _error_msg = (
+                    f"The '{setting}' value '{_oauth_api_type_from_arg}' is invalid "
+                    f"(Expected one of: {_valid_values})"
+                )
+                logger.error(_error_msg)
+                raise ValueError(_error_msg)
+            self.oauth_api_type = _oauth_api_type
+            logger.debug(debug_msg.format(setting=setting, value=self.oauth_api_type, method=methods[0]))
+            return
+
+        self.oauth_api_type = const.AUTH_API_TYPE
+        logger.debug(default_debug_msg.format(setting=setting, value=self.oauth_api_type))
 
     def _construct_base_url_with_tenant_name(self, _api_type: str, _tenant_name: Optional[str] = None) -> str:
         """Construct the base URL for a given API type using a tenant name."""
@@ -493,18 +629,25 @@ class PyDPlus(object):
     def _define_base_url(self, _base_url_from_arg: Optional[str]) -> None:
         """Define the base_url value from user-defined setting or raise an exception if it cannot be defined."""
         # Attempt to define the base URL value for the Administration API by first checking if defined via argument
+        setting = const.CLIENT_SETTINGS.BASE_URL
+        methods = const.ARGUMENT_VALUES.PROVIDED_METHODS                            # arg, helper, or env
+        debug_msg = const._LOG_MESSAGES._CLIENT_SETTING_CONFIGURED
+
         if _base_url_from_arg:
             self.base_url = core_utils.get_base_url(_base_url_from_arg)
+            logger.debug(debug_msg.format(setting=setting, value=self.base_url, method=methods[0]))
 
         # Attempt to define the base URL using the helper settings if defined and populated
         elif (self._helper_settings and const.HELPER_SETTINGS.BASE_URL in self._helper_settings
               and self._helper_settings[const.HELPER_SETTINGS.BASE_URL]):
             self.base_url = core_utils.get_base_url(self._helper_settings.get(const.HELPER_SETTINGS.BASE_URL))
+            logger.debug(debug_msg.format(setting=setting, value=self.base_url, method=methods[1]))
 
         # Attempt to define the base URL using an environment variable if defined
         elif (const.ENV_VARIABLES.BASE_URL_FIELD in self._env_variables
               and self._env_variables[const.ENV_VARIABLES.BASE_URL_FIELD]):
             self.base_url = core_utils.get_base_url(self._env_variables.get(const.ENV_VARIABLES.BASE_URL_FIELD))
+            logger.debug(debug_msg.format(setting=setting, value=self.base_url, method=methods[2]))
 
         # Set the value to None if the base URL could not be found
         else:
@@ -573,6 +716,13 @@ class PyDPlus(object):
         if not self.auth_base_url and self.tenant_name:
             self.auth_base_url = self._construct_base_url_with_tenant_name(const.AUTH_API_TYPE)
 
+        # Attempt to infer the auth base URL from a known admin base URL pattern if still undefined
+        if not self.auth_base_url and self.admin_base_url:
+            _inferred_auth_base_url = _infer_auth_base_url_from_admin_base_url(self.admin_base_url)
+            if _inferred_auth_base_url:
+                self.auth_base_url = _inferred_auth_base_url
+                logger.debug('The auth_base_url value was inferred from the admin_base_url setting')
+
         # Log a warning if the Authentication API base URL could not be defined but do not raise an exception
         if not self.auth_base_url:
             _warn_msg = 'The base URL for the Authentication API could not be defined and calls to that API will fail.'
@@ -587,6 +737,10 @@ class PyDPlus(object):
             _private_key: Optional[str] = None,
             _legacy_access_id: Optional[str] = None,
             _oauth_client_id: Optional[str] = None,
+            _oauth_issuer_url: Optional[str] = None,
+            _oauth_private_key: Optional[str] = None,
+            _oauth_private_key_jwk: Union[Optional[dict], Optional[str]] = None,
+            _oauth_scope: Union[Optional[str], Optional[tuple], Optional[list], Optional[set], Optional[frozenset]] = None,
             _legacy_key_material: Optional[IDPlusLegacyKeyMaterial] = None,
     ) -> None:
         """Check for provided connection info and define the class object attribute."""
@@ -598,9 +752,15 @@ class PyDPlus(object):
             _connection_info = compile_connection_info(
                 base_url=self.base_url,
                 admin_base_url=self.admin_base_url,
+                auth_base_url=self.auth_base_url,
+                oauth_api_type=self.oauth_api_type,
                 private_key=_private_key,
                 legacy_access_id=_legacy_access_id,
                 oauth_client_id=_oauth_client_id,
+                oauth_issuer_url=_oauth_issuer_url,
+                oauth_private_key=_oauth_private_key,
+                oauth_private_key_jwk=_oauth_private_key_jwk,
+                oauth_scope=_oauth_scope,
             )
 
             # Check for defined helper settings
@@ -698,12 +858,18 @@ class PyDPlus(object):
         _oauth_key = const.CONNECTION_INFO.OAUTH
         _grant_type_key = const.CONNECTION_INFO.OAUTH_GRANT_TYPE
         _client_auth_key = const.CONNECTION_INFO.OAUTH_CLIENT_AUTHENTICATION
+        if self.oauth_api_type == const.AUTH_API_TYPE:
+            _issuer_base_url = self.auth_base_url if self.auth_base_url else self.admin_base_url
+        else:
+            _issuer_base_url = self.admin_base_url if self.admin_base_url else self.auth_base_url
+        if not _issuer_base_url:
+            _issuer_base_url = self.base_url
 
         # Populate the Issuer URL value for OAuth connections if not defined
         if ((_issuer_url_key not in _partial_connection_info[_oauth_key]
              or not _partial_connection_info[_oauth_key][_issuer_url_key])
-                and self.base_url is not None):
-            _partial_connection_info[_oauth_key][_issuer_url_key] = const.URLS.OAUTH.format(base_url=self.base_url)
+                and _issuer_base_url is not None):
+            _partial_connection_info[_oauth_key][_issuer_url_key] = const.URLS.OAUTH.format(base_url=_issuer_base_url)
 
         # Populate the Grant Type value for OAuth connections if not defined
         if (_grant_type_key not in _partial_connection_info[_oauth_key]
@@ -711,12 +877,29 @@ class PyDPlus(object):
             _partial_connection_info[_oauth_key][_grant_type_key] = const.CONNECTION_INFO.OAUTH_DEFAULT_GRANT_TYPE
 
         # Populate the Client Authentication value for OAuth connections if not defined
-        if (_client_auth_key not in _partial_connection_info[_oauth_key][_client_auth_key]
+        if (_client_auth_key not in _partial_connection_info[_oauth_key]
                 or not _partial_connection_info[_oauth_key][_client_auth_key]):
             _partial_connection_info[_oauth_key][_client_auth_key] = const.CONNECTION_INFO.OAUTH_DEFAULT_CLIENT_AUTH
 
         # Return the updated connection info dictionary
         return _partial_connection_info
+
+    def _ensure_oauth_headers(self, force_refresh: bool = False) -> dict[str, str]:
+        """Ensure valid OAuth headers are available for Administration API calls."""
+        if self.connection_type != const.CONNECTION_INFO.OAUTH:
+            return self.base_headers
+        base_headers, self._oauth_token_data = auth.get_oauth_headers(
+            connection_info=self.connection_info,
+            verify_ssl=self.verify_ssl,
+            token_data=self._oauth_token_data,
+            force_refresh=force_refresh,
+        )
+        self.base_headers = base_headers
+        return base_headers
+
+    def refresh_oauth_token(self) -> dict[str, str]:
+        """Force refresh the OAuth access token and return updated base headers."""
+        return self._ensure_oauth_headers(force_refresh=True)
 
     def _check_if_connected(self) -> None:
         """Check to see if the object is connected to the tenant and raises an exception if not."""
@@ -732,28 +915,40 @@ class PyDPlus(object):
         :raises: :py:exc:`errors.exceptions.APIConnectionError`,
                  :py:exc:`errors.exceptions.FeatureNotConfiguredError`
         """
-        base_headers = None
+        base_headers = self.base_headers
         connected = self.connected
-        if connected:
-            logger.debug('The client is already connected to the RSA ID Plus tenant.')
+        if connected and self.connection_type != const.CLIENT_SETTINGS.CONNECTION_TYPE_OAUTH:
+            logger.debug('The client is already connected to the RSA ID Plus tenant')
+            return connected, base_headers
+
+        if self.connection_type == const.CLIENT_SETTINGS.CONNECTION_TYPE_LEGACY:
+            # Connect to the tenant using the legacy API method
+            try:
+                base_headers = auth.get_legacy_headers(
+                    base_url=self.base_url,
+                    connection_info=self.connection_info
+                )
+                self._oauth_token_data = None
+                connected = True
+            except Exception as exc:
+                exc_type = type(exc).__name__
+                error_msg = f'Failed to connect using Legacy API due to the following {exc_type} exception: {exc}'
+                logger.error(error_msg)
+                raise errors.exceptions.APIConnectionError(error_msg)
+        elif self.connection_type == const.CLIENT_SETTINGS.CONNECTION_TYPE_OAUTH:
+            # Connect to the tenant using the OAuth method
+            try:
+                base_headers = self._ensure_oauth_headers(force_refresh=connected)
+                connected = True
+            except Exception as exc:
+                exc_type = type(exc).__name__
+                error_msg = f'Failed to connect using OAuth due to the following {exc_type} exception: {exc}'
+                logger.error(error_msg)
+                raise errors.exceptions.APIConnectionError(error_msg)
         else:
-            if self.connection_type == const.CLIENT_SETTINGS.CONNECTION_TYPE_LEGACY:
-                # Connect to the tenant using the legacy API method
-                try:
-                    base_headers = auth.get_legacy_headers(
-                        base_url=self.base_url,
-                        connection_info=self.connection_info
-                    )
-                    connected = True
-                except Exception as exc:
-                    exc_type = type(exc).__name__
-                    error_msg = f'Failed to connect using Legacy API due to the following {exc_type} exception: {exc}'
-                    logger.error(error_msg)
-                    raise errors.exceptions.APIConnectionError(error_msg)
-            elif self.connection_type == const.CLIENT_SETTINGS.CONNECTION_TYPE_OAUTH:
-                # Connect to the tenant using the OAuth method
-                # TODO: Define the base headers using OAuth and establish connection instead of raising an exception
-                raise errors.exceptions.FeatureNotConfiguredError('OAuth connections are not currently supported')
+            error_msg = f"Unsupported connection_type '{self.connection_type}'"
+            logger.error(error_msg)
+            raise errors.exceptions.APIConnectionError(error_msg)
         return connected, base_headers
 
     def get(
@@ -1197,6 +1392,12 @@ def compile_connection_info(
         private_key: Optional[str] = None,
         legacy_access_id: Optional[str] = None,
         oauth_client_id: Optional[str] = None,
+        oauth_private_key: Optional[str] = None,
+        oauth_private_key_jwk: Union[Optional[dict], Optional[str]] = None,
+        oauth_scope: Union[Optional[str], Optional[tuple], Optional[list], Optional[set], Optional[frozenset]] = None,
+        auth_base_url: Optional[str] = None,
+        oauth_api_type: Optional[str] = None,
+        oauth_issuer_url: Optional[str] = None,
 ) -> dict:
     """Compile the connection_info dictionary to use when authenticating to the API.
 
@@ -1204,14 +1405,28 @@ def compile_connection_info(
     :type base_url: str, None
     :param admin_base_url: The base URL for the Administration API
     :type admin_base_url: str, None
-    :param private_key: The file path to the private key used for API authentication (OAuth or Legacy)
+    :param private_key: The file path to the private key used for legacy API authentication
     :type private_key: str, None
     :param legacy_access_id: The Access ID associated with the Legacy API connection
     :type legacy_access_id: str, None
     :param oauth_client_id: The Client ID associated with the OAuth API connection
     :type oauth_client_id: str, None
+    :param oauth_private_key: The file path to the OAuth private-key JWK used for Private Key JWT authentication
+    :type oauth_private_key: str, None
+    :param oauth_private_key_jwk: The OAuth private-key JWK payload used for Private Key JWT authentication
+    :type oauth_private_key_jwk: dict, str, None
+    :param oauth_scope: One or more OAuth scopes to request in token requests
+                        (``+``-delimited string or iterable of scope strings)
+    :type oauth_scope: str, tuple, list, set, frozenset, None
+    :param auth_base_url: The base URL for the Authentication API
+    :type auth_base_url: str, None
+    :param oauth_api_type: The API type to use when inferring OAuth issuer URL values (``auth`` by default)
+    :type oauth_api_type: str, None
+    :param oauth_issuer_url: The explicit OAuth issuer URL to use for token requests
+    :type oauth_issuer_url: str, None
     :returns: The compiled connection_info dictionary
-    :raises: :py:exc:`TypeError`
+    :raises: :py:exc:`TypeError`,
+             :py:exc:`ValueError`
     """
     # Define the two private key variables if defined
     if private_key and isinstance(private_key, str):
@@ -1219,18 +1434,74 @@ def compile_connection_info(
     else:
         private_key_path, private_key_file = None, None
 
+    # Define OAuth private-key file path variables if defined
+    if oauth_private_key and isinstance(oauth_private_key, str):
+        oauth_private_key_path, oauth_private_key_file = core_utils.split_file_path(oauth_private_key)
+    else:
+        oauth_private_key_path, oauth_private_key_file = None, None
+
+    # Validate the OAuth private key JWK payload when provided
+    if oauth_private_key_jwk is not None and not isinstance(oauth_private_key_jwk, (dict, str)):
+        _error_msg = ("The 'oauth_private_key_jwk' parameter must be supplied as a dictionary or string "
+                      f"(provided: {type(oauth_private_key_jwk)})")
+        logger.error(_error_msg)
+        raise TypeError(_error_msg)
+    oauth_scope = core_utils.normalize_oauth_scope(oauth_scope)
+
     # Prepare the admin_base_url value in order to construct the issuer_url value
     if base_url and admin_base_url:
         if base_url == admin_base_url:
             logger.debug("The 'base_url' argument is not needed if 'admin_base_url' is defined")
         else:
             logger.warning("The 'base_url' and 'admin_base_url' values do not match and the latter will be used")
-        admin_base_url = core_utils.get_base_url(base_url)
+        admin_base_url = core_utils.get_base_url(admin_base_url)
     elif base_url and not admin_base_url:
         admin_base_url = core_utils.get_base_url(base_url)
+    elif admin_base_url:
+        admin_base_url = core_utils.get_base_url(admin_base_url)
 
-    # Define the issuer URL and compile the connection info
-    issuer_url = const.URLS.OAUTH.format(base_url=admin_base_url) if admin_base_url else None
+    # Normalize the auth_base_url value for OAuth issuer inference if defined
+    if auth_base_url:
+        auth_base_url = core_utils.get_base_url(auth_base_url)
+
+    # Normalize and validate oauth_api_type when provided
+    if oauth_api_type is None:
+        oauth_api_type = const.AUTH_API_TYPE
+    if not isinstance(oauth_api_type, str):
+        _error_msg = f"The 'oauth_api_type' parameter must be a string (provided: {type(oauth_api_type)})"
+        logger.error(_error_msg)
+        raise TypeError(_error_msg)
+    oauth_api_type = oauth_api_type.strip().lower()
+    if oauth_api_type not in const.VALID_API_TYPES:
+        _valid_values = ','.join(sorted(const.VALID_API_TYPES))
+        _error_msg = f"The 'oauth_api_type' value '{oauth_api_type}' is invalid (Expected one of: {_valid_values})"
+        logger.error(_error_msg)
+        raise ValueError(_error_msg)
+
+    # Validate and normalize an explicitly provided OAuth issuer URL if defined
+    if oauth_issuer_url is not None and not isinstance(oauth_issuer_url, str):
+        _error_msg = f"The 'oauth_issuer_url' parameter must be a string (provided: {type(oauth_issuer_url)})"
+        logger.error(_error_msg)
+        raise TypeError(_error_msg)
+    oauth_issuer_url = oauth_issuer_url.strip() if isinstance(oauth_issuer_url, str) else None
+    if oauth_issuer_url:
+        _parsed_issuer_url = urllib.parse.urlparse(oauth_issuer_url)
+        if not _parsed_issuer_url.netloc or not _parsed_issuer_url.scheme:
+            _error_msg = f"The provided OAuth issuer URL '{oauth_issuer_url}' is invalid"
+            logger.error(_error_msg)
+            raise ValueError(_error_msg)
+        issuer_url = core_utils.remove_ending_slash(oauth_issuer_url)
+    else:
+        # Infer an auth base URL from the admin base URL when the auth URL is not explicitly defined
+        if not auth_base_url and admin_base_url:
+            auth_base_url = _infer_auth_base_url_from_admin_base_url(admin_base_url)
+
+        # Define the issuer URL and compile the connection info
+        if oauth_api_type == const.AUTH_API_TYPE:
+            issuer_base_url = auth_base_url if auth_base_url else admin_base_url
+        else:
+            issuer_base_url = admin_base_url if admin_base_url else auth_base_url
+        issuer_url = const.URLS.OAUTH.format(base_url=issuer_base_url) if issuer_base_url else None
     connection_info = {
         const.CONNECTION_INFO.LEGACY: {
             const.CONNECTION_INFO.LEGACY_ACCESS_ID: legacy_access_id,
@@ -1240,8 +1511,29 @@ def compile_connection_info(
         const.CONNECTION_INFO.OAUTH: {
             const.CONNECTION_INFO.OAUTH_ISSUER_URL: issuer_url,
             const.CONNECTION_INFO.OAUTH_CLIENT_ID: oauth_client_id,
+            const.CONNECTION_INFO.OAUTH_SCOPE: oauth_scope,
             const.CONNECTION_INFO.OAUTH_GRANT_TYPE: const.CONNECTION_INFO.OAUTH_DEFAULT_GRANT_TYPE,
             const.CONNECTION_INFO.OAUTH_CLIENT_AUTHENTICATION: const.CONNECTION_INFO.OAUTH_DEFAULT_CLIENT_AUTH,
+            const.CONNECTION_INFO.OAUTH_PRIVATE_KEY_PATH: oauth_private_key_path,
+            const.CONNECTION_INFO.OAUTH_PRIVATE_KEY_FILE: oauth_private_key_file,
+            const.CONNECTION_INFO.OAUTH_PRIVATE_KEY_JWK: oauth_private_key_jwk,
         }
     }
     return connection_info
+
+
+def _infer_auth_base_url_from_admin_base_url(_admin_base_url: Optional[str]) -> Optional[str]:
+    """Infer an Authentication API base URL from a matching Administration API base URL."""
+    if not isinstance(_admin_base_url, str) or not _admin_base_url:
+        return None
+    try:
+        _normalized_admin_base_url = core_utils.get_base_url(_admin_base_url)
+    except Exception as _exc:
+        _exc_type = core_utils.get_exception_type(_exc)
+        _error_msg = (f'Failed to infer Authentication API base URL from the Administration due to {_exc_type} '
+                      f'exception: {_exc}')
+        logger.error(_error_msg)
+        return None
+    if '.access.' not in _normalized_admin_base_url:
+        return None
+    return _normalized_admin_base_url.replace('.access.', '.auth.', 1)

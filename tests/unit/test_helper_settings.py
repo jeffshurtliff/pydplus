@@ -4,7 +4,7 @@
 :Synopsis:          Unit tests for helper configuration functions in pydplus.utils.helper
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff (via GPT-5.3-codex)
-:Modified Date:     20 Mar 2026
+:Modified Date:     25 Mar 2026
 """
 
 from __future__ import annotations
@@ -94,6 +94,7 @@ def test_get_connection_info_returns_known_nested_connection_fields_only() -> No
             },
             const.CONNECTION_INFO.OAUTH: {
                 const.CONNECTION_INFO.OAUTH_CLIENT_ID: 'oauth-client-id',
+                const.CONNECTION_INFO.OAUTH_SCOPE: const.OAUTH_SCOPES.USER_READ,
                 const.CONNECTION_INFO.OAUTH_GRANT_TYPE: const.CONNECTION_INFO.OAUTH_DEFAULT_GRANT_TYPE,
                 'unexpected': 'ignore-me',
             },
@@ -108,6 +109,7 @@ def test_get_connection_info_returns_known_nested_connection_fields_only() -> No
         },
         const.CONNECTION_INFO.OAUTH: {
             const.CONNECTION_INFO.OAUTH_CLIENT_ID: 'oauth-client-id',
+            const.CONNECTION_INFO.OAUTH_SCOPE: const.OAUTH_SCOPES.USER_READ,
             const.CONNECTION_INFO.OAUTH_GRANT_TYPE: const.CONNECTION_INFO.OAUTH_DEFAULT_GRANT_TYPE,
         },
     }
@@ -179,6 +181,7 @@ def test_get_helper_settings_parses_root_and_nested_settings(tmp_path: Path) -> 
             const.CONNECTION_INFO.OAUTH: {
                 const.CONNECTION_INFO.OAUTH_ISSUER_URL: 'https://issuer.example.com',
                 const.CONNECTION_INFO.OAUTH_CLIENT_ID: 'oauth-client-id',
+                const.CONNECTION_INFO.OAUTH_SCOPE: const.OAUTH_SCOPES.USER_READ,
                 const.CONNECTION_INFO.OAUTH_GRANT_TYPE: const.CONNECTION_INFO.OAUTH_DEFAULT_GRANT_TYPE,
                 const.CONNECTION_INFO.OAUTH_CLIENT_AUTHENTICATION: const.CONNECTION_INFO.OAUTH_DEFAULT_CLIENT_AUTH,
             },
@@ -204,6 +207,7 @@ def test_get_helper_settings_parses_root_and_nested_settings(tmp_path: Path) -> 
     assert settings[const.HELPER_SETTINGS.CONNECTION][const.CONNECTION_INFO.OAUTH] == {
         const.CONNECTION_INFO.OAUTH_ISSUER_URL: 'https://issuer.example.com',
         const.CONNECTION_INFO.OAUTH_CLIENT_ID: 'oauth-client-id',
+        const.CONNECTION_INFO.OAUTH_SCOPE: const.OAUTH_SCOPES.USER_READ,
         const.CONNECTION_INFO.OAUTH_GRANT_TYPE: const.CONNECTION_INFO.OAUTH_DEFAULT_GRANT_TYPE,
         const.CONNECTION_INFO.OAUTH_CLIENT_AUTHENTICATION: const.CONNECTION_INFO.OAUTH_DEFAULT_CLIENT_AUTH,
     }

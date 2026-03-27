@@ -3,8 +3,8 @@
 :Module:            pydplus.api
 :Synopsis:          Defines the basic functions associated with the RSA ID Plus API
 :Created By:        Jeff Shurtliff
-:Last Modified:     Jeff Shurtliff (via GPT-5.3-codex)
-:Modified Date:     21 Mar 2026
+:Last Modified:     Jeff Shurtliff
+:Modified Date:     24 Mar 2026
 """
 
 from __future__ import annotations
@@ -61,18 +61,39 @@ def get(
     params = {} if params is None else params
 
     # Define the headers
-    headers = {} if headers is None else headers
-    headers = _get_headers(pydp_object.base_headers, headers)
+    additional_headers = {} if headers is None else dict(headers)
+    request_headers = _get_headers(
+        pydp_object,
+        _additional_headers=additional_headers,
+        _api_type=api_type,
+    )
 
     # Perform the API call
     full_api_url = _get_full_api_url(pydp_object, endpoint, api_type)
     response = requests.get(
         full_api_url,
-        headers=headers,
+        headers=request_headers,
         params=params,
         timeout=timeout,
         verify=pydp_object.verify_ssl
     )
+
+    # Retry once after a forced OAuth token refresh when the token is rejected.
+    if _should_retry_oauth_401(pydp_object, api_type, response):
+        logger.debug('The OAuth token was rejected and will be refreshed before trying the API call again')
+        request_headers = _get_headers(
+            pydp_object,
+            _additional_headers=additional_headers,
+            _api_type=api_type,
+            _force_oauth_refresh=True,
+        )
+        response = requests.get(
+            full_api_url,
+            headers=request_headers,
+            params=params,
+            timeout=timeout,
+            verify=pydp_object.verify_ssl
+        )
 
     # Examine the result
     allow_failed_response = _should_allow_failed_responses(pydp_object, allow_failed_response)
@@ -138,46 +159,44 @@ def api_call_with_payload(
     params = {} if params is None else params
 
     # Define the headers
-    headers = {} if headers is None else headers
-    headers = _get_headers(pydp_object.base_headers, headers)
+    additional_headers = {} if headers is None else dict(headers)
+    request_headers = _get_headers(
+        pydp_object,
+        _additional_headers=additional_headers,
+        _api_type=api_type,
+    )
 
     # Perform the API call
-    response = None
     full_api_url = _get_full_api_url(pydp_object, endpoint, api_type)
-    if isinstance(method, str) and method.upper() == const.API_REQUEST_TYPES.POST:
-        if isinstance(payload, dict):
-            response = requests.post(full_api_url, json=payload, headers=headers, params=params, timeout=timeout,
-                                     verify=pydp_object.verify_ssl)
-        elif isinstance(payload, str):
-            response = requests.post(full_api_url, data=payload, headers=headers, params=params, timeout=timeout,
-                                     verify=pydp_object.verify_ssl)
-        else:
-            _raise_exception_for_payload()
-    elif isinstance(method, str) and method.upper() == const.API_REQUEST_TYPES.PATCH:
-        if isinstance(payload, dict):
-            response = requests.patch(full_api_url, json=payload, headers=headers, params=params, timeout=timeout,
-                                      verify=pydp_object.verify_ssl)
-        elif isinstance(payload, str):
-            response = requests.patch(full_api_url, data=payload, headers=headers, params=params, timeout=timeout,
-                                      verify=pydp_object.verify_ssl)
-        else:
-            _raise_exception_for_payload()
-    elif isinstance(method, str) and method.upper() == const.API_REQUEST_TYPES.PUT:
-        if isinstance(payload, dict):
-            response = requests.put(full_api_url, json=payload, headers=headers, params=params, timeout=timeout,
-                                    verify=pydp_object.verify_ssl)
-        elif isinstance(payload, str):
-            response = requests.put(full_api_url, data=payload, headers=headers, params=params, timeout=timeout,
-                                    verify=pydp_object.verify_ssl)
-        else:
-            _raise_exception_for_payload()
-    else:
-        if isinstance(method, str) and method.upper() == const.API_REQUEST_TYPES.GET:
-            error_msg = "The 'GET' API call method is not valid when a payload has been provided."
-        else:
-            error_msg = 'A valid API call method (POST or PATCH or PUT) must be defined.'
-        logger.error(error_msg)
-        raise errors.exceptions.APIMethodError(error_msg)
+    response = _perform_api_call_with_payload(
+        pydp_object=pydp_object,
+        method=method,
+        payload=payload,
+        params=params,
+        headers=request_headers,
+        timeout=timeout,
+        full_api_url=full_api_url,
+        raise_payload_exception=_raise_exception_for_payload,
+    )
+
+    # Retry once after a forced OAuth token refresh when the token is rejected.
+    if response is not None and _should_retry_oauth_401(pydp_object, api_type, response):
+        request_headers = _get_headers(
+            pydp_object,
+            _additional_headers=additional_headers,
+            _api_type=api_type,
+            _force_oauth_refresh=True,
+        )
+        response = _perform_api_call_with_payload(
+            pydp_object=pydp_object,
+            method=method,
+            payload=payload,
+            params=params,
+            headers=request_headers,
+            timeout=timeout,
+            full_api_url=full_api_url,
+            raise_payload_exception=_raise_exception_for_payload,
+        )
 
     # Examine the result
     allow_failed_response = _should_allow_failed_responses(pydp_object, allow_failed_response)
@@ -345,16 +364,99 @@ def _should_allow_failed_responses(_pydp_object, _allow_failed_response: Optiona
     return _allow_failed_response
 
 
+def _is_admin_oauth_request(_pydp_object, _api_type: str) -> bool:
+    """Return whether the request targets Admin API over an OAuth connection."""
+    if not isinstance(_api_type, str):
+        return False
+    return (
+        _api_type.lower() == const.ADMIN_API_TYPE
+        and getattr(_pydp_object, const.CLIENT_SETTINGS.CONNECTION_TYPE, None) == const.CONNECTION_INFO.OAUTH
+    )
+
+
+def _should_retry_oauth_401(_pydp_object, _api_type: str, _response) -> bool:
+    """Return whether a failed response is eligible for OAuth token refresh retry."""
+    return (
+        _is_admin_oauth_request(_pydp_object, _api_type)
+        and _response is not None
+        and getattr(_response, const.RESPONSE_KEYS.STATUS_CODE, None) == 401
+    )
+
+
 def _get_headers(
-        _headers: dict,
+        _pydp_object,
         _additional_headers: Optional[dict] = None,
+        _api_type: str = const.DEFAULT_API_TYPE,
         _header_type: str = const.DEFAULT_HEADER_TYPE,
+        _force_oauth_refresh: bool = const.AUTH_VALUES.OAUTH_DEFAULT_FORCE_REFRESH,
 ) -> dict:
     """Return the appropriate HTTP headers to use for different types of API calls."""
     _additional_headers = {} if _additional_headers is None else _additional_headers
+    _headers = dict(_pydp_object.base_headers) if isinstance(_pydp_object.base_headers, dict) else {}
+
+    if _is_admin_oauth_request(_pydp_object, _api_type):
+        if _force_oauth_refresh:
+            _headers = _pydp_object.refresh_oauth_token()
+        else:
+            _headers = _pydp_object._ensure_oauth_headers()
+
     # TODO: Define additional headers as needed based on header type
     _headers.update(_additional_headers)
     return _headers
+
+
+def _perform_api_call_with_payload(
+        pydp_object,
+        method: str,
+        payload: Union[Optional[dict], Optional[str]] = None,
+        params: Optional[dict] = None,
+        headers: Optional[dict] = None,
+        timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
+        full_api_url: Optional[str] = None,
+        raise_payload_exception=None,
+):
+    """Perform API requests that include payload data and return the response object."""
+    if not full_api_url:
+        error_msg = 'A full API URL must be defined before calling _perform_api_call_with_payload()'
+        logger.error(error_msg)
+        raise errors.exceptions.APIMethodError(error_msg)
+
+    if isinstance(method, str) and method.upper() == const.API_REQUEST_TYPES.POST:
+        if isinstance(payload, dict):
+            return requests.post(full_api_url, json=payload, headers=headers, params=params, timeout=timeout,
+                                 verify=pydp_object.verify_ssl)
+        if isinstance(payload, str):
+            return requests.post(full_api_url, data=payload, headers=headers, params=params, timeout=timeout,
+                                 verify=pydp_object.verify_ssl)
+        if callable(raise_payload_exception):
+            raise_payload_exception()
+    elif isinstance(method, str) and method.upper() == const.API_REQUEST_TYPES.PATCH:
+        if isinstance(payload, dict):
+            return requests.patch(full_api_url, json=payload, headers=headers, params=params, timeout=timeout,
+                                  verify=pydp_object.verify_ssl)
+        if isinstance(payload, str):
+            return requests.patch(full_api_url, data=payload, headers=headers, params=params, timeout=timeout,
+                                  verify=pydp_object.verify_ssl)
+        if callable(raise_payload_exception):
+            raise_payload_exception()
+    elif isinstance(method, str) and method.upper() == const.API_REQUEST_TYPES.PUT:
+        if isinstance(payload, dict):
+            return requests.put(full_api_url, json=payload, headers=headers, params=params, timeout=timeout,
+                                verify=pydp_object.verify_ssl)
+        if isinstance(payload, str):
+            return requests.put(full_api_url, data=payload, headers=headers, params=params, timeout=timeout,
+                                verify=pydp_object.verify_ssl)
+        if callable(raise_payload_exception):
+            raise_payload_exception()
+    elif isinstance(method, str) and method.upper() == const.API_REQUEST_TYPES.GET:
+        error_msg = 'The GET API call method is not valid when a payload has been provided.'
+        logger.error(error_msg)
+        raise errors.exceptions.APIMethodError(error_msg)
+    else:
+        error_msg = 'A valid API call method (POST or PATCH or PUT) must be defined.'
+        logger.error(error_msg)
+        raise errors.exceptions.APIMethodError(error_msg)
+    return None
 
 
 def _get_full_api_url(_pydp_object, _endpoint: str, _api_type: str = const.DEFAULT_API_TYPE) -> str:

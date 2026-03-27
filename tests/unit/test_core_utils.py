@@ -4,12 +4,13 @@
 :Synopsis:          Unit tests for utility functions in pydplus.utils.core_utils
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff (via GPT-5.3-codex)
-:Modified Date:     16 Mar 2026
+:Modified Date:     27 Mar 2026
 """
 
 from __future__ import annotations
 
 import os
+import string
 
 import pytest
 
@@ -134,6 +135,7 @@ def test_get_random_string_returns_expected_length_and_prefix() -> None:
     generated = core_utils.get_random_string(length=12, prefix_string='pre_')
     assert generated.startswith('pre_')
     assert len(generated) == 16
+    assert all(char in string.ascii_letters + string.digits for char in generated[4:])
 
 
 def test_get_env_variable_name_by_environment_raises_value_error_for_invalid_field() -> None:
@@ -166,3 +168,48 @@ def test_get_env_variable_name_by_environment_raises_runtime_error_for_unexpecte
     """Ensure unexpected lookup failures are wrapped in RuntimeError."""
     with pytest.raises(RuntimeError):
         core_utils.get_env_variable_name_by_environment(const.ENV_VARIABLES.BASE_URL_FIELD, env=123)  # type: ignore[arg-type]
+
+
+def test_normalize_oauth_scope_normalizes_string_and_removes_duplicates() -> None:
+    """Ensure plus-delimited OAuth scope strings are normalized and deduplicated in order."""
+    normalized_scope = core_utils.normalize_oauth_scope(
+        f" {const.OAUTH_SCOPES.USER_READ} + {const.OAUTH_SCOPES.USER_MANAGE}+{const.OAUTH_SCOPES.USER_READ} "
+    )
+
+    assert normalized_scope == f'{const.OAUTH_SCOPES.USER_READ}+{const.OAUTH_SCOPES.USER_MANAGE}'
+
+
+def test_normalize_oauth_scope_normalizes_iterable_values() -> None:
+    """Ensure iterable OAuth scope inputs are normalized into plus-delimited format."""
+    normalized_scope = core_utils.normalize_oauth_scope(
+        (const.OAUTH_SCOPES.USER_READ, const.OAUTH_SCOPES.USER_MANAGE)
+    )
+
+    assert normalized_scope == f'{const.OAUTH_SCOPES.USER_READ}+{const.OAUTH_SCOPES.USER_MANAGE}'
+
+
+def test_normalize_oauth_scope_accepts_space_delimited_strings() -> None:
+    """Ensure space-delimited OAuth scope strings are normalized into plus-delimited format."""
+    normalized_scope = core_utils.normalize_oauth_scope(
+        f' {const.OAUTH_SCOPES.USER_READ} {const.OAUTH_SCOPES.USER_MANAGE} '
+    )
+
+    assert normalized_scope == f'{const.OAUTH_SCOPES.USER_READ}+{const.OAUTH_SCOPES.USER_MANAGE}'
+
+
+def test_normalize_oauth_scope_raises_missing_required_data_for_missing_required_value() -> None:
+    """Ensure required OAuth scope values raise MissingRequiredDataError when missing."""
+    with pytest.raises(errors.exceptions.MissingRequiredDataError):
+        core_utils.normalize_oauth_scope(None, required=True)
+
+
+def test_normalize_oauth_scope_raises_value_error_for_unknown_scope_values() -> None:
+    """Ensure unknown OAuth scope values are rejected."""
+    with pytest.raises(ValueError):
+        core_utils.normalize_oauth_scope('rsa.unknown.scope')
+
+
+def test_normalize_oauth_scope_raises_type_error_for_non_string_iterable_values() -> None:
+    """Ensure iterable OAuth scope values must contain strings."""
+    with pytest.raises(TypeError):
+        core_utils.normalize_oauth_scope([const.OAUTH_SCOPES.USER_READ, 123])  # type: ignore[list-item]
