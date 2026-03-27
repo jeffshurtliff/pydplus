@@ -6,7 +6,7 @@
 :Example:           ``encoded_string = core_utils.encode_url(decoded_string)``
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     26 Mar 2026
+:Modified Date:     27 Mar 2026
 """
 
 from __future__ import annotations
@@ -231,8 +231,10 @@ def get_env_variable_name_by_environment(field: str, env: Optional[str] = None) 
 def normalize_oauth_scope(scope_value: Any, required: bool = False) -> Optional[str]:
     """Normalize and validate OAuth scope values into canonical ``+``-delimited format.
 
-    :param scope_value: Scope value defined as a ``+``-delimited string or iterable of scope strings
+    :param scope_value: Scope value defined as a ``+``-delimited or space-delimited string,
+                        or iterable of scope strings
     :param required: Indicates whether a scope value is mandatory (``False`` by default)
+    :type required: bool
     :returns: The normalized ``+``-delimited scope string when defined
     :raises: :py:exc:`TypeError`,
              :py:exc:`ValueError`,
@@ -250,7 +252,7 @@ def normalize_oauth_scope(scope_value: Any, required: bool = False) -> Optional[
     parsed_scopes: list[str] = []
 
     if isinstance(scope_value, str):
-        parsed_scopes = [segment.strip() for segment in scope_value.split('+')]
+        parsed_scopes = [segment.strip() for segment in scope_value.replace('+', ' ').split()]
     elif isinstance(scope_value, Iterable) and not isinstance(scope_value, (bytes, bytearray, dict)):
         for scope in scope_value:
             if not isinstance(scope, str):

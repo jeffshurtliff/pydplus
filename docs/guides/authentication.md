@@ -46,10 +46,13 @@ OAuth (Private Key JWT) requires:
 - `oauth_client_id`
 - `oauth_private_key` (path to `.jwk`) or `oauth_private_key_jwk` (inline JWK)
 - `issuer_url` (`oauth_issuer_url` argument, `connection_info["oauth"]["issuer_url"]`, or inferred from base URLs)
-- `oauth_scope` (required; plus-delimited string or iterable of scope values)
+- `oauth_scope` (required; plus-delimited, space-delimited, or iterable scope values)
 - Optional: `oauth_api_type` (`auth` by default, `admin` supported)
 
 Token endpoint defaults to: `{issuer_url}/token`
+
+When requesting tokens, PyDPlus sends scopes to `/oauth/token` as a space-delimited list and sets
+`Content-Type: application/x-www-form-urlencoded; charset=UTF-8`.
 
 ### Argument-Based Example
 
@@ -130,7 +133,8 @@ For OAuth Admin API requests:
 - Current OAuth support in PyDPlus is scoped to **Administration API** usage.
 - `Client Credentials` and `client_credentials` are both accepted.
 - `Private Key JWT` and `private_key_jwt` are both accepted.
-- OAuth scope values are required and must be supplied as a `+`-delimited list.
+- OAuth scope values are required and can be supplied as `+`-delimited, space-delimited, or iterable values.
+- Scope values are normalized internally and sent to `/oauth/token` as a space-delimited list.
 - OAuth issuer inference defaults to the Authentication base URL (`auth` mode).
 - When only `base_admin_url` is provided and it matches `*.access.*`, PyDPlus attempts to infer `base_auth_url`.
 - Use `oauth_api_type="admin"` to force issuer inference from `base_admin_url`.

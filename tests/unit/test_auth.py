@@ -4,7 +4,7 @@
 :Synopsis:          Unit tests for OAuth and legacy authentication helper functions
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff (via GPT-5.3-codex)
-:Modified Date:     25 Mar 2026
+:Modified Date:     27 Mar 2026
 """
 
 from __future__ import annotations
@@ -163,22 +163,23 @@ def test_get_oauth_access_token_posts_expected_private_key_jwt_payload(monkeypat
     monkeypatch.setattr(auth.requests, 'post', _fake_post)
 
     token_data = auth.get_oauth_access_token(
-        connection_info=_oauth_connection_info(),
+        connection_info=_oauth_connection_info(scope=f'{const.OAUTH_SCOPES.USER_READ}+{const.OAUTH_SCOPES.USER_MANAGE}'),
         verify_ssl=False,
         timeout=17,
     )
 
     assert observed_request['url'] == 'https://example.com/oauth/token'
     assert observed_request['headers'][const.HEADERS.ACCEPT] == const.CONTENT_TYPES.JSON
+    assert observed_request['headers'][const.HEADERS.CONTENT_TYPE] == const.CONTENT_TYPES.FORM_URLENCODED_UTF8
     assert observed_request['data']['grant_type'] == const.CONNECTION_INFO.OAUTH_GRANT_TYPE_CLIENT_CREDENTIALS
     assert observed_request['data']['client_id'] == 'oauth-client-id'
-    assert observed_request['data']['scope'] == const.OAUTH_SCOPES.USER_READ
+    assert observed_request['data']['scope'] == f'{const.OAUTH_SCOPES.USER_READ} {const.OAUTH_SCOPES.USER_MANAGE}'
     assert observed_request['data']['client_assertion_type'] == 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer'
     assert observed_request['data']['client_assertion'] == 'signed-client-assertion'
     assert observed_request['timeout'] == 17
     assert observed_request['verify'] is False
     assert token_data['access_token'] == 'fresh-token'
-    assert token_data['scope'] == const.OAUTH_SCOPES.USER_READ
+    assert token_data['scope'] == f'{const.OAUTH_SCOPES.USER_READ}+{const.OAUTH_SCOPES.USER_MANAGE}'
 
 
 def test_get_oauth_headers_returns_bearer_authorization_header(monkeypatch) -> None:

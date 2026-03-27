@@ -4,7 +4,7 @@
 :Synopsis:          Unit tests for utility functions in pydplus.utils.core_utils
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff (via GPT-5.3-codex)
-:Modified Date:     25 Mar 2026
+:Modified Date:     27 Mar 2026
 """
 
 from __future__ import annotations
@@ -183,6 +183,15 @@ def test_normalize_oauth_scope_normalizes_iterable_values() -> None:
     """Ensure iterable OAuth scope inputs are normalized into plus-delimited format."""
     normalized_scope = core_utils.normalize_oauth_scope(
         (const.OAUTH_SCOPES.USER_READ, const.OAUTH_SCOPES.USER_MANAGE)
+    )
+
+    assert normalized_scope == f'{const.OAUTH_SCOPES.USER_READ}+{const.OAUTH_SCOPES.USER_MANAGE}'
+
+
+def test_normalize_oauth_scope_accepts_space_delimited_strings() -> None:
+    """Ensure space-delimited OAuth scope strings are normalized into plus-delimited format."""
+    normalized_scope = core_utils.normalize_oauth_scope(
+        f' {const.OAUTH_SCOPES.USER_READ} {const.OAUTH_SCOPES.USER_MANAGE} '
     )
 
     assert normalized_scope == f'{const.OAUTH_SCOPES.USER_READ}+{const.OAUTH_SCOPES.USER_MANAGE}'

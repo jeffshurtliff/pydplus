@@ -4,7 +4,7 @@
 :Synopsis:          Constants that are utilized throughout the package
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     26 Mar 2026
+:Modified Date:     27 Mar 2026
 """
 
 from __future__ import annotations
@@ -1099,6 +1099,7 @@ class ContentTypes:
     sending or receiving data from the RSA REST API.
     """
     JSON: ClassVar[str] = 'application/json'
+    FORM_URLENCODED_UTF8: ClassVar[str] = 'application/x-www-form-urlencoded; charset=UTF-8'
 
 
 # -----------------------------

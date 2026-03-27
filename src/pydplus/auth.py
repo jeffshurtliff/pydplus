@@ -547,6 +547,7 @@ def _request_oauth_access_token(
     _issuer_url = oauth_connection_info[const.CONNECTION_INFO.OAUTH_ISSUER_URL]
     _client_id = oauth_connection_info[const.CONNECTION_INFO.OAUTH_CLIENT_ID]
     _scope = oauth_connection_info[const.CONNECTION_INFO.OAUTH_SCOPE]
+    _request_scope = ' '.join(_scope.split('+'))
     _grant_type = oauth_connection_info[const.CONNECTION_INFO.OAUTH_GRANT_TYPE]
     _client_auth = oauth_connection_info[const.CONNECTION_INFO.OAUTH_CLIENT_AUTHENTICATION]
     _token_endpoint = _get_oauth_token_endpoint(_issuer_url)
@@ -554,7 +555,7 @@ def _request_oauth_access_token(
     _request_data = {
         const.CONNECTION_INFO.OAUTH_GRANT_TYPE: _grant_type,
         const.CONNECTION_INFO.OAUTH_CLIENT_ID: _client_id,
-        const.CONNECTION_INFO.OAUTH_SCOPE: _scope,
+        const.CONNECTION_INFO.OAUTH_SCOPE: _request_scope,
     }
 
     if _client_auth == const.CONNECTION_INFO.OAUTH_CLIENT_AUTH_PRIVATE_KEY_JWT:
@@ -581,6 +582,7 @@ def _request_oauth_access_token(
 
     _headers = {
         const.HEADERS.ACCEPT: const.CONTENT_TYPES.JSON,
+        const.HEADERS.CONTENT_TYPE: const.CONTENT_TYPES.FORM_URLENCODED_UTF8,
     }
     _response = requests.post(
         _token_endpoint,
