@@ -25,6 +25,14 @@ Common commands (prefer these unless the user asks otherwise):
 If you add a dependency, add it via Poetry (`poetry add ...` / `poetry add --group dev ...`) rather than 
 editing `pyproject.toml` by hand.
 
+## Python version support
+
+The `pydplus` package is intended to support Python versions 3.9 and above. Support for version 3.9 should
+**not** be removed (i.e, requiring 3.10+) unless there is a critical need to do so, such as a high-severity 
+security vulnerability that requires 3.10 or higher to patch, crucial functionality cannot be implemented, 
+or similar situations. Agents should never remove 3.9 support unilaterally without explicit authorization 
+from a package maintainer.
+
 ## Coding style
 
 - Prefer clarity over cleverness.
