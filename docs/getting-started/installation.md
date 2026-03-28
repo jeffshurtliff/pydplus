@@ -62,3 +62,19 @@ poetry run python -m pip install -e .
 If installation fails due to missing Python or environment issues, revisit the
 requirements on the [Overview](overview.md) page and confirm your Python version
 matches the supported range.
+
+### Temporary Directory Hardening (`TMPDIR`)
+
+`pydplus` does not call `requests.utils.extract_zipped_paths()` directly, but if
+your runtime environment enforces conservative hardening for temporary-file use,
+you can set `TMPDIR` to a directory with restricted write access.
+
+Example (Linux/macOS):
+
+```bash
+mkdir -p "${HOME}/.tmp/pydplus"
+chmod 700 "${HOME}/.tmp/pydplus"
+export TMPDIR="${HOME}/.tmp/pydplus"
+```
+
+In CI, set `TMPDIR` in the job environment before running tests or scripts.
