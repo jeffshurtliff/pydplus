@@ -28,6 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Refactored tests into `tests/unit/` and `tests/integration/` with updated testing documentation and default coverage reporting.
 - Documented the Requests `extract_zipped_paths()` advisory triage: PyDPlus does not call the affected utility, maintainers should dismiss the related Dependabot alert as not affected, and runtime environments should set `TMPDIR` to a restricted-write directory where applicable.
 - Updated `pygments` from `2.19.1` to `2.19.2` (latest available) and documented risk-limiting guidance for the low-severity ReDoS advisory affecting lexer behavior in documentation tooling paths.
+- Updated `cryptography` minimum version to `46.0.6` to remediate the name-constraint enforcement advisory affecting peer-name validation.
 - Updated `pydplus.utils.log_utils` with comprehensive type hints/docstrings and improved handler/level configuration behavior.
 - Updated `pydplus.core.PyDPlus` to accept legacy key material (parsed object or `.key` path) and wire it into legacy connection initialization.
 - Updated legacy auth private-key loading to support in-memory PEM data from connection info in addition to file paths.
