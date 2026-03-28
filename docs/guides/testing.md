@@ -29,3 +29,15 @@ To run all tests (including integration) with coverage:
 ```bash
 poetry run pytest --run-integration --cov=pydplus --cov-report=term-missing --cov-report=xml
 ```
+
+## Security Notes for Documentation Tooling
+
+`pygments` is used in this repository for documentation rendering via Sphinx, not
+for `pydplus` runtime request/response processing.
+
+For the current low-severity ReDoS advisory affecting `pygments` lexer behavior:
+
+- Keep `pygments` at the newest available version in the lock file.
+- Only build docs from trusted repository content.
+- Do not run ad-hoc syntax highlighting on untrusted input as part of local scripts or CI jobs.
+- If your CI platform supports it, run documentation builds with a job timeout and isolated resources.
