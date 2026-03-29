@@ -4,7 +4,7 @@
 :Synopsis:          Constants that are utilized throughout the package
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     27 Mar 2026
+:Modified Date:     28 Mar 2026
 """
 
 from __future__ import annotations
@@ -759,8 +759,8 @@ class OauthScopes:
     AUTHENTICATOR_SIDTOKEN_READ: ClassVar[str] = 'rsa.authenticator.sidtoken.read'         # Retrieve a hardware token's details
     AUTHENTICATOR_SIDTOKEN_MANAGE: ClassVar[str] = 'rsa.authenticator.sidtoken.manage'     # Update, enable, disable, assign, unassign, and clear pin for a hardware token
     AUTHENTICATOR_SIDTOKEN_DELETE: ClassVar[str] = 'rsa.authenticator.sidtoken.delete'     # Delete a hardware token from CAS
-    AUTHENTICATOR_DS100_MANAGE: ClassVar[str] = 'rsa.authenticator.ds100.manage'           # Enable, disable, and clear pin for a SecurID DS100 OTP
-    AUTHENTICATOR_DS100_DELETE: ClassVar[str] = 'rsa.authenticator.ds100.delete'           # Delete user's SecurID DS100 OTP credential
+    AUTHENTICATOR_DS100_MANAGE: ClassVar[str] = 'rsa.authenticator.ds100.manage'           # Enable, disable, and clear pin for an RSA DS100 OTP
+    AUTHENTICATOR_DS100_DELETE: ClassVar[str] = 'rsa.authenticator.ds100.delete'           # Delete user's RSA DS100 OTP credential
     AUTHENTICATOR_DS100_READ: ClassVar[str] = 'rsa.authenticator.ds100.read'               # Retrieve user's RSA DS100 OTP credential
     AUTHENTICATOR_SCOPES: ClassVar[frozenset] = frozenset({
         AUTHENTICATOR_MOBILE_DELETE,
@@ -791,18 +791,18 @@ class OauthScopes:
     GROUP_MANAGE: ClassVar[str] = 'rsa.group.manage'                                       # Local group management actions (create, update, delete)
     GROUP_READ: ClassVar[str] = 'rsa.group.read'                                           # Retrieve local group(s) details
     GROUP_USERS_MANAGE: ClassVar[str] = 'rsa.group.users.manage'                           # Local group membership actions (add/remove users)
-    GROUPS_USERS_READ: ClassVar[str] = 'rsa.group.users.read'                              # Retrieve local group user details
-    GROUPS_SCOPES: ClassVar[frozenset] = frozenset({
+    GROUP_USERS_READ: ClassVar[str] = 'rsa.group.users.read'                               # Retrieve local group user details
+    GROUP_SCOPES: ClassVar[frozenset] = frozenset({
         GROUP_MANAGE,
         GROUP_READ,
         GROUP_USERS_MANAGE,
-        GROUPS_USERS_READ,
+        GROUP_USERS_READ,
     })
 
     # Report permissions (Cloud Administration API)
     REPORT_HEALTH: ClassVar[str] = 'rsa.report.health'                                     # Retrieve report on CAS availability
     REPORT_LICENSE_USAGE: ClassVar[str] = 'rsa.report.license.usage'                       # Retrieve MFA license usage to monitor license compliance
-    REPORT_READ: ClassVar[str] = 'rsa.report.read'                                         # Generate and download users, hardware tokens, and MFA clients report
+    REPORT_READ: ClassVar[str] = 'rsa.report.read'                                         # Generate and download reports for users, hardware tokens, and MFA clients
     REPORT_USER_RISKY: ClassVar[str] = 'rsa.report.user.risky'                             # Retrieve a list of users who exhibit anomalous behavior
     REPORT_SCOPES: ClassVar[frozenset] = frozenset({
         REPORT_HEALTH,
@@ -845,7 +845,7 @@ class OauthScopes:
         AUDIT_SCOPES,
         AUTHENTICATOR_SCOPES,
         FIDO_CONFIGURATION_SCOPES,
-        GROUPS_SCOPES,
+        GROUP_SCOPES,
         REPORT_SCOPES,
         USER_SCOPES,
     )
@@ -861,11 +861,56 @@ class OauthScopes:
         AUDIT_SCOPES,
         AUTHENTICATOR_SCOPES,
         FIDO_CONFIGURATION_SCOPES,
-        GROUPS_SCOPES,
+        GROUP_SCOPES,
         REPORT_SCOPES,
         USER_SCOPES,
         MFA_SCOPES,
     )
+
+    # Presets: Read-only permission scopes
+    ALL_READ_ONLY_PRESET: ClassVar[frozenset[str]] = frozenset({
+        AGENT_READ,                                                                         # Retrieve Agent details
+        AUTHENTICATOR_MOBILE_READ,                                                          # Retrieve device details for individual users and user event logs
+        AUTHENTICATOR_FIDO_READ,                                                            # Retrieve FIDO authenticator(s) assigned to a user
+        AUTHENTICATOR_SIDTOKEN_READ,                                                        # Retrieve a hardware token's details
+        AUTHENTICATOR_DS100_READ,                                                           # Retrieve user's RSA DS100 OTP credential
+        FIDO_CONFIGURATION_READ,                                                            # Retrieve current configuration of FIDO authenticators
+        GROUP_READ,                                                                         # Retrieve local group(s) details
+        GROUP_USERS_READ,                                                                   # Retrieve local group user details
+        REPORT_HEALTH,                                                                      # Retrieve report on CAS availability
+        REPORT_LICENSE_USAGE,                                                               # Retrieve MFA license usage to monitor license compliance
+        REPORT_READ,                                                                        # Generate and download reports for users, hardware tokens, and MFA clients
+        REPORT_USER_RISKY,                                                                  # Retrieve a list of users who exhibit anomalous behavior
+        USER_READ,                                                                          # Retrieve user information from the identity source
+        USER_RISKY_READ,                                                                    # Retrieve a list of users who are identified as high risk
+    })
+    AGENT_READ_ONLY_PRESET: ClassVar[frozenset[str]] = frozenset({
+        AGENT_READ,                                                                         # Retrieve Agent details
+    })
+    AUTHENTICATOR_READ_ONLY_PRESET: ClassVar[frozenset[str]] = frozenset({
+        AUTHENTICATOR_MOBILE_READ,                                                          # Retrieve device details for individual users and user event logs
+        AUTHENTICATOR_FIDO_READ,                                                            # Retrieve FIDO authenticator(s) assigned to a user
+        AUTHENTICATOR_SIDTOKEN_READ,                                                        # Retrieve a hardware token's details
+        AUTHENTICATOR_DS100_READ,                                                           # Retrieve user's RSA DS100 OTP credential
+    })
+    FIDO_READ_ONLY_PRESET: ClassVar[frozenset[str]] = frozenset({
+        AUTHENTICATOR_FIDO_READ,                                                            # Retrieve FIDO authenticator(s) assigned to a user
+        FIDO_CONFIGURATION_READ,                                                            # Retrieve current configuration of FIDO authenticators
+    })
+    GROUP_READ_ONLY_PRESET: ClassVar[frozenset[str]] = frozenset({
+        GROUP_READ,                                                                         # Retrieve local group(s) details
+        GROUP_USERS_READ,                                                                   # Retrieve local group user details
+    })
+    REPORT_READ_ONLY_PRESET: ClassVar[frozenset[str]] = frozenset({
+        REPORT_HEALTH,                                                                      # Retrieve report on CAS availability
+        REPORT_LICENSE_USAGE,                                                               # Retrieve MFA license usage to monitor license compliance
+        REPORT_READ,                                                                        # Generate and download reports for users, hardware tokens, and MFA clients
+        REPORT_USER_RISKY,                                                                  # Retrieve a list of users who exhibit anomalous behavior
+    })
+    USER_READ_ONLY_PRESET: ClassVar[frozenset[str]] = frozenset({
+        USER_READ,                                                                          # Retrieve user information from the identity source
+        USER_RISKY_READ,                                                                    # Retrieve a list of users who are identified as high risk
+    })
 
 
 # -----------------------------

@@ -6,7 +6,7 @@
 :Example:           ``pydp = PyDPlus()``
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     25 Mar 2026
+:Modified Date:     29 Mar 2026
 """
 
 from __future__ import annotations
@@ -77,6 +77,9 @@ class PyDPlus(object):
     :param oauth_scope: One or more OAuth scopes to request in token requests
                         (``+``-delimited string or iterable of scope strings)
     :type oauth_scope: str, tuple, list, set, frozenset, None
+    :param oauth_scope_preset: A preset string associated with grouping of scope permissions
+                               (e.g. ``all``, ``user_read_only``, etc.)
+    :type oauth_scope_preset: str, tuple, list, set, frozenset, None
     :param oauth_api_type: Defines which API base URL should be used when inferring the OAuth issuer URL
                            (``auth`` by default; ``admin`` supported when configured)
     :type oauth_api_type: str, None
@@ -114,6 +117,7 @@ class PyDPlus(object):
             oauth_private_key: Optional[str] = None,
             oauth_private_key_jwk: Union[Optional[dict], Optional[str]] = None,
             oauth_scope: Union[Optional[str], Optional[tuple], Optional[list], Optional[set], Optional[frozenset]] = None,
+            oauth_scope_preset: Union[Optional[str], Optional[tuple], Optional[list], Optional[set], Optional[frozenset]] = None,
             verify_ssl: Optional[bool] = None,
             auto_connect: bool = const.CLIENT_SETTINGS.DEFAULT_AUTO_CONNECT_VALUE,
             strict_mode: Optional[bool] = None,
@@ -189,6 +193,7 @@ class PyDPlus(object):
             oauth_private_key,
             oauth_private_key_jwk,
             oauth_scope,
+            oauth_scope_preset,
             self.legacy_key_material,
         )
 
@@ -741,6 +746,7 @@ class PyDPlus(object):
             _oauth_private_key: Optional[str] = None,
             _oauth_private_key_jwk: Union[Optional[dict], Optional[str]] = None,
             _oauth_scope: Union[Optional[str], Optional[tuple], Optional[list], Optional[set], Optional[frozenset]] = None,
+            _oauth_scope_preset: Union[Optional[str], Optional[tuple[str]], Optional[list[str]], Optional[set[str]]] = None,
             _legacy_key_material: Optional[IDPlusLegacyKeyMaterial] = None,
     ) -> None:
         """Check for provided connection info and define the class object attribute."""
@@ -760,6 +766,7 @@ class PyDPlus(object):
                 oauth_issuer_url=_oauth_issuer_url,
                 oauth_private_key=_oauth_private_key,
                 oauth_private_key_jwk=_oauth_private_key_jwk,
+                oauth_scope_preset=_oauth_scope_preset,
                 oauth_scope=_oauth_scope,
             )
 
@@ -1395,6 +1402,7 @@ def compile_connection_info(
         oauth_private_key: Optional[str] = None,
         oauth_private_key_jwk: Union[Optional[dict], Optional[str]] = None,
         oauth_scope: Union[Optional[str], Optional[tuple], Optional[list], Optional[set], Optional[frozenset]] = None,
+        oauth_scope_preset: Union[Optional[str], Optional[tuple[str]], Optional[list[str]], Optional[set[str]]] = None,
         auth_base_url: Optional[str] = None,
         oauth_api_type: Optional[str] = None,
         oauth_issuer_url: Optional[str] = None,
@@ -1418,6 +1426,8 @@ def compile_connection_info(
     :param oauth_scope: One or more OAuth scopes to request in token requests
                         (``+``-delimited string or iterable of scope strings)
     :type oauth_scope: str, tuple, list, set, frozenset, None
+    :param oauth_scope_preset: One or more presets representing groupings of OAuth scopes and permissions
+    :type oauth_scope_preset: str, tuple, list, set, None
     :param auth_base_url: The base URL for the Authentication API
     :type auth_base_url: str, None
     :param oauth_api_type: The API type to use when inferring OAuth issuer URL values (``auth`` by default)
@@ -1446,6 +1456,10 @@ def compile_connection_info(
                       f"(provided: {type(oauth_private_key_jwk)})")
         logger.error(_error_msg)
         raise TypeError(_error_msg)
+
+    # Define and normalize the OAuth scope
+    # TODO: Check the helper settings and environment variables for scope presets
+    oauth_scope = auth._get_scope_from_preset(oauth_scope_preset, oauth_scope)
     oauth_scope = core_utils.normalize_oauth_scope(oauth_scope)
 
     # Prepare the admin_base_url value in order to construct the issuer_url value

@@ -6,7 +6,7 @@
 :Example:           ``jwt_string = auth.get_legacy_jwt_string(base_url, connection_info)``
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     27 Mar 2026
+:Modified Date:     28 Mar 2026
 """
 
 from __future__ import annotations
@@ -15,7 +15,7 @@ import json
 import logging
 import datetime
 from uuid import uuid4
-from typing import Any, Optional, Tuple
+from typing import Any, Optional, Union, Tuple
 
 import jwt
 import requests
@@ -671,3 +671,65 @@ def _is_oauth_token_valid(
 
     _now = int(datetime.datetime.now(datetime.timezone.utc).timestamp())
     return _expires_at > (_now + const.AUTH_VALUES._OAUTH_TOKEN_EXPIRY_BUFFER_SECONDS)
+
+
+def _get_scope_from_preset(
+        _preset: Union[Optional[str], Optional[tuple], Optional[list], Optional[set], Optional[frozenset]] = None,
+        _existing_scope: Union[Optional[str], Optional[tuple], Optional[list], Optional[set], Optional[frozenset]] = None,
+) -> set[str]:
+    """Retrieves one or more groupings of OAuth scope permissions based on presets."""
+    _merged_scope: set[str] = set()
+    _preset_mapping: dict[str, frozenset[str]] = {
+        # All scopes (or all scopes for a given API)
+        'all': const.OAUTH_SCOPES.ALL_SCOPES,
+        'admin': const.OAUTH_SCOPES.ADMIN_API_SCOPES,
+        'auth': const.OAUTH_SCOPES.AUTH_API_SCOPES,
+
+        # Administration API scopes by type/category
+        'agent': const.OAUTH_SCOPES.AGENT_SCOPES,
+        'audit': const.OAUTH_SCOPES.AUDIT_SCOPES,
+        'authenticator': const.OAUTH_SCOPES.AUTHENTICATOR_SCOPES,
+        'fido': const.OAUTH_SCOPES.FIDO_CONFIGURATION_SCOPES,
+        'group': const.OAUTH_SCOPES.GROUP_SCOPES,
+        'report': const.OAUTH_SCOPES.REPORT_SCOPES,
+        'user': const.OAUTH_SCOPES.USER_SCOPES,
+
+        # Read-only scopes
+        'all_read_only': const.OAUTH_SCOPES.ALL_READ_ONLY_PRESET,
+        'agent_read_only': const.OAUTH_SCOPES.AGENT_READ_ONLY_PRESET,
+        'authenticator_read_only': const.OAUTH_SCOPES.AUTHENTICATOR_READ_ONLY_PRESET,
+        'fido_read_only': const.OAUTH_SCOPES.FIDO_READ_ONLY_PRESET,
+        'group_read_only': const.OAUTH_SCOPES.GROUP_READ_ONLY_PRESET,
+        'report_read_only': const.OAUTH_SCOPES.REPORT_READ_ONLY_PRESET,
+        'user_read_only': const.OAUTH_SCOPES.USER_READ_ONLY_PRESET,
+
+        # TODO: Add additional presets
+    }
+
+    if _existing_scope:
+        if isinstance(_existing_scope, str):
+            _existing_scope = set(_existing_scope.strip().replace(' ', '+').split('+'))
+        _merged_scope.update(_existing_scope)
+
+    if not _preset:
+        logger.debug('No OAuth scope preset was provided')
+        return _merged_scope
+
+    _preset = {_preset} if isinstance(_preset, str) else _preset
+    _added: list[str] = []
+    _skipped: list[str] = []
+    for _val in _preset:
+        if _val.lower() in _preset_mapping:
+            _merged_scope.update(_preset_mapping.get(_val.lower(), {}))
+            _added.append(_val.lower())
+        else:
+            logger.warning(f"'{_val.lower()}' is not a valid OAuth scope preset and will be ignored")
+            _skipped.append(_val.lower())
+
+    _results_msg = (f"Processed {len(_preset)} OAuth scope presets "
+                    f"(Added: {','.join(_added)}; Skipped: {','.join(_skipped)})")
+    if _added or _skipped:
+        logger.info(_results_msg)
+    else:
+        logger.debug(_results_msg)
+    return _merged_scope
