@@ -6,7 +6,7 @@
 :Example:           ``jwt_string = auth.get_legacy_jwt_string(base_url, connection_info)``
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     28 Mar 2026
+:Modified Date:     29 Mar 2026
 """
 
 from __future__ import annotations
@@ -676,9 +676,10 @@ def _is_oauth_token_valid(
 def _get_scope_from_preset(
         _preset: Union[Optional[str], Optional[tuple], Optional[list], Optional[set], Optional[frozenset]] = None,
         _existing_scope: Union[Optional[str], Optional[tuple], Optional[list], Optional[set], Optional[frozenset]] = None,
-) -> set[str]:
+) -> list[str]:
     """Retrieves one or more groupings of OAuth scope permissions based on presets."""
-    _merged_scope: set[str] = set()
+    _merged_scope: list[str] = []
+    _seen_scopes: set[str] = set()
     _preset_mapping: dict[str, frozenset[str]] = {
         # All scopes (or all scopes for a given API)
         'all': const.OAUTH_SCOPES.ALL_SCOPES,
@@ -706,27 +707,51 @@ def _get_scope_from_preset(
         # TODO: Add additional presets
     }
 
-    if _existing_scope:
-        if isinstance(_existing_scope, str):
-            _existing_scope = set(_existing_scope.strip().replace(' ', '+').split('+'))
-        _merged_scope.update(_existing_scope)
+    if _existing_scope is not None:
+        _normalized_existing_scope = core_utils.normalize_oauth_scope(_existing_scope)
+        if _normalized_existing_scope:
+            for _scope in _normalized_existing_scope.split('+'):
+                if _scope not in _seen_scopes:
+                    _seen_scopes.add(_scope)
+                    _merged_scope.append(_scope)
 
     if not _preset:
         logger.debug('No OAuth scope preset was provided')
         return _merged_scope
 
-    _preset = {_preset} if isinstance(_preset, str) else _preset
+    if isinstance(_preset, str):
+        _preset_values = [_preset]
+    elif isinstance(_preset, (tuple, list)):
+        _preset_values = list(_preset)
+    elif isinstance(_preset, (set, frozenset)):
+        _preset_values = sorted(_preset)
+    else:
+        _error_msg = ("The 'oauth_scope_preset' value must be supplied as a string or iterable of strings "
+                      f"(provided: {type(_preset)})")
+        logger.error(_error_msg)
+        raise TypeError(_error_msg)
+
     _added: list[str] = []
     _skipped: list[str] = []
-    for _val in _preset:
-        if _val.lower() in _preset_mapping:
-            _merged_scope.update(_preset_mapping.get(_val.lower(), {}))
-            _added.append(_val.lower())
-        else:
-            logger.warning(f"'{_val.lower()}' is not a valid OAuth scope preset and will be ignored")
-            _skipped.append(_val.lower())
+    for _val in _preset_values:
+        if not isinstance(_val, str):
+            _error_msg = ("The 'oauth_scope_preset' values must be strings "
+                          f"(provided element type: {type(_val)})")
+            logger.error(_error_msg)
+            raise TypeError(_error_msg)
 
-    _results_msg = (f"Processed {len(_preset)} OAuth scope presets "
+        _preset_name = _val.strip().lower()
+        if _preset_name in _preset_mapping:
+            for _scope in sorted(_preset_mapping.get(_preset_name, {})):
+                if _scope not in _seen_scopes:
+                    _seen_scopes.add(_scope)
+                    _merged_scope.append(_scope)
+            _added.append(_preset_name)
+        else:
+            logger.warning(f"'{_preset_name}' is not a valid OAuth scope preset and will be ignored")
+            _skipped.append(_preset_name)
+
+    _results_msg = (f"Processed {len(_preset_values)} OAuth scope presets "
                     f"(Added: {','.join(_added)}; Skipped: {','.join(_skipped)})")
     if _added or _skipped:
         logger.info(_results_msg)
