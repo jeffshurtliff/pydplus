@@ -5,7 +5,7 @@
 :Usage:             ``from pydplus import PyDPlus``
 :Example:           ``pydp = PyDPlus()``
 :Created By:        Jeff Shurtliff
-:Last Modified:     Jeff Shurtliff (via GPT-5.3-Codex)
+:Last Modified:     Jeff Shurtliff
 :Modified Date:     29 Mar 2026
 """
 
@@ -77,9 +77,12 @@ class PyDPlus(object):
     :param oauth_scope: One or more OAuth scopes to request in token requests
                         (``+``-delimited string or iterable of scope strings)
     :type oauth_scope: str, tuple, list, set, frozenset, None
-    :param oauth_scope_preset: One or more scope preset names to merge with explicit OAuth scopes.
-                               Presets can also be provided through helper settings or environment variables.
-                               (e.g. ``all``, ``user_read_only``, etc.)
+    :param oauth_scope_preset: One or more scope preset names to merge with explicit OAuth scopes
+
+                               .. note::
+                                  Presets can also be provided through helper settings or environment variables.
+                                  (e.g. ``all``, ``user_read_only``, etc.)
+
     :type oauth_scope_preset: str, tuple, list, set, frozenset, None
     :param oauth_api_type: Defines which API base URL should be used when inferring the OAuth issuer URL
                            (``auth`` by default; ``admin`` supported when configured)
