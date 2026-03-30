@@ -4,7 +4,7 @@
 :Synopsis:          Unit tests for client object instantiation and connection-info compilation
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff (via GPT-5.3-codex)
-:Modified Date:     25 Mar 2026
+:Modified Date:     29 Mar 2026
 """
 
 from __future__ import annotations
@@ -74,6 +74,90 @@ def test_compile_connection_info_normalizes_oauth_scope_iterable(sample_base_url
     assert connection_info[const.CONNECTION_INFO.OAUTH][const.CONNECTION_INFO.OAUTH_SCOPE] == (
         f'{const.OAUTH_SCOPES.USER_READ}+{const.OAUTH_SCOPES.USER_MANAGE}'
     )
+
+
+def test_compile_connection_info_merges_oauth_scope_preset_with_explicit_scope(sample_base_url: str) -> None:
+    """Ensure explicit OAuth scopes are merged with preset scopes without duplicates."""
+    connection_info = compile_connection_info(
+        base_url=sample_base_url,
+        oauth_client_id='oauth-client-id',
+        oauth_scope=const.OAUTH_SCOPES.USER_READ,
+        oauth_scope_preset='user_read_only',
+    )
+    parsed_scopes = connection_info[const.CONNECTION_INFO.OAUTH][const.CONNECTION_INFO.OAUTH_SCOPE].split('+')
+
+    assert set(parsed_scopes) == {
+        const.OAUTH_SCOPES.USER_READ,
+        const.OAUTH_SCOPES.USER_RISKY_READ,
+    }
+    assert parsed_scopes.count(const.OAUTH_SCOPES.USER_READ) == 1
+
+
+def test_compile_connection_info_ignores_invalid_oauth_scope_preset_values(sample_base_url: str) -> None:
+    """Ensure invalid OAuth scope preset names are ignored while valid ones are applied."""
+    connection_info = compile_connection_info(
+        base_url=sample_base_url,
+        oauth_client_id='oauth-client-id',
+        oauth_scope_preset=('user_read_only', 'unknown_preset'),
+    )
+    parsed_scopes = connection_info[const.CONNECTION_INFO.OAUTH][const.CONNECTION_INFO.OAUTH_SCOPE].split('+')
+
+    assert set(parsed_scopes) == {
+        const.OAUTH_SCOPES.USER_READ,
+        const.OAUTH_SCOPES.USER_RISKY_READ,
+    }
+
+
+def test_instantiate_core_object_merges_helper_oauth_scope_preset_with_explicit_scope(tmp_path: Path) -> None:
+    """Ensure helper-defined scope presets are merged with explicitly provided OAuth scopes."""
+    helper_payload = {
+        const.HELPER_SETTINGS.CONNECTION_TYPE: const.CONNECTION_INFO.OAUTH,
+        const.HELPER_SETTINGS.BASE_URLS: {
+            const.HELPER_SETTINGS.ADMIN: 'https://example-company.access.securid.com',
+        },
+        const.HELPER_SETTINGS.OAUTH_SCOPE_PRESET: 'user_read_only',
+    }
+    helper_file = tmp_path / 'helper.json'
+    helper_file.write_text(json.dumps(helper_payload), encoding='utf-8')
+
+    pydp_object = PyDPlus(
+        helper=str(helper_file),
+        oauth_client_id='oauth-client-id',
+        oauth_private_key_jwk='{"kty":"RSA","n":"abc","e":"AQAB","d":"xyz"}',
+        oauth_scope=const.OAUTH_SCOPES.USER_MANAGE,
+        auto_connect=False,
+    )
+    parsed_scopes = pydp_object.connection_info[const.CONNECTION_INFO.OAUTH][const.CONNECTION_INFO.OAUTH_SCOPE]
+    parsed_scopes = parsed_scopes.split('+')
+
+    assert set(parsed_scopes) == {
+        const.OAUTH_SCOPES.USER_MANAGE,
+        const.OAUTH_SCOPES.USER_READ,
+        const.OAUTH_SCOPES.USER_RISKY_READ,
+    }
+
+
+def test_instantiate_core_object_merges_env_oauth_scope_preset_with_explicit_scope(monkeypatch) -> None:
+    """Ensure environment-defined scope presets are merged with explicitly provided OAuth scopes."""
+    monkeypatch.setenv(const.ENV_VARIABLES.OAUTH_SCOPE_PRESET, 'group_read_only user_read_only')
+
+    pydp_object = PyDPlus(
+        base_admin_url='https://example-company.access.securid.com',
+        oauth_client_id='oauth-client-id',
+        oauth_private_key_jwk='{"kty":"RSA","n":"abc","e":"AQAB","d":"xyz"}',
+        oauth_scope=const.OAUTH_SCOPES.USER_MANAGE,
+        auto_connect=False,
+    )
+    parsed_scopes = pydp_object.connection_info[const.CONNECTION_INFO.OAUTH][const.CONNECTION_INFO.OAUTH_SCOPE]
+    parsed_scopes = parsed_scopes.split('+')
+
+    assert set(parsed_scopes) == {
+        const.OAUTH_SCOPES.USER_MANAGE,
+        const.OAUTH_SCOPES.USER_READ,
+        const.OAUTH_SCOPES.USER_RISKY_READ,
+        const.OAUTH_SCOPES.GROUP_READ,
+        const.OAUTH_SCOPES.GROUP_USERS_READ,
+    }
 
 
 def test_compile_connection_info_defaults_to_auth_base_url_for_oauth_issuer(sample_base_url: str) -> None:

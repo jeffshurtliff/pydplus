@@ -91,6 +91,7 @@ pydp = PyDPlus(
 ```json
 {
   "connection_type": "oauth",
+  "oauth_scope_preset": "user_read_only",
   "base_urls": {
     "admin": "https://example-company.access.securid.com"
   },
@@ -116,6 +117,7 @@ PYDPLUS_ADMIN_BASE_URL=https://example-company.access.securid.com
 PYDPLUS_OAUTH_ISSUER_URL=https://example-company.auth.securid.com/oauth
 PYDPLUS_OAUTH_CLIENT_ID=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
 PYDPLUS_OAUTH_SCOPE=rsa.user.read+rsa.user.manage
+PYDPLUS_OAUTH_SCOPE_PRESET=user_read_only
 PYDPLUS_OAUTH_PRIVATE_KEY_FILE=oauth-private-key.jwk
 PYDPLUS_OAUTH_PRIVATE_KEY_PATH=/path/to/keys
 ```
@@ -134,6 +136,9 @@ For OAuth Admin API requests:
 - `Client Credentials` and `client_credentials` are both accepted.
 - `Private Key JWT` and `private_key_jwt` are both accepted.
 - OAuth scope values are required and can be supplied as `+`-delimited, space-delimited, or iterable values.
+- OAuth scope presets can be supplied through `oauth_scope_preset` (argument), helper setting, or
+  `PYDPLUS_OAUTH_SCOPE_PRESET` (environment variable).
+- Scope presets are additive and are merged with explicit `oauth_scope` values; explicit scopes are preserved.
 - Scope values are normalized internally and sent to `/oauth/token` as a space-delimited list.
 - OAuth issuer inference defaults to the Authentication base URL (`auth` mode).
 - When only `base_admin_url` is provided and it matches `*.access.*`, PyDPlus attempts to infer `base_auth_url`.
