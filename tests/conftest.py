@@ -4,7 +4,7 @@
 :Synopsis:          Shared pytest fixtures and test-session hooks
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff (via GPT-5.3-codex)
-:Modified Date:     25 Mar 2026
+:Modified Date:     30 Mar 2026
 """
 
 from __future__ import annotations
@@ -89,20 +89,22 @@ def helper_yaml_file(tmp_path: Path) -> Path:
     """Create a temporary YAML helper file and return its path."""
     helper_file = tmp_path / 'helper.yaml'
     helper_file.write_text(
-        '\n'.join([
-            'base_url: https://example.com',
-            'connection_type: legacy',
-            'strict_mode: false',
-            'verify_ssl: true',
-            'connection:',
-            '  legacy:',
-            '    access_id: legacy-access-id',
-            '    private_key_path: /tmp/',
-            '    private_key_file: private.pem',
-            '  oauth:',
-            '    client_id: oauth-client-id',
-            f'    scope: {const.OAUTH_SCOPES.USER_READ}',
-        ]),
+        '\n'.join(
+            [
+                'base_url: https://example.com',
+                'connection_type: legacy',
+                'strict_mode: false',
+                'verify_ssl: true',
+                'connection:',
+                '  legacy:',
+                '    access_id: legacy-access-id',
+                '    private_key_path: /tmp/',
+                '    private_key_file: private.pem',
+                '  oauth:',
+                '    client_id: oauth-client-id',
+                f'    scope: {const.OAUTH_SCOPES.USER_READ}',
+            ]
+        ),
         encoding='utf-8',
     )
     return helper_file

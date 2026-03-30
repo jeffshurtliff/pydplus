@@ -3,16 +3,15 @@
 :Module:            pydplus.constants
 :Synopsis:          Constants that are utilized throughout the package
 :Created By:        Jeff Shurtliff
-:Last Modified:     Jeff Shurtliff (via GPT-5.3-Codex)
-:Modified Date:     29 Mar 2026
+:Last Modified:     Jeff Shurtliff
+:Modified Date:     30 Mar 2026
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import Any, Final, ClassVar, Mapping, Union
-
+from typing import Any, ClassVar, Final, Mapping, Union
 
 # --------------------------------------
 # Common and Generic Values
@@ -23,12 +22,14 @@ UTF8_ENCODING: Final[str] = 'utf-8'
 # --------------------------------------
 # Common Validation Criteria / Mapping
 # --------------------------------------
-YAML_BOOLEAN_MAPPING: Final[Mapping[Union[str, bool], bool]] = MappingProxyType({
-    True: True,
-    False: False,
-    'yes': True,
-    'no': False,
-})
+YAML_BOOLEAN_MAPPING: Final[Mapping[Union[str, bool], bool]] = MappingProxyType(
+    {
+        True: True,
+        False: False,
+        'yes': True,
+        'no': False,
+    }
+)
 
 
 # -----------------------------
@@ -43,6 +44,7 @@ _DEFAULT_WARNING_CATEGORY: Final[type[Warning]] = UserWarning
 @dataclass(frozen=True)
 class ArgumentValues:
     """Common argument values leveraged throughout the package."""
+
     # Common values
     FILE: ClassVar[str] = 'file'
     URL: ClassVar[str] = 'url'
@@ -57,10 +59,12 @@ class ArgumentValues:
     # User status actions
     ENABLE: ClassVar[str] = 'enable'
     DISABLE: ClassVar[str] = 'disable'
-    VALID_USER_STATUS_ACTIONS: ClassVar[frozenset[str]] = frozenset({
-        ENABLE,
-        DISABLE,
-    })
+    VALID_USER_STATUS_ACTIONS: ClassVar[frozenset[str]] = frozenset(
+        {
+            ENABLE,
+            DISABLE,
+        }
+    )
 
 
 # -------------------------------
@@ -69,6 +73,7 @@ class ArgumentValues:
 @dataclass(frozen=True)
 class CredentialValues:
     """Constants used by secure credential parsing and private-key persistence helpers."""
+
     JSON_FIELD_CUSTOMER_NAME: ClassVar[str] = 'customerName'
     JSON_FIELD_ACCESS_ID: ClassVar[str] = 'accessID'
     JSON_FIELD_ACCESS_KEY: ClassVar[str] = 'accessKey'
@@ -93,24 +98,34 @@ class CredentialValues:
 @dataclass(frozen=True)
 class LogMessages:
     """Common log messages that are utilized in multiple locations throughout the package."""
+
     # Generic argument messages
-    _INVALID_ARG_IGNORE: ClassVar[str] = 'The {arg} argument is invalid and will be ignored'                            # Vars: arg
+    _INVALID_ARG_IGNORE: ClassVar[str] = 'The {arg} argument is invalid and will be ignored'  # Vars: arg
 
     # Generic parameter value messages
-    _INVALID_PARAM_VALUE_DEFAULT: ClassVar[str] = "The {param} value is not valid and will default to '{default}'"      # Vars: param, default
-    _INVALID_PARAM_VALUE_IGNORE: ClassVar[str] = "The {param} value '{value}' is not valid and will be ignored"         # Vars: param, value
-    _MUST_BE_DATA_TYPE_ERROR: ClassVar[str] = "The data type of the {param} parameter must be '{data_type}'"            # Vars: param, data_type
-    _PARAM_EXCEEDS_MAX_VALUE: ClassVar[str] = 'The {param} value exceeds the maximum and will default to {default}'     # Vars: param, default
+    _INVALID_PARAM_VALUE_DEFAULT: ClassVar[str] = (
+        "The {param} value is not valid and will default to '{default}'"  # Vars: param, default
+    )
+    _INVALID_PARAM_VALUE_IGNORE: ClassVar[str] = (
+        "The {param} value '{value}' is not valid and will be ignored"  # Vars: param, value
+    )
+    _MUST_BE_DATA_TYPE_ERROR: ClassVar[str] = (
+        "The data type of the {param} parameter must be '{data_type}'"  # Vars: param, data_type
+    )
+    _PARAM_EXCEEDS_MAX_VALUE: ClassVar[str] = (
+        'The {param} value exceeds the maximum and will default to {default}'  # Vars: param, default
+    )
 
     # Generic data messages
-    _MISSING_REQUIRED_DATA: ClassVar[str] = '{data} is missing and must be provided as it is required'                  # Vars: data
-    _MUST_BE_PROVIDED_ERROR: ClassVar[str] = 'The {data} must be provided.'                                             # Vars: data
+    _MISSING_REQUIRED_DATA: ClassVar[str] = '{data} is missing and must be provided as it is required'  # Vars: data
+    _MUST_BE_PROVIDED_ERROR: ClassVar[str] = 'The {data} must be provided.'  # Vars: data
 
     # Client instantiation messages
-    _CLIENT_SETTING_CONFIGURED: ClassVar[str] = "The {setting} setting was configured as '{value}' via {method}"        # Vars: setting, value, method
-    _WILL_USE_DEFAULT_VALUE: ClassVar[str] = (                                                                          # Vars: setting, value
-        "The {setting} setting was not defined and will use "
-        "the default value '{value}'"
+    _CLIENT_SETTING_CONFIGURED: ClassVar[str] = (
+        "The {setting} setting was configured as '{value}' via {method}"  # Vars: setting, value, method
+    )
+    _WILL_USE_DEFAULT_VALUE: ClassVar[str] = (  # Vars: setting, value
+        "The {setting} setting was not defined and will use the default value '{value}'"
     )
 
 
@@ -120,6 +135,7 @@ class LogMessages:
 @dataclass(frozen=True)
 class ExceptionClasses:
     """Constants utilized by the exception classes in the :py:mod:`pydplus.errors.exceptions` module."""
+
     # Keyword arguments
     _DATA: ClassVar[str] = 'data'
     _FEATURE: ClassVar[str] = 'feature'
@@ -138,12 +154,16 @@ class ExceptionClasses:
     _VALUE: ClassVar[str] = 'value'
 
     # Exception messages and message segments
-    _API_CUSTOM_MSG: ClassVar[str] = 'The {type} request failed with the following message:'                            # Vars: type
-    _API_DEFAULT_MSG: ClassVar[str] = 'The {type} request did not return a successful response.'                        # Vars: type
-    _CANNOT_LOCATE_FILE: ClassVar[str] = 'Unable to locate the following file: {file_path}'                             # Vars: file_path
-    _INVALID_HELPER_DEFAULT_MSG: ClassVar[str] = "The helper configuration file can only have the 'yml', 'yaml' or 'json' file type."
-    _PRIVATE_KEY_ALREADY_EXISTS: ClassVar[str] = "The private key file already exists at '{final_path}'"                # Vars: final_path
-    _VALUE_NEEDED_TO_CONNECT_OAUTH: ClassVar[str] = "The '{field}' value is needed to connect to the tenant via OAuth"  # Vars: field
+    _API_CUSTOM_MSG: ClassVar[str] = 'The {type} request failed with the following message:'  # Vars: type
+    _API_DEFAULT_MSG: ClassVar[str] = 'The {type} request did not return a successful response.'  # Vars: type
+    _CANNOT_LOCATE_FILE: ClassVar[str] = 'Unable to locate the following file: {file_path}'  # Vars: file_path
+    _INVALID_HELPER_DEFAULT_MSG: ClassVar[str] = (
+        "The helper configuration file can only have the 'yml', 'yaml' or 'json' file type."
+    )
+    _PRIVATE_KEY_ALREADY_EXISTS: ClassVar[str] = "The private key file already exists at '{final_path}'"  # Vars: final_path
+    _VALUE_NEEDED_TO_CONNECT_OAUTH: ClassVar[str] = (
+        "The '{field}' value is needed to connect to the tenant via OAuth"  # Vars: field
+    )
     _WITH_THE_FOLLOWING_SEGMENT: ClassVar[str] = ' with the following'
 
 
@@ -153,6 +173,7 @@ class ExceptionClasses:
 @dataclass(frozen=True)
 class FileExtensions:
     """Common file extensions leveraged throughout the package."""
+
     # Without delimiter
     JPEG: ClassVar[str] = 'jpeg'
     JSON: ClassVar[str] = 'json'
@@ -178,6 +199,7 @@ class ClientSettings:
     """Fields, values, and other constants relating to the :py:class:`pydplus.PyDPlus`
     client configuration settings.
     """
+
     # Client properties
     BASE_URL: ClassVar[str] = 'base_url'
     CONNECTION_INFO: ClassVar[str] = 'connection_info'
@@ -207,6 +229,7 @@ class HelperSettings:
        If values are updated in this class for constants related to environment variables, then the
        corresponding values should be updated in the :py:class:`pydplus.constants.EnvVariables` class.
     """
+
     # Validation criteria
     VALID_HELPER_FILE_TYPES: ClassVar[frozenset[str]] = frozenset({'json', 'yml', 'yaml'})
     VALID_YAML_TRUE_VALUES: ClassVar[frozenset[str]] = frozenset({'yes', 'true'})
@@ -223,22 +246,24 @@ class HelperSettings:
     VERIFY_SSL: str = 'verify_ssl'
     OAUTH_SCOPE_PRESET: ClassVar[str] = 'oauth_scope_preset'
     ENV_VARIABLES: ClassVar[str] = 'env_variables'
-    ROOT_LEVEL_BASIC_FIELDS: ClassVar[frozenset[str]] = frozenset({
-        ENV_NAME,
-        TENANT_NAME,
-        BASE_URL,
-        CONNECTION_TYPE,
-        STRICT_MODE,
-        VERIFY_SSL,
-        OAUTH_SCOPE_PRESET,
-    })
+    ROOT_LEVEL_BASIC_FIELDS: ClassVar[frozenset[str]] = frozenset(
+        {
+            ENV_NAME,
+            TENANT_NAME,
+            BASE_URL,
+            CONNECTION_TYPE,
+            STRICT_MODE,
+            VERIFY_SSL,
+            OAUTH_SCOPE_PRESET,
+        }
+    )
 
     # Base URL fields
     ADMIN: ClassVar[str] = 'admin'
     ADMIN_BASE_URL: ClassVar[str] = 'admin_base_url'
     AUTH: ClassVar[str] = 'auth'
     AUTH_BASE_URL: ClassVar[str] = 'auth_base_url'
-    API_BASE_URL: ClassVar[str] = '{type}_base_url'                                                 # Vars: type
+    API_BASE_URL: ClassVar[str] = '{type}_base_url'  # Vars: type
 
     # Environment variable fields
     ENV_ENV_NAME: ClassVar[str] = 'env'
@@ -291,51 +316,57 @@ class HelperSettings:
     ENV_DEFAULT_VERIFY_SSL: ClassVar[str] = 'PYDPLUS_VERIFY_SSL'
 
     # Environment variable default mapping
-    ENV_VARIABLE_DEFAULT_MAPPING: ClassVar[Mapping[str, str]] = MappingProxyType({
-        ENV_ENV_NAME: ENV_DEFAULT_ENV_NAME,
-        ENV_TENANT_NAME: ENV_DEFAULT_TENANT_NAME,
-        ENV_BASE_URL: ENV_DEFAULT_BASE_URL,
-        ENV_ADMIN_BASE_URL: ENV_DEFAULT_ADMIN_BASE_URL,
-        ENV_AUTH_BASE_URL: ENV_DEFAULT_AUTH_BASE_URL,
-        ENV_CONNECTION_TYPE: ENV_DEFAULT_CONNECTION_TYPE,
-        ENV_LEGACY_ACCESS_ID: ENV_DEFAULT_LEGACY_ACCESS_ID,
-        ENV_LEGACY_KEY_PATH: ENV_DEFAULT_LEGACY_KEY_PATH,
-        ENV_LEGACY_KEY_FILE: ENV_DEFAULT_LEGACY_KEY_FILE,
-        ENV_LEGACY_KEY_PEM: ENV_DEFAULT_LEGACY_KEY_PEM,
-        ENV_LEGACY_KEY_MATERIAL_PATH: ENV_DEFAULT_LEGACY_KEY_MATERIAL_PATH,
-        ENV_LEGACY_KEY_MATERIAL_FILE: ENV_DEFAULT_LEGACY_KEY_MATERIAL_FILE,
-        ENV_OAUTH_ISSUER_URL: ENV_DEFAULT_OAUTH_ISSUER_URL,
-        ENV_OAUTH_CLIENT_ID: ENV_DEFAULT_OAUTH_CLIENT_ID,
-        ENV_OAUTH_SCOPE: ENV_DEFAULT_OAUTH_SCOPE,
-        ENV_OAUTH_SCOPE_PRESET: ENV_DEFAULT_OAUTH_SCOPE_PRESET,
-        ENV_OAUTH_GRANT_TYPE: ENV_DEFAULT_OAUTH_GRANT_TYPE,
-        ENV_OAUTH_CLIENT_AUTH: ENV_DEFAULT_OAUTH_CLIENT_AUTH,
-        ENV_OAUTH_PRIVATE_KEY_PATH: ENV_DEFAULT_OAUTH_PRIVATE_KEY_PATH,
-        ENV_OAUTH_PRIVATE_KEY_FILE: ENV_DEFAULT_OAUTH_PRIVATE_KEY_FILE,
-        ENV_OAUTH_PRIVATE_KEY_JWK: ENV_DEFAULT_OAUTH_PRIVATE_KEY_JWK,
-        ENV_STRICT_MODE: ENV_DEFAULT_STRICT_MODE,
-        ENV_VERIFY_SSL: ENV_DEFAULT_VERIFY_SSL,
-    })
+    ENV_VARIABLE_DEFAULT_MAPPING: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {
+            ENV_ENV_NAME: ENV_DEFAULT_ENV_NAME,
+            ENV_TENANT_NAME: ENV_DEFAULT_TENANT_NAME,
+            ENV_BASE_URL: ENV_DEFAULT_BASE_URL,
+            ENV_ADMIN_BASE_URL: ENV_DEFAULT_ADMIN_BASE_URL,
+            ENV_AUTH_BASE_URL: ENV_DEFAULT_AUTH_BASE_URL,
+            ENV_CONNECTION_TYPE: ENV_DEFAULT_CONNECTION_TYPE,
+            ENV_LEGACY_ACCESS_ID: ENV_DEFAULT_LEGACY_ACCESS_ID,
+            ENV_LEGACY_KEY_PATH: ENV_DEFAULT_LEGACY_KEY_PATH,
+            ENV_LEGACY_KEY_FILE: ENV_DEFAULT_LEGACY_KEY_FILE,
+            ENV_LEGACY_KEY_PEM: ENV_DEFAULT_LEGACY_KEY_PEM,
+            ENV_LEGACY_KEY_MATERIAL_PATH: ENV_DEFAULT_LEGACY_KEY_MATERIAL_PATH,
+            ENV_LEGACY_KEY_MATERIAL_FILE: ENV_DEFAULT_LEGACY_KEY_MATERIAL_FILE,
+            ENV_OAUTH_ISSUER_URL: ENV_DEFAULT_OAUTH_ISSUER_URL,
+            ENV_OAUTH_CLIENT_ID: ENV_DEFAULT_OAUTH_CLIENT_ID,
+            ENV_OAUTH_SCOPE: ENV_DEFAULT_OAUTH_SCOPE,
+            ENV_OAUTH_SCOPE_PRESET: ENV_DEFAULT_OAUTH_SCOPE_PRESET,
+            ENV_OAUTH_GRANT_TYPE: ENV_DEFAULT_OAUTH_GRANT_TYPE,
+            ENV_OAUTH_CLIENT_AUTH: ENV_DEFAULT_OAUTH_CLIENT_AUTH,
+            ENV_OAUTH_PRIVATE_KEY_PATH: ENV_DEFAULT_OAUTH_PRIVATE_KEY_PATH,
+            ENV_OAUTH_PRIVATE_KEY_FILE: ENV_DEFAULT_OAUTH_PRIVATE_KEY_FILE,
+            ENV_OAUTH_PRIVATE_KEY_JWK: ENV_DEFAULT_OAUTH_PRIVATE_KEY_JWK,
+            ENV_STRICT_MODE: ENV_DEFAULT_STRICT_MODE,
+            ENV_VERIFY_SSL: ENV_DEFAULT_VERIFY_SSL,
+        }
+    )
 
     # Environment variable to connection field mappings
-    ENV_LEGACY_CONNECTION_MAPPING: ClassVar[Mapping[str, str]] = MappingProxyType({
-        'access_id': ENV_LEGACY_ACCESS_ID,
-        'private_key_path': ENV_LEGACY_KEY_PATH,
-        'private_key_file': ENV_LEGACY_KEY_FILE,
-        'private_key_pem': ENV_LEGACY_KEY_PEM,
-        'private_key_material_path': ENV_LEGACY_KEY_MATERIAL_PATH,
-        'private_key_material_file': ENV_LEGACY_KEY_MATERIAL_FILE,
-    })
-    ENV_OAUTH_CONNECTION_MAPPING: ClassVar[Mapping[str, str]] = MappingProxyType({
-        'issuer_url': ENV_OAUTH_ISSUER_URL,
-        'client_id': ENV_OAUTH_CLIENT_ID,
-        'scope': ENV_OAUTH_SCOPE,
-        'grant_type': ENV_OAUTH_GRANT_TYPE,
-        'client_authentication': ENV_OAUTH_CLIENT_AUTH,
-        'private_key_path': ENV_OAUTH_PRIVATE_KEY_PATH,
-        'private_key_file': ENV_OAUTH_PRIVATE_KEY_FILE,
-        'private_key_jwk': ENV_OAUTH_PRIVATE_KEY_JWK,
-    })
+    ENV_LEGACY_CONNECTION_MAPPING: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {
+            'access_id': ENV_LEGACY_ACCESS_ID,
+            'private_key_path': ENV_LEGACY_KEY_PATH,
+            'private_key_file': ENV_LEGACY_KEY_FILE,
+            'private_key_pem': ENV_LEGACY_KEY_PEM,
+            'private_key_material_path': ENV_LEGACY_KEY_MATERIAL_PATH,
+            'private_key_material_file': ENV_LEGACY_KEY_MATERIAL_FILE,
+        }
+    )
+    ENV_OAUTH_CONNECTION_MAPPING: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {
+            'issuer_url': ENV_OAUTH_ISSUER_URL,
+            'client_id': ENV_OAUTH_CLIENT_ID,
+            'scope': ENV_OAUTH_SCOPE,
+            'grant_type': ENV_OAUTH_GRANT_TYPE,
+            'client_authentication': ENV_OAUTH_CLIENT_AUTH,
+            'private_key_path': ENV_OAUTH_PRIVATE_KEY_PATH,
+            'private_key_file': ENV_OAUTH_PRIVATE_KEY_FILE,
+            'private_key_jwk': ENV_OAUTH_PRIVATE_KEY_JWK,
+        }
+    )
 
     # Other default values
     DEFAULT_ENV_NAME = None
@@ -355,6 +386,7 @@ class EnvVariables:
        If values are updated in this class then the corresponding values should be updated
        in the :py:class:`pydplus.constants.HelperSettings` class.
     """
+
     # ----------------------------------
     # Environment Identifier Names
     # ----------------------------------
@@ -404,31 +436,31 @@ class EnvVariables:
     # These environment variables are for a custom or otherwise specific environment defined by the env_name variable
 
     # Tenant Information
-    CUSTOM_BASE_URL: ClassVar[str] = 'PYDPLUS_{env_name}_BASE_URL'                                  # Vars: env_name
-    CUSTOM_ADMIN_BASE_URL: ClassVar[str] = 'PYDPLUS_{env_name}_ADMIN_BASE_URL'                      # Vars: env_name
-    CUSTOM_AUTH_BASE_URL: ClassVar[str] = 'PYDPLUS_{env_name}_AUTH_BASE_URL'                        # Vars: env_name
+    CUSTOM_BASE_URL: ClassVar[str] = 'PYDPLUS_{env_name}_BASE_URL'  # Vars: env_name
+    CUSTOM_ADMIN_BASE_URL: ClassVar[str] = 'PYDPLUS_{env_name}_ADMIN_BASE_URL'  # Vars: env_name
+    CUSTOM_AUTH_BASE_URL: ClassVar[str] = 'PYDPLUS_{env_name}_AUTH_BASE_URL'  # Vars: env_name
 
     # General Settings
-    CUSTOM_STRICT_MODE: ClassVar[str] = 'PYDPLUS_{env_name}_STRICT_MODE'                            # Vars: env_name
-    CUSTOM_VERIFY_SSL: ClassVar[str] = 'PYDPLUS_{env_name}_VERIFY_SSL'                              # Vars: env_name
+    CUSTOM_STRICT_MODE: ClassVar[str] = 'PYDPLUS_{env_name}_STRICT_MODE'  # Vars: env_name
+    CUSTOM_VERIFY_SSL: ClassVar[str] = 'PYDPLUS_{env_name}_VERIFY_SSL'  # Vars: env_name
 
     # Authentication / Connection
-    CUSTOM_CONNECTION_TYPE: ClassVar[str] = 'PYDPLUS_{env_name}_CONNECTION_TYPE'                    # Vars: env_name
-    CUSTOM_LEGACY_ACCESS_ID: ClassVar[str] = 'PYDPLUS_{env_name}_LEGACY_ACCESS_ID'                  # Vars: env_name
-    CUSTOM_LEGACY_KEY_PATH: ClassVar[str] = 'PYDPLUS_{env_name}_LEGACY_KEY_PATH'                    # Vars: env_name
-    CUSTOM_LEGACY_KEY_FILE: ClassVar[str] = 'PYDPLUS_{env_name}_LEGACY_KEY_FILE'                    # Vars: env_name
-    CUSTOM_LEGACY_KEY_PEM: ClassVar[str] = 'PYDPLUS_{env_name}_LEGACY_KEY_PEM'                      # Vars: env_name
+    CUSTOM_CONNECTION_TYPE: ClassVar[str] = 'PYDPLUS_{env_name}_CONNECTION_TYPE'  # Vars: env_name
+    CUSTOM_LEGACY_ACCESS_ID: ClassVar[str] = 'PYDPLUS_{env_name}_LEGACY_ACCESS_ID'  # Vars: env_name
+    CUSTOM_LEGACY_KEY_PATH: ClassVar[str] = 'PYDPLUS_{env_name}_LEGACY_KEY_PATH'  # Vars: env_name
+    CUSTOM_LEGACY_KEY_FILE: ClassVar[str] = 'PYDPLUS_{env_name}_LEGACY_KEY_FILE'  # Vars: env_name
+    CUSTOM_LEGACY_KEY_PEM: ClassVar[str] = 'PYDPLUS_{env_name}_LEGACY_KEY_PEM'  # Vars: env_name
     CUSTOM_LEGACY_KEY_MATERIAL_PATH: ClassVar[str] = 'PYDPLUS_{env_name}_LEGACY_KEY_MATERIAL_PATH'  # Vars: env_name
     CUSTOM_LEGACY_KEY_MATERIAL_FILE: ClassVar[str] = 'PYDPLUS_{env_name}_LEGACY_KEY_MATERIAL_FILE'  # Vars: env_name
-    CUSTOM_OAUTH_ISSUER_URL: ClassVar[str] = 'PYDPLUS_{env_name}_OAUTH_ISSUER_URL'                  # Vars: env_name
-    CUSTOM_OAUTH_CLIENT_ID: ClassVar[str] = 'PYDPLUS_{env_name}_OAUTH_CLIENT_ID'                    # Vars: env_name
-    CUSTOM_OAUTH_SCOPE: ClassVar[str] = 'PYDPLUS_{env_name}_OAUTH_SCOPE'                            # Vars: env_name
-    CUSTOM_OAUTH_SCOPE_PRESET: ClassVar[str] = 'PYDPLUS_{env_name}_OAUTH_SCOPE_PRESET'              # Vars: env_name
-    CUSTOM_OAUTH_GRANT_TYPE: ClassVar[str] = 'PYDPLUS_{env_name}_OAUTH_GRANT_TYPE'                  # Vars: env_name
-    CUSTOM_OAUTH_CLIENT_AUTH: ClassVar[str] = 'PYDPLUS_{env_name}_OAUTH_CLIENT_AUTH'                # Vars: env_name
-    CUSTOM_OAUTH_PRIVATE_KEY_PATH: ClassVar[str] = 'PYDPLUS_{env_name}_OAUTH_PRIVATE_KEY_PATH'      # Vars: env_name
-    CUSTOM_OAUTH_PRIVATE_KEY_FILE: ClassVar[str] = 'PYDPLUS_{env_name}_OAUTH_PRIVATE_KEY_FILE'      # Vars: env_name
-    CUSTOM_OAUTH_PRIVATE_KEY_JWK: ClassVar[str] = 'PYDPLUS_{env_name}_OAUTH_PRIVATE_KEY_JWK'        # Vars: env_name
+    CUSTOM_OAUTH_ISSUER_URL: ClassVar[str] = 'PYDPLUS_{env_name}_OAUTH_ISSUER_URL'  # Vars: env_name
+    CUSTOM_OAUTH_CLIENT_ID: ClassVar[str] = 'PYDPLUS_{env_name}_OAUTH_CLIENT_ID'  # Vars: env_name
+    CUSTOM_OAUTH_SCOPE: ClassVar[str] = 'PYDPLUS_{env_name}_OAUTH_SCOPE'  # Vars: env_name
+    CUSTOM_OAUTH_SCOPE_PRESET: ClassVar[str] = 'PYDPLUS_{env_name}_OAUTH_SCOPE_PRESET'  # Vars: env_name
+    CUSTOM_OAUTH_GRANT_TYPE: ClassVar[str] = 'PYDPLUS_{env_name}_OAUTH_GRANT_TYPE'  # Vars: env_name
+    CUSTOM_OAUTH_CLIENT_AUTH: ClassVar[str] = 'PYDPLUS_{env_name}_OAUTH_CLIENT_AUTH'  # Vars: env_name
+    CUSTOM_OAUTH_PRIVATE_KEY_PATH: ClassVar[str] = 'PYDPLUS_{env_name}_OAUTH_PRIVATE_KEY_PATH'  # Vars: env_name
+    CUSTOM_OAUTH_PRIVATE_KEY_FILE: ClassVar[str] = 'PYDPLUS_{env_name}_OAUTH_PRIVATE_KEY_FILE'  # Vars: env_name
+    CUSTOM_OAUTH_PRIVATE_KEY_JWK: ClassVar[str] = 'PYDPLUS_{env_name}_OAUTH_PRIVATE_KEY_JWK'  # Vars: env_name
 
     # ------------------------------------
     # Production Environment Variables
@@ -522,135 +554,141 @@ class EnvVariables:
     VERIFY_SSL_FIELD: ClassVar[str] = 'verify_ssl'
 
     # Environment mapping
-    MAPPING: ClassVar[Mapping[str, Mapping[str, str]]] = MappingProxyType({
-        DEFAULT_ENVIRONMENT: {
-            ENV_FIELD: ENV_NAME,
-            BASE_URL_FIELD: BASE_URL,
-            ADMIN_BASE_URL_FIELD: ADMIN_BASE_URL,
-            AUTH_BASE_URL_FIELD: AUTH_BASE_URL,
-            CONNECTION_TYPE_FIELD: CONNECTION_TYPE,
-            LEGACY_ACCESS_ID_FIELD: LEGACY_ACCESS_ID,
-            LEGACY_KEY_PATH_FIELD: LEGACY_KEY_PATH,
-            LEGACY_KEY_FILE_FIELD: LEGACY_KEY_FILE,
-            LEGACY_KEY_PEM_FIELD: LEGACY_KEY_PEM,
-            LEGACY_KEY_MATERIAL_PATH_FIELD: LEGACY_KEY_MATERIAL_PATH,
-            LEGACY_KEY_MATERIAL_FILE_FIELD: LEGACY_KEY_MATERIAL_FILE,
-            OAUTH_ISSUER_URL_FIELD: OAUTH_ISSUER_URL,
-            OAUTH_CLIENT_ID_FIELD: OAUTH_CLIENT_ID,
-            OAUTH_SCOPE_FIELD: OAUTH_SCOPE,
-            OAUTH_SCOPE_PRESET_FIELD: OAUTH_SCOPE_PRESET,
-            OAUTH_GRANT_TYPE_FIELD: OAUTH_GRANT_TYPE,
-            OAUTH_CLIENT_AUTH_FIELD: OAUTH_CLIENT_AUTH,
-            OAUTH_PRIVATE_KEY_PATH_FIELD: OAUTH_PRIVATE_KEY_PATH,
-            OAUTH_PRIVATE_KEY_FILE_FIELD: OAUTH_PRIVATE_KEY_FILE,
-            OAUTH_PRIVATE_KEY_JWK_FIELD: OAUTH_PRIVATE_KEY_JWK,
-            STRICT_MODE_FIELD: STRICT_MODE,
-            VERIFY_SSL_FIELD: VERIFY_SSL,
-        },
-        PROD_ENVIRONMENT: {
-            BASE_URL_FIELD: PROD_BASE_URL,
-            ADMIN_BASE_URL_FIELD: PROD_ADMIN_BASE_URL,
-            AUTH_BASE_URL_FIELD: PROD_AUTH_BASE_URL,
-            CONNECTION_TYPE_FIELD: PROD_CONNECTION_TYPE,
-            LEGACY_ACCESS_ID_FIELD: PROD_LEGACY_ACCESS_ID,
-            LEGACY_KEY_PATH_FIELD: PROD_LEGACY_KEY_PATH,
-            LEGACY_KEY_FILE_FIELD: PROD_LEGACY_KEY_FILE,
-            LEGACY_KEY_PEM_FIELD: PROD_LEGACY_KEY_PEM,
-            LEGACY_KEY_MATERIAL_PATH_FIELD: PROD_LEGACY_KEY_MATERIAL_PATH,
-            LEGACY_KEY_MATERIAL_FILE_FIELD: PROD_LEGACY_KEY_MATERIAL_FILE,
-            OAUTH_ISSUER_URL_FIELD: PROD_OAUTH_ISSUER_URL,
-            OAUTH_CLIENT_ID_FIELD: PROD_OAUTH_CLIENT_ID,
-            OAUTH_SCOPE_FIELD: PROD_OAUTH_SCOPE,
-            OAUTH_SCOPE_PRESET_FIELD: PROD_OAUTH_SCOPE_PRESET,
-            OAUTH_GRANT_TYPE_FIELD: PROD_OAUTH_GRANT_TYPE,
-            OAUTH_CLIENT_AUTH_FIELD: PROD_OAUTH_CLIENT_AUTH,
-            OAUTH_PRIVATE_KEY_PATH_FIELD: PROD_OAUTH_PRIVATE_KEY_PATH,
-            OAUTH_PRIVATE_KEY_FILE_FIELD: PROD_OAUTH_PRIVATE_KEY_FILE,
-            OAUTH_PRIVATE_KEY_JWK_FIELD: PROD_OAUTH_PRIVATE_KEY_JWK,
-            STRICT_MODE_FIELD: PROD_STRICT_MODE,
-            VERIFY_SSL_FIELD: PROD_VERIFY_SSL,
-        },
-        DEV_ENVIRONMENT: {
-            BASE_URL_FIELD: DEV_BASE_URL,
-            ADMIN_BASE_URL_FIELD: DEV_ADMIN_BASE_URL,
-            AUTH_BASE_URL_FIELD: DEV_AUTH_BASE_URL,
-            CONNECTION_TYPE_FIELD: DEV_CONNECTION_TYPE,
-            LEGACY_ACCESS_ID_FIELD: DEV_LEGACY_ACCESS_ID,
-            LEGACY_KEY_PATH_FIELD: DEV_LEGACY_KEY_PATH,
-            LEGACY_KEY_FILE_FIELD: DEV_LEGACY_KEY_FILE,
-            LEGACY_KEY_PEM_FIELD: DEV_LEGACY_KEY_PEM,
-            LEGACY_KEY_MATERIAL_PATH_FIELD: DEV_LEGACY_KEY_MATERIAL_PATH,
-            LEGACY_KEY_MATERIAL_FILE_FIELD: DEV_LEGACY_KEY_MATERIAL_FILE,
-            OAUTH_ISSUER_URL_FIELD: DEV_OAUTH_ISSUER_URL,
-            OAUTH_CLIENT_ID_FIELD: DEV_OAUTH_CLIENT_ID,
-            OAUTH_SCOPE_FIELD: DEV_OAUTH_SCOPE,
-            OAUTH_SCOPE_PRESET_FIELD: DEV_OAUTH_SCOPE_PRESET,
-            OAUTH_GRANT_TYPE_FIELD: DEV_OAUTH_GRANT_TYPE,
-            OAUTH_CLIENT_AUTH_FIELD: DEV_OAUTH_CLIENT_AUTH,
-            OAUTH_PRIVATE_KEY_PATH_FIELD: DEV_OAUTH_PRIVATE_KEY_PATH,
-            OAUTH_PRIVATE_KEY_FILE_FIELD: DEV_OAUTH_PRIVATE_KEY_FILE,
-            OAUTH_PRIVATE_KEY_JWK_FIELD: DEV_OAUTH_PRIVATE_KEY_JWK,
-            STRICT_MODE_FIELD: DEV_STRICT_MODE,
-            VERIFY_SSL_FIELD: DEV_VERIFY_SSL,
-        },
-        CUSTOM_ENVIRONMENT: {
-            BASE_URL_FIELD: CUSTOM_BASE_URL,
-            ADMIN_BASE_URL_FIELD: CUSTOM_ADMIN_BASE_URL,
-            AUTH_BASE_URL_FIELD: CUSTOM_AUTH_BASE_URL,
-            CONNECTION_TYPE_FIELD: CUSTOM_CONNECTION_TYPE,
-            LEGACY_ACCESS_ID_FIELD: CUSTOM_LEGACY_ACCESS_ID,
-            LEGACY_KEY_PATH_FIELD: CUSTOM_LEGACY_KEY_PATH,
-            LEGACY_KEY_FILE_FIELD: CUSTOM_LEGACY_KEY_FILE,
-            LEGACY_KEY_PEM_FIELD: CUSTOM_LEGACY_KEY_PEM,
-            LEGACY_KEY_MATERIAL_PATH_FIELD: CUSTOM_LEGACY_KEY_MATERIAL_PATH,
-            LEGACY_KEY_MATERIAL_FILE_FIELD: CUSTOM_LEGACY_KEY_MATERIAL_FILE,
-            OAUTH_ISSUER_URL_FIELD: CUSTOM_OAUTH_ISSUER_URL,
-            OAUTH_CLIENT_ID_FIELD: CUSTOM_OAUTH_CLIENT_ID,
-            OAUTH_SCOPE_FIELD: CUSTOM_OAUTH_SCOPE,
-            OAUTH_SCOPE_PRESET_FIELD: CUSTOM_OAUTH_SCOPE_PRESET,
-            OAUTH_GRANT_TYPE_FIELD: CUSTOM_OAUTH_GRANT_TYPE,
-            OAUTH_CLIENT_AUTH_FIELD: CUSTOM_OAUTH_CLIENT_AUTH,
-            OAUTH_PRIVATE_KEY_PATH_FIELD: CUSTOM_OAUTH_PRIVATE_KEY_PATH,
-            OAUTH_PRIVATE_KEY_FILE_FIELD: CUSTOM_OAUTH_PRIVATE_KEY_FILE,
-            OAUTH_PRIVATE_KEY_JWK_FIELD: CUSTOM_OAUTH_PRIVATE_KEY_JWK,
-            STRICT_MODE_FIELD: CUSTOM_STRICT_MODE,
-            VERIFY_SSL_FIELD: CUSTOM_VERIFY_SSL,
-        },
-    })
+    MAPPING: ClassVar[Mapping[str, Mapping[str, str]]] = MappingProxyType(
+        {
+            DEFAULT_ENVIRONMENT: {
+                ENV_FIELD: ENV_NAME,
+                BASE_URL_FIELD: BASE_URL,
+                ADMIN_BASE_URL_FIELD: ADMIN_BASE_URL,
+                AUTH_BASE_URL_FIELD: AUTH_BASE_URL,
+                CONNECTION_TYPE_FIELD: CONNECTION_TYPE,
+                LEGACY_ACCESS_ID_FIELD: LEGACY_ACCESS_ID,
+                LEGACY_KEY_PATH_FIELD: LEGACY_KEY_PATH,
+                LEGACY_KEY_FILE_FIELD: LEGACY_KEY_FILE,
+                LEGACY_KEY_PEM_FIELD: LEGACY_KEY_PEM,
+                LEGACY_KEY_MATERIAL_PATH_FIELD: LEGACY_KEY_MATERIAL_PATH,
+                LEGACY_KEY_MATERIAL_FILE_FIELD: LEGACY_KEY_MATERIAL_FILE,
+                OAUTH_ISSUER_URL_FIELD: OAUTH_ISSUER_URL,
+                OAUTH_CLIENT_ID_FIELD: OAUTH_CLIENT_ID,
+                OAUTH_SCOPE_FIELD: OAUTH_SCOPE,
+                OAUTH_SCOPE_PRESET_FIELD: OAUTH_SCOPE_PRESET,
+                OAUTH_GRANT_TYPE_FIELD: OAUTH_GRANT_TYPE,
+                OAUTH_CLIENT_AUTH_FIELD: OAUTH_CLIENT_AUTH,
+                OAUTH_PRIVATE_KEY_PATH_FIELD: OAUTH_PRIVATE_KEY_PATH,
+                OAUTH_PRIVATE_KEY_FILE_FIELD: OAUTH_PRIVATE_KEY_FILE,
+                OAUTH_PRIVATE_KEY_JWK_FIELD: OAUTH_PRIVATE_KEY_JWK,
+                STRICT_MODE_FIELD: STRICT_MODE,
+                VERIFY_SSL_FIELD: VERIFY_SSL,
+            },
+            PROD_ENVIRONMENT: {
+                BASE_URL_FIELD: PROD_BASE_URL,
+                ADMIN_BASE_URL_FIELD: PROD_ADMIN_BASE_URL,
+                AUTH_BASE_URL_FIELD: PROD_AUTH_BASE_URL,
+                CONNECTION_TYPE_FIELD: PROD_CONNECTION_TYPE,
+                LEGACY_ACCESS_ID_FIELD: PROD_LEGACY_ACCESS_ID,
+                LEGACY_KEY_PATH_FIELD: PROD_LEGACY_KEY_PATH,
+                LEGACY_KEY_FILE_FIELD: PROD_LEGACY_KEY_FILE,
+                LEGACY_KEY_PEM_FIELD: PROD_LEGACY_KEY_PEM,
+                LEGACY_KEY_MATERIAL_PATH_FIELD: PROD_LEGACY_KEY_MATERIAL_PATH,
+                LEGACY_KEY_MATERIAL_FILE_FIELD: PROD_LEGACY_KEY_MATERIAL_FILE,
+                OAUTH_ISSUER_URL_FIELD: PROD_OAUTH_ISSUER_URL,
+                OAUTH_CLIENT_ID_FIELD: PROD_OAUTH_CLIENT_ID,
+                OAUTH_SCOPE_FIELD: PROD_OAUTH_SCOPE,
+                OAUTH_SCOPE_PRESET_FIELD: PROD_OAUTH_SCOPE_PRESET,
+                OAUTH_GRANT_TYPE_FIELD: PROD_OAUTH_GRANT_TYPE,
+                OAUTH_CLIENT_AUTH_FIELD: PROD_OAUTH_CLIENT_AUTH,
+                OAUTH_PRIVATE_KEY_PATH_FIELD: PROD_OAUTH_PRIVATE_KEY_PATH,
+                OAUTH_PRIVATE_KEY_FILE_FIELD: PROD_OAUTH_PRIVATE_KEY_FILE,
+                OAUTH_PRIVATE_KEY_JWK_FIELD: PROD_OAUTH_PRIVATE_KEY_JWK,
+                STRICT_MODE_FIELD: PROD_STRICT_MODE,
+                VERIFY_SSL_FIELD: PROD_VERIFY_SSL,
+            },
+            DEV_ENVIRONMENT: {
+                BASE_URL_FIELD: DEV_BASE_URL,
+                ADMIN_BASE_URL_FIELD: DEV_ADMIN_BASE_URL,
+                AUTH_BASE_URL_FIELD: DEV_AUTH_BASE_URL,
+                CONNECTION_TYPE_FIELD: DEV_CONNECTION_TYPE,
+                LEGACY_ACCESS_ID_FIELD: DEV_LEGACY_ACCESS_ID,
+                LEGACY_KEY_PATH_FIELD: DEV_LEGACY_KEY_PATH,
+                LEGACY_KEY_FILE_FIELD: DEV_LEGACY_KEY_FILE,
+                LEGACY_KEY_PEM_FIELD: DEV_LEGACY_KEY_PEM,
+                LEGACY_KEY_MATERIAL_PATH_FIELD: DEV_LEGACY_KEY_MATERIAL_PATH,
+                LEGACY_KEY_MATERIAL_FILE_FIELD: DEV_LEGACY_KEY_MATERIAL_FILE,
+                OAUTH_ISSUER_URL_FIELD: DEV_OAUTH_ISSUER_URL,
+                OAUTH_CLIENT_ID_FIELD: DEV_OAUTH_CLIENT_ID,
+                OAUTH_SCOPE_FIELD: DEV_OAUTH_SCOPE,
+                OAUTH_SCOPE_PRESET_FIELD: DEV_OAUTH_SCOPE_PRESET,
+                OAUTH_GRANT_TYPE_FIELD: DEV_OAUTH_GRANT_TYPE,
+                OAUTH_CLIENT_AUTH_FIELD: DEV_OAUTH_CLIENT_AUTH,
+                OAUTH_PRIVATE_KEY_PATH_FIELD: DEV_OAUTH_PRIVATE_KEY_PATH,
+                OAUTH_PRIVATE_KEY_FILE_FIELD: DEV_OAUTH_PRIVATE_KEY_FILE,
+                OAUTH_PRIVATE_KEY_JWK_FIELD: DEV_OAUTH_PRIVATE_KEY_JWK,
+                STRICT_MODE_FIELD: DEV_STRICT_MODE,
+                VERIFY_SSL_FIELD: DEV_VERIFY_SSL,
+            },
+            CUSTOM_ENVIRONMENT: {
+                BASE_URL_FIELD: CUSTOM_BASE_URL,
+                ADMIN_BASE_URL_FIELD: CUSTOM_ADMIN_BASE_URL,
+                AUTH_BASE_URL_FIELD: CUSTOM_AUTH_BASE_URL,
+                CONNECTION_TYPE_FIELD: CUSTOM_CONNECTION_TYPE,
+                LEGACY_ACCESS_ID_FIELD: CUSTOM_LEGACY_ACCESS_ID,
+                LEGACY_KEY_PATH_FIELD: CUSTOM_LEGACY_KEY_PATH,
+                LEGACY_KEY_FILE_FIELD: CUSTOM_LEGACY_KEY_FILE,
+                LEGACY_KEY_PEM_FIELD: CUSTOM_LEGACY_KEY_PEM,
+                LEGACY_KEY_MATERIAL_PATH_FIELD: CUSTOM_LEGACY_KEY_MATERIAL_PATH,
+                LEGACY_KEY_MATERIAL_FILE_FIELD: CUSTOM_LEGACY_KEY_MATERIAL_FILE,
+                OAUTH_ISSUER_URL_FIELD: CUSTOM_OAUTH_ISSUER_URL,
+                OAUTH_CLIENT_ID_FIELD: CUSTOM_OAUTH_CLIENT_ID,
+                OAUTH_SCOPE_FIELD: CUSTOM_OAUTH_SCOPE,
+                OAUTH_SCOPE_PRESET_FIELD: CUSTOM_OAUTH_SCOPE_PRESET,
+                OAUTH_GRANT_TYPE_FIELD: CUSTOM_OAUTH_GRANT_TYPE,
+                OAUTH_CLIENT_AUTH_FIELD: CUSTOM_OAUTH_CLIENT_AUTH,
+                OAUTH_PRIVATE_KEY_PATH_FIELD: CUSTOM_OAUTH_PRIVATE_KEY_PATH,
+                OAUTH_PRIVATE_KEY_FILE_FIELD: CUSTOM_OAUTH_PRIVATE_KEY_FILE,
+                OAUTH_PRIVATE_KEY_JWK_FIELD: CUSTOM_OAUTH_PRIVATE_KEY_JWK,
+                STRICT_MODE_FIELD: CUSTOM_STRICT_MODE,
+                VERIFY_SSL_FIELD: CUSTOM_VERIFY_SSL,
+            },
+        }
+    )
 
     # --------------------------------------------
     # Environment Variable Validation Criteria
     # --------------------------------------------
-    VALID_ENVIRONMENTS: ClassVar[frozenset[str]] = frozenset({
-        DEFAULT_ENVIRONMENT,
-        PROD_ENVIRONMENT,
-        DEV_ENVIRONMENT,
-        CUSTOM_ENVIRONMENT,
-    })
-    VALID_FIELDS: ClassVar[frozenset[str]] = frozenset({
-        ENV_FIELD,
-        BASE_URL_FIELD,
-        ADMIN_BASE_URL_FIELD,
-        AUTH_BASE_URL_FIELD,
-        CONNECTION_TYPE_FIELD,
-        LEGACY_ACCESS_ID_FIELD,
-        LEGACY_KEY_PATH_FIELD,
-        LEGACY_KEY_FILE_FIELD,
-        LEGACY_KEY_PEM_FIELD,
-        LEGACY_KEY_MATERIAL_PATH_FIELD,
-        LEGACY_KEY_MATERIAL_FILE_FIELD,
-        OAUTH_ISSUER_URL_FIELD,
-        OAUTH_CLIENT_ID_FIELD,
-        OAUTH_SCOPE_FIELD,
-        OAUTH_SCOPE_PRESET_FIELD,
-        OAUTH_GRANT_TYPE_FIELD,
-        OAUTH_CLIENT_AUTH_FIELD,
-        OAUTH_PRIVATE_KEY_PATH_FIELD,
-        OAUTH_PRIVATE_KEY_FILE_FIELD,
-        OAUTH_PRIVATE_KEY_JWK_FIELD,
-        STRICT_MODE_FIELD,
-        VERIFY_SSL_FIELD,
-    })
+    VALID_ENVIRONMENTS: ClassVar[frozenset[str]] = frozenset(
+        {
+            DEFAULT_ENVIRONMENT,
+            PROD_ENVIRONMENT,
+            DEV_ENVIRONMENT,
+            CUSTOM_ENVIRONMENT,
+        }
+    )
+    VALID_FIELDS: ClassVar[frozenset[str]] = frozenset(
+        {
+            ENV_FIELD,
+            BASE_URL_FIELD,
+            ADMIN_BASE_URL_FIELD,
+            AUTH_BASE_URL_FIELD,
+            CONNECTION_TYPE_FIELD,
+            LEGACY_ACCESS_ID_FIELD,
+            LEGACY_KEY_PATH_FIELD,
+            LEGACY_KEY_FILE_FIELD,
+            LEGACY_KEY_PEM_FIELD,
+            LEGACY_KEY_MATERIAL_PATH_FIELD,
+            LEGACY_KEY_MATERIAL_FILE_FIELD,
+            OAUTH_ISSUER_URL_FIELD,
+            OAUTH_CLIENT_ID_FIELD,
+            OAUTH_SCOPE_FIELD,
+            OAUTH_SCOPE_PRESET_FIELD,
+            OAUTH_GRANT_TYPE_FIELD,
+            OAUTH_CLIENT_AUTH_FIELD,
+            OAUTH_PRIVATE_KEY_PATH_FIELD,
+            OAUTH_PRIVATE_KEY_FILE_FIELD,
+            OAUTH_PRIVATE_KEY_JWK_FIELD,
+            STRICT_MODE_FIELD,
+            VERIFY_SSL_FIELD,
+        }
+    )
 
 
 # -----------------------------
@@ -661,13 +699,16 @@ class ConnectionInfo:
     """Fields, values, and other constants relating to the ``connection_info``
     dictionary within the client object and the :py:mod:`pydplus.utils.helper` module.
     """
+
     # Authentication/Connection type parent fields
     LEGACY: ClassVar[str] = 'legacy'
     OAUTH: ClassVar[str] = 'oauth'
-    VALID_CONNECTION_TYPES: ClassVar[frozenset[str]] = frozenset({
-        LEGACY,
-        OAUTH,
-    })
+    VALID_CONNECTION_TYPES: ClassVar[frozenset[str]] = frozenset(
+        {
+            LEGACY,
+            OAUTH,
+        }
+    )
     DEFAULT_CONNECTION_TYPE: ClassVar[str] = OAUTH
 
     # Legacy authentication fields
@@ -677,14 +718,16 @@ class ConnectionInfo:
     LEGACY_PRIVATE_KEY_PEM: ClassVar[str] = 'private_key_pem'
     LEGACY_KEY_MATERIAL_PATH: ClassVar[str] = 'private_key_material_path'
     LEGACY_KEY_MATERIAL_FILE: ClassVar[str] = 'private_key_material_file'
-    LEGACY_FIELDS: ClassVar[frozenset[str]] = frozenset({
-        LEGACY_ACCESS_ID,
-        LEGACY_PRIVATE_KEY_FILE,
-        LEGACY_PRIVATE_KEY_PATH,
-        LEGACY_PRIVATE_KEY_PEM,
-        LEGACY_KEY_MATERIAL_PATH,
-        LEGACY_KEY_MATERIAL_FILE,
-    })
+    LEGACY_FIELDS: ClassVar[frozenset[str]] = frozenset(
+        {
+            LEGACY_ACCESS_ID,
+            LEGACY_PRIVATE_KEY_FILE,
+            LEGACY_PRIVATE_KEY_PATH,
+            LEGACY_PRIVATE_KEY_PEM,
+            LEGACY_KEY_MATERIAL_PATH,
+            LEGACY_KEY_MATERIAL_FILE,
+        }
+    )
 
     # OAuth authentication fields
     OAUTH_ISSUER_URL: ClassVar[str] = 'issuer_url'
@@ -695,16 +738,18 @@ class ConnectionInfo:
     OAUTH_PRIVATE_KEY_PATH: ClassVar[str] = 'private_key_path'
     OAUTH_PRIVATE_KEY_FILE: ClassVar[str] = 'private_key_file'
     OAUTH_PRIVATE_KEY_JWK: ClassVar[str] = 'private_key_jwk'
-    OAUTH_FIELDS: ClassVar[frozenset[str]] = frozenset({
-        OAUTH_ISSUER_URL,
-        OAUTH_CLIENT_ID,
-        OAUTH_SCOPE,
-        OAUTH_GRANT_TYPE,
-        OAUTH_CLIENT_AUTHENTICATION,
-        OAUTH_PRIVATE_KEY_PATH,
-        OAUTH_PRIVATE_KEY_FILE,
-        OAUTH_PRIVATE_KEY_JWK,
-    })
+    OAUTH_FIELDS: ClassVar[frozenset[str]] = frozenset(
+        {
+            OAUTH_ISSUER_URL,
+            OAUTH_CLIENT_ID,
+            OAUTH_SCOPE,
+            OAUTH_GRANT_TYPE,
+            OAUTH_CLIENT_AUTHENTICATION,
+            OAUTH_PRIVATE_KEY_PATH,
+            OAUTH_PRIVATE_KEY_FILE,
+            OAUTH_PRIVATE_KEY_JWK,
+        }
+    )
 
     # OAuth default values
     OAUTH_DEFAULT_GRANT_TYPE: ClassVar[str] = 'Client Credentials'
@@ -712,30 +757,38 @@ class ConnectionInfo:
     OAUTH_GRANT_TYPE_CLIENT_CREDENTIALS: ClassVar[str] = 'client_credentials'
     OAUTH_CLIENT_AUTH_PRIVATE_KEY_JWT: ClassVar[str] = 'private_key_jwt'
     OAUTH_CLIENT_AUTH_CLIENT_SECRET_BASIC: ClassVar[str] = 'client_secret_basic'
-    OAUTH_GRANT_TYPE_MAPPING: ClassVar[Mapping[str, str]] = MappingProxyType({
-        OAUTH_DEFAULT_GRANT_TYPE.lower(): OAUTH_GRANT_TYPE_CLIENT_CREDENTIALS,
-        OAUTH_GRANT_TYPE_CLIENT_CREDENTIALS: OAUTH_GRANT_TYPE_CLIENT_CREDENTIALS,
-        'client credentials': OAUTH_GRANT_TYPE_CLIENT_CREDENTIALS,
-    })
-    OAUTH_CLIENT_AUTH_MAPPING: ClassVar[Mapping[str, str]] = MappingProxyType({
-        OAUTH_DEFAULT_CLIENT_AUTH.lower(): OAUTH_CLIENT_AUTH_PRIVATE_KEY_JWT,
-        OAUTH_CLIENT_AUTH_PRIVATE_KEY_JWT: OAUTH_CLIENT_AUTH_PRIVATE_KEY_JWT,
-        'private key jwt': OAUTH_CLIENT_AUTH_PRIVATE_KEY_JWT,
-        'private-key-jwt': OAUTH_CLIENT_AUTH_PRIVATE_KEY_JWT,
-        'client_secret_basic': OAUTH_CLIENT_AUTH_CLIENT_SECRET_BASIC,
-        'client secret basic': OAUTH_CLIENT_AUTH_CLIENT_SECRET_BASIC,
-        'client-secret-basic': OAUTH_CLIENT_AUTH_CLIENT_SECRET_BASIC,
-    })
+    OAUTH_GRANT_TYPE_MAPPING: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {
+            OAUTH_DEFAULT_GRANT_TYPE.lower(): OAUTH_GRANT_TYPE_CLIENT_CREDENTIALS,
+            OAUTH_GRANT_TYPE_CLIENT_CREDENTIALS: OAUTH_GRANT_TYPE_CLIENT_CREDENTIALS,
+            'client credentials': OAUTH_GRANT_TYPE_CLIENT_CREDENTIALS,
+        }
+    )
+    OAUTH_CLIENT_AUTH_MAPPING: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {
+            OAUTH_DEFAULT_CLIENT_AUTH.lower(): OAUTH_CLIENT_AUTH_PRIVATE_KEY_JWT,
+            OAUTH_CLIENT_AUTH_PRIVATE_KEY_JWT: OAUTH_CLIENT_AUTH_PRIVATE_KEY_JWT,
+            'private key jwt': OAUTH_CLIENT_AUTH_PRIVATE_KEY_JWT,
+            'private-key-jwt': OAUTH_CLIENT_AUTH_PRIVATE_KEY_JWT,
+            'client_secret_basic': OAUTH_CLIENT_AUTH_CLIENT_SECRET_BASIC,
+            'client secret basic': OAUTH_CLIENT_AUTH_CLIENT_SECRET_BASIC,
+            'client-secret-basic': OAUTH_CLIENT_AUTH_CLIENT_SECRET_BASIC,
+        }
+    )
 
     # Connection fields
-    EMPTY_CONNECTION_INFO: ClassVar[Mapping[str, Mapping[str, Any]]] = MappingProxyType({
-        LEGACY: MappingProxyType({}),
-        OAUTH: MappingProxyType({}),
-    })
-    CONNECTION_FIELDS: ClassVar[Mapping[str, frozenset[str]]] = MappingProxyType({
-        LEGACY: LEGACY_FIELDS,
-        OAUTH: OAUTH_FIELDS,
-    })
+    EMPTY_CONNECTION_INFO: ClassVar[Mapping[str, Mapping[str, Any]]] = MappingProxyType(
+        {
+            LEGACY: MappingProxyType({}),
+            OAUTH: MappingProxyType({}),
+        }
+    )
+    CONNECTION_FIELDS: ClassVar[Mapping[str, frozenset[str]]] = MappingProxyType(
+        {
+            LEGACY: LEGACY_FIELDS,
+            OAUTH: OAUTH_FIELDS,
+        }
+    )
 
 
 # -----------------------------
@@ -746,113 +799,150 @@ class OauthScopes:
     """Constants representing the OAuth 2.0 permission scopes.
     (`Reference <https://community.rsa.com/s/article/OAuth-2-0-Based-Permissions-for-the-Cloud-Administration-APIs-27c2ca90>`__)
     """
+
     # Agent permissions (Cloud Administration API)
-    AGENT_READ: ClassVar[str] = 'rsa.agent.read'                                           # Retrieve Agent details
-    AGENT_CERT: ClassVar[str] = 'rsa.agent.cert'                                           # Agent Certificate Provisioning
-    AGENT_SCOPES: ClassVar[frozenset] = frozenset({
-        AGENT_READ,
-        AGENT_CERT,
-    })
+    AGENT_READ: ClassVar[str] = 'rsa.agent.read'  # Retrieve Agent details
+    AGENT_CERT: ClassVar[str] = 'rsa.agent.cert'  # Agent Certificate Provisioning
+    AGENT_SCOPES: ClassVar[frozenset] = frozenset(
+        {
+            AGENT_READ,
+            AGENT_CERT,
+        }
+    )
 
     # Audit permissions (Cloud Administration API)
-    AUDIT_ADMIN: ClassVar[str] = 'rsa.audit.admin'                                         # Retrieve admin event logs from the Cloud Access Service (audit microservice)
-    AUDIT_USER: ClassVar[str] = 'rsa.audit.user'                                           # Retrieve RSA authentication audit and user event logs
-    AUDIT_SCOPES: ClassVar[frozenset] = frozenset({
-        AUDIT_ADMIN,
-        AUDIT_USER,
-    })
+    AUDIT_ADMIN: ClassVar[str] = 'rsa.audit.admin'  # Retrieve admin event logs from the Cloud Access Service (audit microservice)
+    AUDIT_USER: ClassVar[str] = 'rsa.audit.user'  # Retrieve RSA authentication audit and user event logs
+    AUDIT_SCOPES: ClassVar[frozenset] = frozenset(
+        {
+            AUDIT_ADMIN,
+            AUDIT_USER,
+        }
+    )
 
     # Authenticator permissions (Cloud Administration API)
-    AUTHENTICATOR_MOBILE_DELETE: ClassVar[str] = 'rsa.authenticator.mobile.delete'         # Delete a device for individual users
-    AUTHENTICATOR_MOBILE_READ: ClassVar[str] = 'rsa.authenticator.mobile.read'             # Retrieve device details for individual users and user event logs
-    AUTHENTICATOR_MOBILE_MANAGE: ClassVar[str] = 'rsa.authenticator.mobile.manage'         # Generate a code for users to register their iOS, Android, and Windows devices
-    AUTHENTICATOR_DEVICE_DELETE: ClassVar[str] = 'rsa.authenticator.device.delete'         # Delete devices for individual users
-    AUTHENTICATOR_EMERGENCY_MANAGE: ClassVar[str] = 'rsa.authenticator.emergency.manage'   # Enable/disable Emergency Token code for a user
-    AUTHENTICATOR_FIDO_READ: ClassVar[str] = 'rsa.authenticator.fido.read'                 # Retrieve FIDO authenticator(s) assigned to a user
-    AUTHENTICATOR_FIDO_DELETE: ClassVar[str] = 'rsa.authenticator.fido.delete'             # Delete FIDO authenticator assigned to a user
-    AUTHENTICATOR_FIDO_MANAGE: ClassVar[str] = 'rsa.authenticator.fido.manage'             # Update, enroll, enable, and disable FIDO authenticators
-    AUTHENTICATOR_SIDTOKEN_READ: ClassVar[str] = 'rsa.authenticator.sidtoken.read'         # Retrieve a hardware token's details
-    AUTHENTICATOR_SIDTOKEN_MANAGE: ClassVar[str] = 'rsa.authenticator.sidtoken.manage'     # Update, enable, disable, assign, unassign, and clear pin for a hardware token
-    AUTHENTICATOR_SIDTOKEN_DELETE: ClassVar[str] = 'rsa.authenticator.sidtoken.delete'     # Delete a hardware token from CAS
-    AUTHENTICATOR_DS100_MANAGE: ClassVar[str] = 'rsa.authenticator.ds100.manage'           # Enable, disable, and clear pin for an RSA DS100 OTP
-    AUTHENTICATOR_DS100_DELETE: ClassVar[str] = 'rsa.authenticator.ds100.delete'           # Delete user's RSA DS100 OTP credential
-    AUTHENTICATOR_DS100_READ: ClassVar[str] = 'rsa.authenticator.ds100.read'               # Retrieve user's RSA DS100 OTP credential
-    AUTHENTICATOR_SCOPES: ClassVar[frozenset] = frozenset({
-        AUTHENTICATOR_MOBILE_DELETE,
-        AUTHENTICATOR_MOBILE_READ,
-        AUTHENTICATOR_MOBILE_MANAGE,
-        AUTHENTICATOR_DEVICE_DELETE,
-        AUTHENTICATOR_EMERGENCY_MANAGE,
-        AUTHENTICATOR_FIDO_READ,
-        AUTHENTICATOR_FIDO_DELETE,
-        AUTHENTICATOR_FIDO_MANAGE,
-        AUTHENTICATOR_SIDTOKEN_READ,
-        AUTHENTICATOR_SIDTOKEN_MANAGE,
-        AUTHENTICATOR_SIDTOKEN_DELETE,
-        AUTHENTICATOR_DS100_MANAGE,
-        AUTHENTICATOR_DS100_DELETE,
-        AUTHENTICATOR_DS100_READ,
-    })
+    AUTHENTICATOR_MOBILE_DELETE: ClassVar[str] = 'rsa.authenticator.mobile.delete'  # Delete a device for individual users
+    AUTHENTICATOR_MOBILE_READ: ClassVar[str] = (
+        'rsa.authenticator.mobile.read'  # Retrieve device details for individual users and user event logs
+    )
+    AUTHENTICATOR_MOBILE_MANAGE: ClassVar[str] = (
+        'rsa.authenticator.mobile.manage'  # Generate a code for users to register their iOS, Android, and Windows devices
+    )
+    AUTHENTICATOR_DEVICE_DELETE: ClassVar[str] = 'rsa.authenticator.device.delete'  # Delete devices for individual users
+    AUTHENTICATOR_EMERGENCY_MANAGE: ClassVar[str] = (
+        'rsa.authenticator.emergency.manage'  # Enable/disable Emergency Token code for a user
+    )
+    AUTHENTICATOR_FIDO_READ: ClassVar[str] = 'rsa.authenticator.fido.read'  # Retrieve FIDO authenticator(s) assigned to a user
+    AUTHENTICATOR_FIDO_DELETE: ClassVar[str] = 'rsa.authenticator.fido.delete'  # Delete FIDO authenticator assigned to a user
+    AUTHENTICATOR_FIDO_MANAGE: ClassVar[str] = (
+        'rsa.authenticator.fido.manage'  # Update, enroll, enable, and disable FIDO authenticators
+    )
+    AUTHENTICATOR_SIDTOKEN_READ: ClassVar[str] = 'rsa.authenticator.sidtoken.read'  # Retrieve a hardware token's details
+    AUTHENTICATOR_SIDTOKEN_MANAGE: ClassVar[str] = (
+        'rsa.authenticator.sidtoken.manage'  # Update, enable, disable, assign, unassign, and clear pin for a hardware token
+    )
+    AUTHENTICATOR_SIDTOKEN_DELETE: ClassVar[str] = 'rsa.authenticator.sidtoken.delete'  # Delete a hardware token from CAS
+    AUTHENTICATOR_DS100_MANAGE: ClassVar[str] = (
+        'rsa.authenticator.ds100.manage'  # Enable, disable, and clear pin for an RSA DS100 OTP
+    )
+    AUTHENTICATOR_DS100_DELETE: ClassVar[str] = 'rsa.authenticator.ds100.delete'  # Delete user's RSA DS100 OTP credential
+    AUTHENTICATOR_DS100_READ: ClassVar[str] = 'rsa.authenticator.ds100.read'  # Retrieve user's RSA DS100 OTP credential
+    AUTHENTICATOR_SCOPES: ClassVar[frozenset] = frozenset(
+        {
+            AUTHENTICATOR_MOBILE_DELETE,
+            AUTHENTICATOR_MOBILE_READ,
+            AUTHENTICATOR_MOBILE_MANAGE,
+            AUTHENTICATOR_DEVICE_DELETE,
+            AUTHENTICATOR_EMERGENCY_MANAGE,
+            AUTHENTICATOR_FIDO_READ,
+            AUTHENTICATOR_FIDO_DELETE,
+            AUTHENTICATOR_FIDO_MANAGE,
+            AUTHENTICATOR_SIDTOKEN_READ,
+            AUTHENTICATOR_SIDTOKEN_MANAGE,
+            AUTHENTICATOR_SIDTOKEN_DELETE,
+            AUTHENTICATOR_DS100_MANAGE,
+            AUTHENTICATOR_DS100_DELETE,
+            AUTHENTICATOR_DS100_READ,
+        }
+    )
 
     # FIDO configuration permissions (Cloud Administration API)
-    FIDO_CONFIGURATION_MANAGE: ClassVar[str] = 'rsa.fido.configuration.manage'             # Manage configuration of FIDO authenticators
-    FIDO_CONFIGURATION_READ: ClassVar[str] = 'rsa.fido.configuration.read'                 # Retrieve current configuration of FIDO authenticators
-    FIDO_CONFIGURATION_SCOPES: ClassVar[frozenset] = frozenset({
-        FIDO_CONFIGURATION_MANAGE,
-        FIDO_CONFIGURATION_READ,
-    })
+    FIDO_CONFIGURATION_MANAGE: ClassVar[str] = 'rsa.fido.configuration.manage'  # Manage configuration of FIDO authenticators
+    FIDO_CONFIGURATION_READ: ClassVar[str] = (
+        'rsa.fido.configuration.read'  # Retrieve current configuration of FIDO authenticators
+    )
+    FIDO_CONFIGURATION_SCOPES: ClassVar[frozenset] = frozenset(
+        {
+            FIDO_CONFIGURATION_MANAGE,
+            FIDO_CONFIGURATION_READ,
+        }
+    )
 
     # Local group permissions (Cloud Administration API)
-    GROUP_MANAGE: ClassVar[str] = 'rsa.group.manage'                                       # Local group management actions (create, update, delete)
-    GROUP_READ: ClassVar[str] = 'rsa.group.read'                                           # Retrieve local group(s) details
-    GROUP_USERS_MANAGE: ClassVar[str] = 'rsa.group.users.manage'                           # Local group membership actions (add/remove users)
-    GROUP_USERS_READ: ClassVar[str] = 'rsa.group.users.read'                               # Retrieve local group user details
-    GROUP_SCOPES: ClassVar[frozenset] = frozenset({
-        GROUP_MANAGE,
-        GROUP_READ,
-        GROUP_USERS_MANAGE,
-        GROUP_USERS_READ,
-    })
+    GROUP_MANAGE: ClassVar[str] = 'rsa.group.manage'  # Local group management actions (create, update, delete)
+    GROUP_READ: ClassVar[str] = 'rsa.group.read'  # Retrieve local group(s) details
+    GROUP_USERS_MANAGE: ClassVar[str] = 'rsa.group.users.manage'  # Local group membership actions (add/remove users)
+    GROUP_USERS_READ: ClassVar[str] = 'rsa.group.users.read'  # Retrieve local group user details
+    GROUP_SCOPES: ClassVar[frozenset] = frozenset(
+        {
+            GROUP_MANAGE,
+            GROUP_READ,
+            GROUP_USERS_MANAGE,
+            GROUP_USERS_READ,
+        }
+    )
 
     # Report permissions (Cloud Administration API)
-    REPORT_HEALTH: ClassVar[str] = 'rsa.report.health'                                     # Retrieve report on CAS availability
-    REPORT_LICENSE_USAGE: ClassVar[str] = 'rsa.report.license.usage'                       # Retrieve MFA license usage to monitor license compliance
-    REPORT_READ: ClassVar[str] = 'rsa.report.read'                                         # Generate and download reports for users, hardware tokens, and MFA clients
-    REPORT_USER_RISKY: ClassVar[str] = 'rsa.report.user.risky'                             # Retrieve a list of users who exhibit anomalous behavior
-    REPORT_SCOPES: ClassVar[frozenset] = frozenset({
-        REPORT_HEALTH,
-        REPORT_LICENSE_USAGE,
-        REPORT_READ,
-        REPORT_USER_RISKY,
-    })
+    REPORT_HEALTH: ClassVar[str] = 'rsa.report.health'  # Retrieve report on CAS availability
+    REPORT_LICENSE_USAGE: ClassVar[str] = 'rsa.report.license.usage'  # Retrieve MFA license usage to monitor license compliance
+    REPORT_READ: ClassVar[str] = 'rsa.report.read'  # Generate and download reports for users, hardware tokens, and MFA clients
+    REPORT_USER_RISKY: ClassVar[str] = 'rsa.report.user.risky'  # Retrieve a list of users who exhibit anomalous behavior
+    REPORT_SCOPES: ClassVar[frozenset] = frozenset(
+        {
+            REPORT_HEALTH,
+            REPORT_LICENSE_USAGE,
+            REPORT_READ,
+            REPORT_USER_RISKY,
+        }
+    )
 
     # User permissions (Cloud Administration API)
-    USER_READ: ClassVar[str] = 'rsa.user.read'                                             # Retrieve user information from the identity source
-    USER_SYNC: ClassVar[str] = 'rsa.user.sync'                                             # User synchronization to user identity
-    USER_DELETE_SOFT: ClassVar[str] = 'rsa.user.delete.soft'                               # Mark a disabled user as pending deletion
-    USER_DELETE: ClassVar[str] = 'rsa.user.delete'                                         # Delete a single disabled user and immediately remove all devices associated with that user
-    USER_MANAGE: ClassVar[str] = 'rsa.user.manage'                                         # Update, sync, enable, and disable users
-    USER_FACTOR_MANAGE: ClassVar[str] = 'rsa.user.factor.manage'                           # Unlock, update, reset, and generate codes for users' authentication factors
-    USER_RISKY_MANAGE: ClassVar[str] = 'rsa.user.risky.manage'                             # Add or remove one or more users from the high-risk user lisT
-    USER_RISKY_READ: ClassVar[str] = 'rsa.user.risky.read'                                 # Retrieve a list of users who are identified as high risk
-    USER_SCOPES: ClassVar[frozenset] = frozenset({
-        USER_READ,
-        USER_SYNC,
-        USER_DELETE_SOFT,
-        USER_DELETE,
-        USER_MANAGE,
-        USER_FACTOR_MANAGE,
-        USER_RISKY_MANAGE,
-        USER_RISKY_READ,
-    })
+    USER_READ: ClassVar[str] = 'rsa.user.read'  # Retrieve user information from the identity source
+    USER_SYNC: ClassVar[str] = 'rsa.user.sync'  # User synchronization to user identity
+    USER_DELETE_SOFT: ClassVar[str] = 'rsa.user.delete.soft'  # Mark a disabled user as pending deletion
+    USER_DELETE: ClassVar[str] = (
+        'rsa.user.delete'  # Delete a single disabled user and immediately remove all devices associated with that user
+    )
+    USER_MANAGE: ClassVar[str] = 'rsa.user.manage'  # Update, sync, enable, and disable users
+    USER_FACTOR_MANAGE: ClassVar[str] = (
+        'rsa.user.factor.manage'  # Unlock, update, reset, and generate codes for users' authentication factors
+    )
+    USER_RISKY_MANAGE: ClassVar[str] = 'rsa.user.risky.manage'  # Add or remove one or more users from the high-risk user lisT
+    USER_RISKY_READ: ClassVar[str] = 'rsa.user.risky.read'  # Retrieve a list of users who are identified as high risk
+    USER_SCOPES: ClassVar[frozenset] = frozenset(
+        {
+            USER_READ,
+            USER_SYNC,
+            USER_DELETE_SOFT,
+            USER_DELETE,
+            USER_MANAGE,
+            USER_FACTOR_MANAGE,
+            USER_RISKY_MANAGE,
+            USER_RISKY_READ,
+        }
+    )
 
     # MFA permissions (Cloud Authentication API)
-    MFA_AUTHN: ClassVar[str] = 'rsa.mfa.authn'                                             # For multifactor, multistep authentications with CAS
-    MFA_IDENTITY_CONFIDENCE: ClassVar[str] = 'rsa.mfa.identityconfidence'                  # View and update the identity confidence score of a user
-    MFA_SCOPES: ClassVar[frozenset] = frozenset({
-        MFA_AUTHN,
-        MFA_IDENTITY_CONFIDENCE,
-    })
+    MFA_AUTHN: ClassVar[str] = 'rsa.mfa.authn'  # For multifactor, multistep authentications with CAS
+    MFA_IDENTITY_CONFIDENCE: ClassVar[str] = (
+        'rsa.mfa.identityconfidence'  # View and update the identity confidence score of a user
+    )
+    MFA_SCOPES: ClassVar[frozenset] = frozenset(
+        {
+            MFA_AUTHN,
+            MFA_IDENTITY_CONFIDENCE,
+        }
+    )
 
     # Collection of scopes relating to the Cloud Administration API
     ADMIN_API_SCOPES: ClassVar[frozenset[str]] = frozenset().union(
@@ -883,49 +973,63 @@ class OauthScopes:
     )
 
     # Presets: Read-only permission scopes
-    ALL_READ_ONLY_PRESET: ClassVar[frozenset[str]] = frozenset({
-        AGENT_READ,                                                                         # Retrieve Agent details
-        AUTHENTICATOR_MOBILE_READ,                                                          # Retrieve device details for individual users and user event logs
-        AUTHENTICATOR_FIDO_READ,                                                            # Retrieve FIDO authenticator(s) assigned to a user
-        AUTHENTICATOR_SIDTOKEN_READ,                                                        # Retrieve a hardware token's details
-        AUTHENTICATOR_DS100_READ,                                                           # Retrieve user's RSA DS100 OTP credential
-        FIDO_CONFIGURATION_READ,                                                            # Retrieve current configuration of FIDO authenticators
-        GROUP_READ,                                                                         # Retrieve local group(s) details
-        GROUP_USERS_READ,                                                                   # Retrieve local group user details
-        REPORT_HEALTH,                                                                      # Retrieve report on CAS availability
-        REPORT_LICENSE_USAGE,                                                               # Retrieve MFA license usage to monitor license compliance
-        REPORT_READ,                                                                        # Generate and download reports for users, hardware tokens, and MFA clients
-        REPORT_USER_RISKY,                                                                  # Retrieve a list of users who exhibit anomalous behavior
-        USER_READ,                                                                          # Retrieve user information from the identity source
-        USER_RISKY_READ,                                                                    # Retrieve a list of users who are identified as high risk
-    })
-    AGENT_READ_ONLY_PRESET: ClassVar[frozenset[str]] = frozenset({
-        AGENT_READ,                                                                         # Retrieve Agent details
-    })
-    AUTHENTICATOR_READ_ONLY_PRESET: ClassVar[frozenset[str]] = frozenset({
-        AUTHENTICATOR_MOBILE_READ,                                                          # Retrieve device details for individual users and user event logs
-        AUTHENTICATOR_FIDO_READ,                                                            # Retrieve FIDO authenticator(s) assigned to a user
-        AUTHENTICATOR_SIDTOKEN_READ,                                                        # Retrieve a hardware token's details
-        AUTHENTICATOR_DS100_READ,                                                           # Retrieve user's RSA DS100 OTP credential
-    })
-    FIDO_READ_ONLY_PRESET: ClassVar[frozenset[str]] = frozenset({
-        AUTHENTICATOR_FIDO_READ,                                                            # Retrieve FIDO authenticator(s) assigned to a user
-        FIDO_CONFIGURATION_READ,                                                            # Retrieve current configuration of FIDO authenticators
-    })
-    GROUP_READ_ONLY_PRESET: ClassVar[frozenset[str]] = frozenset({
-        GROUP_READ,                                                                         # Retrieve local group(s) details
-        GROUP_USERS_READ,                                                                   # Retrieve local group user details
-    })
-    REPORT_READ_ONLY_PRESET: ClassVar[frozenset[str]] = frozenset({
-        REPORT_HEALTH,                                                                      # Retrieve report on CAS availability
-        REPORT_LICENSE_USAGE,                                                               # Retrieve MFA license usage to monitor license compliance
-        REPORT_READ,                                                                        # Generate and download reports for users, hardware tokens, and MFA clients
-        REPORT_USER_RISKY,                                                                  # Retrieve a list of users who exhibit anomalous behavior
-    })
-    USER_READ_ONLY_PRESET: ClassVar[frozenset[str]] = frozenset({
-        USER_READ,                                                                          # Retrieve user information from the identity source
-        USER_RISKY_READ,                                                                    # Retrieve a list of users who are identified as high risk
-    })
+    ALL_READ_ONLY_PRESET: ClassVar[frozenset[str]] = frozenset(
+        {
+            AGENT_READ,  # Retrieve Agent details
+            AUTHENTICATOR_MOBILE_READ,  # Retrieve device details for individual users and user event logs
+            AUTHENTICATOR_FIDO_READ,  # Retrieve FIDO authenticator(s) assigned to a user
+            AUTHENTICATOR_SIDTOKEN_READ,  # Retrieve a hardware token's details
+            AUTHENTICATOR_DS100_READ,  # Retrieve user's RSA DS100 OTP credential
+            FIDO_CONFIGURATION_READ,  # Retrieve current configuration of FIDO authenticators
+            GROUP_READ,  # Retrieve local group(s) details
+            GROUP_USERS_READ,  # Retrieve local group user details
+            REPORT_HEALTH,  # Retrieve report on CAS availability
+            REPORT_LICENSE_USAGE,  # Retrieve MFA license usage to monitor license compliance
+            REPORT_READ,  # Generate and download reports for users, hardware tokens, and MFA clients
+            REPORT_USER_RISKY,  # Retrieve a list of users who exhibit anomalous behavior
+            USER_READ,  # Retrieve user information from the identity source
+            USER_RISKY_READ,  # Retrieve a list of users who are identified as high risk
+        }
+    )
+    AGENT_READ_ONLY_PRESET: ClassVar[frozenset[str]] = frozenset(
+        {
+            AGENT_READ,  # Retrieve Agent details
+        }
+    )
+    AUTHENTICATOR_READ_ONLY_PRESET: ClassVar[frozenset[str]] = frozenset(
+        {
+            AUTHENTICATOR_MOBILE_READ,  # Retrieve device details for individual users and user event logs
+            AUTHENTICATOR_FIDO_READ,  # Retrieve FIDO authenticator(s) assigned to a user
+            AUTHENTICATOR_SIDTOKEN_READ,  # Retrieve a hardware token's details
+            AUTHENTICATOR_DS100_READ,  # Retrieve user's RSA DS100 OTP credential
+        }
+    )
+    FIDO_READ_ONLY_PRESET: ClassVar[frozenset[str]] = frozenset(
+        {
+            AUTHENTICATOR_FIDO_READ,  # Retrieve FIDO authenticator(s) assigned to a user
+            FIDO_CONFIGURATION_READ,  # Retrieve current configuration of FIDO authenticators
+        }
+    )
+    GROUP_READ_ONLY_PRESET: ClassVar[frozenset[str]] = frozenset(
+        {
+            GROUP_READ,  # Retrieve local group(s) details
+            GROUP_USERS_READ,  # Retrieve local group user details
+        }
+    )
+    REPORT_READ_ONLY_PRESET: ClassVar[frozenset[str]] = frozenset(
+        {
+            REPORT_HEALTH,  # Retrieve report on CAS availability
+            REPORT_LICENSE_USAGE,  # Retrieve MFA license usage to monitor license compliance
+            REPORT_READ,  # Generate and download reports for users, hardware tokens, and MFA clients
+            REPORT_USER_RISKY,  # Retrieve a list of users who exhibit anomalous behavior
+        }
+    )
+    USER_READ_ONLY_PRESET: ClassVar[frozenset[str]] = frozenset(
+        {
+            USER_READ,  # Retrieve user information from the identity source
+            USER_RISKY_READ,  # Retrieve a list of users who are identified as high risk
+        }
+    )
 
 
 # -----------------------------
@@ -950,13 +1054,17 @@ DEFAULT_VERIFY_SSL: Final[bool] = True
 DEFAULT_HEADER_TYPE: Final[str] = 'default'
 
 # Validation criteria
-VALID_API_TYPES: Final[frozenset[str]] = frozenset({
-    ADMIN_API_TYPE,
-    AUTH_API_TYPE,
-})
-VALID_HEADER_TYPES: Final[frozenset[str]] = frozenset({
-    DEFAULT_HEADER_TYPE,
-})
+VALID_API_TYPES: Final[frozenset[str]] = frozenset(
+    {
+        ADMIN_API_TYPE,
+        AUTH_API_TYPE,
+    }
+)
+VALID_HEADER_TYPES: Final[frozenset[str]] = frozenset(
+    {
+        DEFAULT_HEADER_TYPE,
+    }
+)
 
 
 # -----------------------------
@@ -965,6 +1073,7 @@ VALID_HEADER_TYPES: Final[frozenset[str]] = frozenset({
 @dataclass(frozen=True)
 class AuthFields:
     """Fields relating to API authentication."""
+
     # Authentication/Connection type parent fields
     LEGACY: ClassVar[str] = 'legacy'
     OAUTH: ClassVar[str] = 'oauth'
@@ -987,9 +1096,9 @@ class AuthFields:
     JWT_NBF: ClassVar[str] = 'nbf'
     JWT_JTI: ClassVar[str] = 'jti'
 
-    JWT_ISSUER: ClassVar[str] = JWT_ISS         # Also a header parameter
-    JWT_SUBJECT: ClassVar[str] = JWT_SUB        # Also a header parameter
-    JWT_AUDIENCE: ClassVar[str] = JWT_AUD       # Also a header parameter
+    JWT_ISSUER: ClassVar[str] = JWT_ISS  # Also a header parameter
+    JWT_SUBJECT: ClassVar[str] = JWT_SUB  # Also a header parameter
+    JWT_AUDIENCE: ClassVar[str] = JWT_AUD  # Also a header parameter
     JWT_ISSUED_AT: ClassVar[str] = JWT_IAT
     JWT_EXPIRATION: ClassVar[str] = JWT_EXP
     JWT_NOT_BEFORE: ClassVar[str] = JWT_NBF
@@ -1085,6 +1194,7 @@ class AuthFields:
 @dataclass(frozen=True)
 class AuthValues:
     """Field/Parameter values relating to API authentication."""
+
     # Legacy default values
     LEGACY_KEY_ALGORITHM: ClassVar[str] = RSA_KEY_ALGORITHM
     LEGACY_DEFAULT_EXPIRATION: ClassVar[int] = 3600
@@ -1100,9 +1210,9 @@ class AuthValues:
     _OAUTH_ASSERTION_LIFETIME_SECONDS: ClassVar[int] = 300
 
     # JSON Web Algorithm (JWA) Property Values (RFC 7518)
-    JWA_EC: ClassVar[str] = 'EC'       # DSS
-    JWA_RSA: ClassVar[str] = 'RSA'     # RFC 3447
-    JWA_OCT: ClassVar[str] = 'oct'     # Used to represent symmetric keys
+    JWA_EC: ClassVar[str] = 'EC'  # DSS
+    JWA_RSA: ClassVar[str] = 'RSA'  # RFC 3447
+    JWA_OCT: ClassVar[str] = 'oct'  # Used to represent symmetric keys
 
 
 # -----------------------------
@@ -1111,6 +1221,7 @@ class AuthValues:
 @dataclass(frozen=True)
 class ApiRequestTypes:
     """Standard REST API Request types used by the package."""
+
     GET: ClassVar[str] = 'GET'
     PATCH: ClassVar[str] = 'PATCH'
     POST: ClassVar[str] = 'POST'
@@ -1130,6 +1241,7 @@ class Headers:
     typographical errors. These values are intended for constructing
     outbound HTTP requests to the RSA REST API.
     """
+
     AUTHORIZATION: ClassVar[str] = 'Authorization'
     CONTENT_TYPE: ClassVar[str] = 'Content-Type'
     ACCEPT: ClassVar[str] = 'Accept'
@@ -1143,9 +1255,10 @@ class Headers:
 @dataclass(frozen=True)
 class AuthSchemes:
     """Authentication schemes that are leveraged with the HTTP ``Authorization`` header.
-       (`Reference <https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Authentication>`__)
+    (`Reference <https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Authentication>`__)
     """
-    BEARER: ClassVar[str] = 'Bearer {token}'                                                        # Vars: token
+
+    BEARER: ClassVar[str] = 'Bearer {token}'  # Vars: token
 
 
 # -----------------------------
@@ -1158,6 +1271,7 @@ class ContentTypes:
     This immutable namespace provides canonical MIME types used when
     sending or receiving data from the RSA REST API.
     """
+
     JSON: ClassVar[str] = 'application/json'
     FORM_URLENCODED_UTF8: ClassVar[str] = 'application/x-www-form-urlencoded; charset=UTF-8'
 
@@ -1168,8 +1282,9 @@ class ContentTypes:
 @dataclass(frozen=True)
 class EncodingTypes:
     """Common HTTP ``Accept-Encoding`` header values.
-       (`Reference <https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Accept-Encoding>`__)
+    (`Reference <https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Accept-Encoding>`__)
     """
+
     GZIP: ClassVar[str] = 'gzip'
     COMPRESS: ClassVar[str] = 'compress'
     DEFLATE: ClassVar[str] = 'deflate'
@@ -1179,7 +1294,7 @@ class EncodingTypes:
     DCZ: ClassVar[str] = 'dcz'
     IDENTITY: ClassVar[str] = 'identity'
     WILDCARD: ClassVar[str] = '*'
-    Q: ClassVar[str] = ';q={weight}'                                                                # Vars: weight
+    Q: ClassVar[str] = ';q={weight}'  # Vars: weight
 
 
 # -----------------------------
@@ -1192,6 +1307,7 @@ class Languages:
     Additional valid IETF language tags may be supplied manually
     when constructing request headers.
     """
+
     EN_US: ClassVar[str] = 'en-US'
     EN_GB: ClassVar[str] = 'en-GB'
     FR_FR: ClassVar[str] = 'fr-FR'
@@ -1203,7 +1319,7 @@ class Languages:
     ZH_CN: ClassVar[str] = 'zh-CN'
     ZH_TW: ClassVar[str] = 'zh-TW'
     WILDCARD: ClassVar[str] = '*'
-    Q: ClassVar[str] = ';q={weight}'                                                                # Vars: weight
+    Q: ClassVar[str] = ';q={weight}'  # Vars: weight
 
 
 # -------------------------------
@@ -1212,6 +1328,7 @@ class Languages:
 @dataclass(frozen=True)
 class Urls:
     """Common URLs leveraged throughout the package."""
+
     # Schemes
     HTTP: ClassVar[str] = 'http://'
     HTTPS: ClassVar[str] = 'https://'
@@ -1219,11 +1336,11 @@ class Urls:
     HTTPS_SCHEME: ClassVar[str] = 'https'
 
     # General URLs
-    BASE_URL: ClassVar[str] = HTTPS + '{tenant_name}.{api_type}.securid.com'                        # Vars: tenant_name, api_type
-    BASE_ADMIN_URL: ClassVar[str] = HTTPS + '{tenant_name}.access.securid.com'                      # Vars: tenant_name
-    BASE_AUTH_URL: ClassVar[str] = HTTPS + '{tenant_name}.auth.securid.com'                         # Vars: tenant_name
-    OAUTH: ClassVar[str] = '{base_url}/oauth'                                                       # Vars: base_url
-    OAUTH_TOKEN: ClassVar[str] = '{issuer_url}/token'                                               # Vars: issuer_url
+    BASE_URL: ClassVar[str] = HTTPS + '{tenant_name}.{api_type}.securid.com'  # Vars: tenant_name, api_type
+    BASE_ADMIN_URL: ClassVar[str] = HTTPS + '{tenant_name}.access.securid.com'  # Vars: tenant_name
+    BASE_AUTH_URL: ClassVar[str] = HTTPS + '{tenant_name}.auth.securid.com'  # Vars: tenant_name
+    OAUTH: ClassVar[str] = '{base_url}/oauth'  # Vars: base_url
+    OAUTH_TOKEN: ClassVar[str] = '{issuer_url}/token'  # Vars: issuer_url
 
 
 # -------------------------------
@@ -1238,6 +1355,7 @@ class RestPaths:
     codebase. The templates are designed to be formatted with runtime
     values such as ``user_id``, ``timeout``, and so forth.
     """
+
     # Versions
     V1_1: ClassVar[str] = 'v1_1'
 
@@ -1249,10 +1367,10 @@ class RestPaths:
     # TODO: Add a preceding slash to USERS string after ensuring base URL references end with slash
     USERS: ClassVar[str] = 'v1/users'
     USERS_LOOKUP: ClassVar[str] = USERS + '/lookup'
-    USER_BY_ID: ClassVar[str] = USERS + '/{user_id}'                                            # Vars: user_id
-    USER_MARK_DELETED: ClassVar[str] = USER_BY_ID + '/markDeleted'                              # Vars: user_id
-    USER_STATUS: ClassVar[str] = USER_BY_ID + '/userStatus'                                     # Vars: user_id
-    USER_SYNC: ClassVar[str] = USERS + '/sync'                                                  # Vars: user_id
+    USER_BY_ID: ClassVar[str] = USERS + '/{user_id}'  # Vars: user_id
+    USER_MARK_DELETED: ClassVar[str] = USER_BY_ID + '/markDeleted'  # Vars: user_id
+    USER_STATUS: ClassVar[str] = USER_BY_ID + '/userStatus'  # Vars: user_id
+    USER_SYNC: ClassVar[str] = USERS + '/sync'  # Vars: user_id
 
 
 # --------------------------------------
@@ -1267,6 +1385,7 @@ class QueryParams:
     REST API. Centralizing these values helps prevent typographical
     errors and ensures consistent request construction.
     """
+
     # Common parameter names
     Q: ClassVar[str] = 'q'
     BODY: ClassVar[str] = 'body'
@@ -1282,6 +1401,7 @@ class QueryParams:
 @dataclass(frozen=True)
 class PayloadValues:
     """Standard and common payload values used in RSA ID Plus REST API requests."""
+
     # User status
     ENABLED: ClassVar[str] = 'Enabled'
     DISABLED: ClassVar[str] = 'Disabled'
@@ -1293,6 +1413,7 @@ class PayloadValues:
 @dataclass(frozen=True)
 class ResponseKeys:
     """Standard and common keys / fields for RSA ID Plus REST API responses."""
+
     # Common keys / fields
     ID: ClassVar[str] = 'id'
     STATUS_CODE: ClassVar[str] = 'status_code'

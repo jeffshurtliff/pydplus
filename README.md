@@ -112,7 +112,23 @@ python poetry install
 ```
 
 ## Change Log
-The change log can be found in the [documentation](https://pydplus.readthedocs.io/en/latest/changelog.html).
+The change log can be found in the [documentation](https://pydplus.readthedocs.io/en/latest/CHANGELOG.html).
+
+## Development Quality Checks
+This repository uses [Ruff](https://docs.astral.sh/ruff/) for linting, import sorting, and formatting.
+The standard maximum line length is `130` characters.
+
+Line-length exceptions should be rare and limited to comments or special cases where wrapping harms readability.
+When an exception is required, use a targeted per-line `# noqa: E501`.
+
+```sh
+poetry run ruff check .
+poetry run ruff check . --fix
+poetry run ruff format .
+poetry run ruff format . --check
+```
+
+These checks are enforced in CI via `.github/workflows/ci.yml`.
 
 ## Usage
 This section provides basic usage instructions for the package.

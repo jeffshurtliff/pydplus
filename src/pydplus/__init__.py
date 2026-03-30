@@ -4,7 +4,7 @@
 :Synopsis:          This is the ``__init__`` module for the pydplus package
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     19 May 2025
+:Modified Date:     30 Mar 2026
 """
 
 from . import core

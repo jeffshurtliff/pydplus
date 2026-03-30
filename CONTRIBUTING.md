@@ -442,6 +442,30 @@ All contributions must:
 - Avoid adding third-party dependencies unless strongly justified
 - Preserve backward compatibility unless explicitly approved
 
+### Linting and Formatting
+
+PyDPlus uses [Ruff](https://docs.astral.sh/ruff/) for linting, import sorting, and code formatting.
+The repository standard is a maximum line length of `130` characters.
+
+Line-length policy:
+
+- Keep production code, tests, and normal string expressions at or under 130 characters.
+- Prefer refactoring/wrapping code over suppressing line-length violations.
+- Overriding line length is permitted only for comments and special situations where readability would be reduced by wrapping
+  (for example: unavoidable literal examples, externally-defined tokens, or similarly constrained values).
+- Use per-line `# noqa: E501` for approved exceptions instead of broad file-level or global ignores.
+
+Before opening a PR, run:
+
+```bash
+poetry run ruff check .
+poetry run ruff check . --fix
+poetry run ruff format .
+poetry run ruff format . --check
+```
+
+CI enforces these Ruff checks.
+
 ---
 
 ## Testing Requirements

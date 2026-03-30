@@ -4,20 +4,20 @@
 :Synopsis:          Decorators that can be used to include additional functionality with functions and methods
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     22 Mar 2026
+:Modified Date:     30 Mar 2026
 """
 
 from __future__ import annotations
 
+import functools
 import logging
 import warnings
-import functools
 from typing import Any, Callable, Optional, Type, TypeVar
 
 logger = logging.getLogger(__name__)
 
 # Define the function Type bound to Callable
-F = TypeVar("F", bound=Callable[..., Any])
+F = TypeVar('F', bound=Callable[..., Any])
 
 
 def deprecated(
@@ -41,13 +41,14 @@ def deprecated(
     :param stacklevel: Warning stacklevel (default: ``2``)
     :type stacklevel: int
     """
+
     def decorator(func: F) -> F:
-        message_parts = [f"{func.__name__} is deprecated since {since}."]
+        message_parts = [f'{func.__name__} is deprecated since {since}.']
         if replacement:
-            message_parts.append(f"Use {replacement} instead.")
+            message_parts.append(f'Use {replacement} instead.')
         if removal:
-            message_parts.append(f"It will be removed in {removal}.")
-        message = " ".join(message_parts)
+            message_parts.append(f'It will be removed in {removal}.')
+        message = ' '.join(message_parts)
 
         @functools.wraps(func)
         def wrapper(*args: Any, **kwargs: Any):

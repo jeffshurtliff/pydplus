@@ -3,16 +3,17 @@
 :Module:            pydplus.utils.version
 :Synopsis:          This module contains the package version information
 :Created By:        Jeff Shurtliff
-:Last Modified:     Jeff Shurtliff (via GPT-5.3-codex)
-:Modified Date:     21 Mar 2026
+:Last Modified:     Jeff Shurtliff
+:Modified Date:     30 Mar 2026
 """
 
 from __future__ import annotations
 
 import logging
+from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
 from typing import Optional
-from importlib.metadata import version, PackageNotFoundError
+
 try:
     import tomllib  # Python 3.11+
 except ModuleNotFoundError:  # pragma: no cover

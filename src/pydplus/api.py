@@ -4,7 +4,7 @@
 :Synopsis:          Defines the basic functions associated with the RSA ID Plus API
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     24 Mar 2026
+:Modified Date:     30 Mar 2026
 """
 
 from __future__ import annotations
@@ -14,22 +14,22 @@ from typing import Optional, Union
 
 import requests
 
-from . import errors
 from . import constants as const
+from . import errors
 
 logger = logging.getLogger(__name__)
 
 
 def get(
-        pydp_object,
-        endpoint: str,
-        params: Optional[dict] = None,
-        headers: Optional[dict] = None,
-        api_type: str = const.DEFAULT_API_TYPE,
-        timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
-        show_full_error: bool = True,
-        return_json: bool = True,
-        allow_failed_response: Optional[bool] = None,
+    pydp_object,
+    endpoint: str,
+    params: Optional[dict] = None,
+    headers: Optional[dict] = None,
+    api_type: str = const.DEFAULT_API_TYPE,
+    timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
+    show_full_error: bool = True,
+    return_json: bool = True,
+    allow_failed_response: Optional[bool] = None,
 ):
     """Perform a GET request against the ID Plus tenant.
 
@@ -70,13 +70,7 @@ def get(
 
     # Perform the API call
     full_api_url = _get_full_api_url(pydp_object, endpoint, api_type)
-    response = requests.get(
-        full_api_url,
-        headers=request_headers,
-        params=params,
-        timeout=timeout,
-        verify=pydp_object.verify_ssl
-    )
+    response = requests.get(full_api_url, headers=request_headers, params=params, timeout=timeout, verify=pydp_object.verify_ssl)
 
     # Retry once after a forced OAuth token refresh when the token is rejected.
     if _should_retry_oauth_401(pydp_object, api_type, response):
@@ -88,11 +82,7 @@ def get(
             _force_oauth_refresh=True,
         )
         response = requests.get(
-            full_api_url,
-            headers=request_headers,
-            params=params,
-            timeout=timeout,
-            verify=pydp_object.verify_ssl
+            full_api_url, headers=request_headers, params=params, timeout=timeout, verify=pydp_object.verify_ssl
         )
 
     # Examine the result
@@ -105,17 +95,17 @@ def get(
 
 
 def api_call_with_payload(
-        pydp_object,
-        method: str,
-        endpoint: str,
-        payload: Union[Optional[dict], Optional[str]] = None,
-        params: Optional[dict] = None,
-        headers: Optional[dict] = None,
-        api_type: str = const.DEFAULT_API_TYPE,
-        timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
-        show_full_error: bool = True,
-        return_json: bool = True,
-        allow_failed_response: Optional[bool] = None,
+    pydp_object,
+    method: str,
+    endpoint: str,
+    payload: Union[Optional[dict], Optional[str]] = None,
+    params: Optional[dict] = None,
+    headers: Optional[dict] = None,
+    api_type: str = const.DEFAULT_API_TYPE,
+    timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
+    show_full_error: bool = True,
+    return_json: bool = True,
+    allow_failed_response: Optional[bool] = None,
 ):
     """Perform an API call with payload against the ID Plus tenant.
 
@@ -149,6 +139,7 @@ def api_call_with_payload(
              :py:exc:`errors.exceptions.APIResponseConversionError`,
              :py:exc:`errors.exceptions.InvalidFieldError`
     """
+
     def _raise_exception_for_payload():
         """Raise a :py:exc:`TypeError` exception when the payload is an invalid data type."""
         _error_msg = f'The API payload must be a dictionary or string (provided: {type(payload)})'
@@ -208,16 +199,16 @@ def api_call_with_payload(
 
 
 def post(
-        pydp_object,
-        endpoint: str,
-        payload: Union[Optional[dict], Optional[str]] = None,
-        params: Optional[dict] = None,
-        headers: Optional[dict] = None,
-        api_type: str = const.DEFAULT_API_TYPE,
-        timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
-        show_full_error: bool = True,
-        return_json: bool = True,
-        allow_failed_response: Optional[bool] = None,
+    pydp_object,
+    endpoint: str,
+    payload: Union[Optional[dict], Optional[str]] = None,
+    params: Optional[dict] = None,
+    headers: Optional[dict] = None,
+    api_type: str = const.DEFAULT_API_TYPE,
+    timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
+    show_full_error: bool = True,
+    return_json: bool = True,
+    allow_failed_response: Optional[bool] = None,
 ):
     """Perform a POST call with payload against the ID Plus tenant.
 
@@ -248,23 +239,32 @@ def post(
              :py:exc:`errors.exceptions.APIResponseConversionError`,
              :py:exc:`errors.exceptions.InvalidFieldError`
     """
-    return api_call_with_payload(pydp_object=pydp_object, method=const.API_REQUEST_TYPES.POST, endpoint=endpoint,
-                                 payload=payload, params=params, headers=headers, api_type=api_type, timeout=timeout,
-                                 show_full_error=show_full_error, return_json=return_json,
-                                 allow_failed_response=allow_failed_response)
+    return api_call_with_payload(
+        pydp_object=pydp_object,
+        method=const.API_REQUEST_TYPES.POST,
+        endpoint=endpoint,
+        payload=payload,
+        params=params,
+        headers=headers,
+        api_type=api_type,
+        timeout=timeout,
+        show_full_error=show_full_error,
+        return_json=return_json,
+        allow_failed_response=allow_failed_response,
+    )
 
 
 def patch(
-        pydp_object,
-        endpoint: str,
-        payload: Union[Optional[dict], Optional[str]] = None,
-        params: Optional[dict] = None,
-        headers: Optional[dict] = None,
-        api_type: str = const.DEFAULT_API_TYPE,
-        timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
-        show_full_error: bool = True,
-        return_json: bool = True,
-        allow_failed_response: Optional[bool] = None,
+    pydp_object,
+    endpoint: str,
+    payload: Union[Optional[dict], Optional[str]] = None,
+    params: Optional[dict] = None,
+    headers: Optional[dict] = None,
+    api_type: str = const.DEFAULT_API_TYPE,
+    timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
+    show_full_error: bool = True,
+    return_json: bool = True,
+    allow_failed_response: Optional[bool] = None,
 ):
     """Perform a PATCH call with payload against the ID Plus tenant.
 
@@ -295,23 +295,32 @@ def patch(
              :py:exc:`errors.exceptions.APIResponseConversionError`,
              :py:exc:`errors.exceptions.InvalidFieldError`
     """
-    return api_call_with_payload(pydp_object=pydp_object, method=const.API_REQUEST_TYPES.PATCH, endpoint=endpoint,
-                                 payload=payload, params=params, headers=headers, api_type=api_type, timeout=timeout,
-                                 show_full_error=show_full_error, return_json=return_json,
-                                 allow_failed_response=allow_failed_response)
+    return api_call_with_payload(
+        pydp_object=pydp_object,
+        method=const.API_REQUEST_TYPES.PATCH,
+        endpoint=endpoint,
+        payload=payload,
+        params=params,
+        headers=headers,
+        api_type=api_type,
+        timeout=timeout,
+        show_full_error=show_full_error,
+        return_json=return_json,
+        allow_failed_response=allow_failed_response,
+    )
 
 
 def put(
-        pydp_object,
-        endpoint: str,
-        payload: Union[Optional[dict], Optional[str]] = None,
-        params: Optional[dict] = None,
-        headers: Optional[dict] = None,
-        api_type: str = const.DEFAULT_API_TYPE,
-        timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
-        show_full_error: bool = True,
-        return_json: bool = True,
-        allow_failed_response: Optional[bool] = None,
+    pydp_object,
+    endpoint: str,
+    payload: Union[Optional[dict], Optional[str]] = None,
+    params: Optional[dict] = None,
+    headers: Optional[dict] = None,
+    api_type: str = const.DEFAULT_API_TYPE,
+    timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
+    show_full_error: bool = True,
+    return_json: bool = True,
+    allow_failed_response: Optional[bool] = None,
 ):
     """Perform a PUT call with payload against the ID Plus tenant.
 
@@ -342,10 +351,19 @@ def put(
              :py:exc:`errors.exceptions.APIResponseConversionError`,
              :py:exc:`errors.exceptions.InvalidFieldError`
     """
-    return api_call_with_payload(pydp_object=pydp_object, method=const.API_REQUEST_TYPES.PUT, endpoint=endpoint,
-                                 payload=payload, params=params, headers=headers, api_type=api_type, timeout=timeout,
-                                 show_full_error=show_full_error, return_json=return_json,
-                                 allow_failed_response=allow_failed_response)
+    return api_call_with_payload(
+        pydp_object=pydp_object,
+        method=const.API_REQUEST_TYPES.PUT,
+        endpoint=endpoint,
+        payload=payload,
+        params=params,
+        headers=headers,
+        api_type=api_type,
+        timeout=timeout,
+        show_full_error=show_full_error,
+        return_json=return_json,
+        allow_failed_response=allow_failed_response,
+    )
 
 
 def _should_allow_failed_responses(_pydp_object, _allow_failed_response: Optional[bool]) -> bool:
@@ -384,11 +402,11 @@ def _should_retry_oauth_401(_pydp_object, _api_type: str, _response) -> bool:
 
 
 def _get_headers(
-        _pydp_object,
-        _additional_headers: Optional[dict] = None,
-        _api_type: str = const.DEFAULT_API_TYPE,
-        _header_type: str = const.DEFAULT_HEADER_TYPE,
-        _force_oauth_refresh: bool = const.AUTH_VALUES.OAUTH_DEFAULT_FORCE_REFRESH,
+    _pydp_object,
+    _additional_headers: Optional[dict] = None,
+    _api_type: str = const.DEFAULT_API_TYPE,
+    _header_type: str = const.DEFAULT_HEADER_TYPE,
+    _force_oauth_refresh: bool = const.AUTH_VALUES.OAUTH_DEFAULT_FORCE_REFRESH,
 ) -> dict:
     """Return the appropriate HTTP headers to use for different types of API calls."""
     _additional_headers = {} if _additional_headers is None else _additional_headers
@@ -406,14 +424,14 @@ def _get_headers(
 
 
 def _perform_api_call_with_payload(
-        pydp_object,
-        method: str,
-        payload: Union[Optional[dict], Optional[str]] = None,
-        params: Optional[dict] = None,
-        headers: Optional[dict] = None,
-        timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
-        full_api_url: Optional[str] = None,
-        raise_payload_exception=None,
+    pydp_object,
+    method: str,
+    payload: Union[Optional[dict], Optional[str]] = None,
+    params: Optional[dict] = None,
+    headers: Optional[dict] = None,
+    timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
+    full_api_url: Optional[str] = None,
+    raise_payload_exception=None,
 ):
     """Perform API requests that include payload data and return the response object."""
     if not full_api_url:
@@ -423,29 +441,35 @@ def _perform_api_call_with_payload(
 
     if isinstance(method, str) and method.upper() == const.API_REQUEST_TYPES.POST:
         if isinstance(payload, dict):
-            return requests.post(full_api_url, json=payload, headers=headers, params=params, timeout=timeout,
-                                 verify=pydp_object.verify_ssl)
+            return requests.post(
+                full_api_url, json=payload, headers=headers, params=params, timeout=timeout, verify=pydp_object.verify_ssl
+            )
         if isinstance(payload, str):
-            return requests.post(full_api_url, data=payload, headers=headers, params=params, timeout=timeout,
-                                 verify=pydp_object.verify_ssl)
+            return requests.post(
+                full_api_url, data=payload, headers=headers, params=params, timeout=timeout, verify=pydp_object.verify_ssl
+            )
         if callable(raise_payload_exception):
             raise_payload_exception()
     elif isinstance(method, str) and method.upper() == const.API_REQUEST_TYPES.PATCH:
         if isinstance(payload, dict):
-            return requests.patch(full_api_url, json=payload, headers=headers, params=params, timeout=timeout,
-                                  verify=pydp_object.verify_ssl)
+            return requests.patch(
+                full_api_url, json=payload, headers=headers, params=params, timeout=timeout, verify=pydp_object.verify_ssl
+            )
         if isinstance(payload, str):
-            return requests.patch(full_api_url, data=payload, headers=headers, params=params, timeout=timeout,
-                                  verify=pydp_object.verify_ssl)
+            return requests.patch(
+                full_api_url, data=payload, headers=headers, params=params, timeout=timeout, verify=pydp_object.verify_ssl
+            )
         if callable(raise_payload_exception):
             raise_payload_exception()
     elif isinstance(method, str) and method.upper() == const.API_REQUEST_TYPES.PUT:
         if isinstance(payload, dict):
-            return requests.put(full_api_url, json=payload, headers=headers, params=params, timeout=timeout,
-                                verify=pydp_object.verify_ssl)
+            return requests.put(
+                full_api_url, json=payload, headers=headers, params=params, timeout=timeout, verify=pydp_object.verify_ssl
+            )
         if isinstance(payload, str):
-            return requests.put(full_api_url, data=payload, headers=headers, params=params, timeout=timeout,
-                                verify=pydp_object.verify_ssl)
+            return requests.put(
+                full_api_url, data=payload, headers=headers, params=params, timeout=timeout, verify=pydp_object.verify_ssl
+            )
         if callable(raise_payload_exception):
             raise_payload_exception()
     elif isinstance(method, str) and method.upper() == const.API_REQUEST_TYPES.GET:
@@ -525,8 +549,7 @@ def _convert_response_to_json(_response, _allow_failed_response: bool = False):
         _response = _response.json()
     except Exception as _exc:
         _exc_type = errors.handlers.get_exception_type(_exc)
-        _error_msg = (f'Failed to convert the API response to JSON format due to the following {_exc_type} '
-                      f'exception: {_exc}')
+        _error_msg = f'Failed to convert the API response to JSON format due to the following {_exc_type} exception: {_exc}'
         logger.error(_error_msg)
         if not _allow_failed_response:
             raise errors.exceptions.APIResponseConversionError(_error_msg)

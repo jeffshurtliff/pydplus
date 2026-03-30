@@ -4,7 +4,7 @@
 :Synopsis:          Defines the user-related functions associated with the RSA ID Plus API
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     25 Mar 2026
+:Modified Date:     30 Mar 2026
 """
 
 from __future__ import annotations
@@ -19,13 +19,13 @@ logger = logging.getLogger(__name__)
 
 
 def get_user_details(
-        pydp_object,
-        email: str,
-        search_unsynced: Optional[bool] = None,
-        timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
-        show_full_error: bool = True,
-        return_json: bool = True,
-        allow_failed_response: Optional[bool] = None,
+    pydp_object,
+    email: str,
+    search_unsynced: Optional[bool] = None,
+    timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
+    show_full_error: bool = True,
+    return_json: bool = True,
+    allow_failed_response: Optional[bool] = None,
 ):
     """Retrieve the details for a specific user based on their email address.
 
@@ -63,18 +63,25 @@ def get_user_details(
         payload[const.QUERY_PARAMS.SEARCH_UNSYNCED] = search_unsynced
 
     # Perform the API call and return the response in JSON format
-    return api.post(pydp_object=pydp_object, endpoint=const.REST_PATHS.USERS_LOOKUP, payload=payload,
-                    api_type=const.ADMIN_API_TYPE, timeout=timeout, show_full_error=show_full_error,
-                    return_json=return_json, allow_failed_response=allow_failed_response)
+    return api.post(
+        pydp_object=pydp_object,
+        endpoint=const.REST_PATHS.USERS_LOOKUP,
+        payload=payload,
+        api_type=const.ADMIN_API_TYPE,
+        timeout=timeout,
+        show_full_error=show_full_error,
+        return_json=return_json,
+        allow_failed_response=allow_failed_response,
+    )
 
 
 def get_user_id(
-        pydp_object,
-        email: str = None,
-        user_details: Optional[dict] = None,
-        search_unsynced: Optional[bool] = None,
-        timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
-        show_full_error: bool = True,
+    pydp_object,
+    email: str = None,
+    user_details: Optional[dict] = None,
+    search_unsynced: Optional[bool] = None,
+    timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
+    show_full_error: bool = True,
 ) -> str:
     """Retrieve the User ID associated with a specific user.
 
@@ -107,8 +114,14 @@ def get_user_id(
 
     # Retrieve the user details if not provided
     if not user_details:
-        user_details = get_user_details(pydp_object=pydp_object, email=email, search_unsynced=search_unsynced,
-                                        timeout=timeout, show_full_error=show_full_error, allow_failed_response=True)
+        user_details = get_user_details(
+            pydp_object=pydp_object,
+            email=email,
+            search_unsynced=search_unsynced,
+            timeout=timeout,
+            show_full_error=show_full_error,
+            allow_failed_response=True,
+        )
 
     # Locate and return the user ID if possible
     if not user_details or not isinstance(user_details, dict) or const.RESPONSE_KEYS.ID not in user_details:
@@ -119,13 +132,13 @@ def get_user_id(
 
 
 def _update_user_status(
-        _pydp_object,
-        _user_id: str,
-        _action: str,
-        _timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
-        _show_full_error: bool = True,
-        _return_json: bool = True,
-        _allow_failed_response: Optional[bool] = None,
+    _pydp_object,
+    _user_id: str,
+    _action: str,
+    _timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
+    _show_full_error: bool = True,
+    _return_json: bool = True,
+    _allow_failed_response: Optional[bool] = None,
 ):
     """Enable or disable a user by calling the User Status API.
 
@@ -170,18 +183,25 @@ def _update_user_status(
     }
 
     # Perform the API call and return the response
-    return api.put(pydp_object=_pydp_object, endpoint=_endpoint, payload=_payload, api_type=const.ADMIN_API_TYPE,
-                   timeout=_timeout, show_full_error=_show_full_error, return_json=_return_json,
-                   allow_failed_response=_allow_failed_response)
+    return api.put(
+        pydp_object=_pydp_object,
+        endpoint=_endpoint,
+        payload=_payload,
+        api_type=const.ADMIN_API_TYPE,
+        timeout=_timeout,
+        show_full_error=_show_full_error,
+        return_json=_return_json,
+        allow_failed_response=_allow_failed_response,
+    )
 
 
 def enable_user(
-        pydp_object,
-        user_id: str,
-        timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
-        show_full_error: bool = True,
-        return_json: bool = True,
-        allow_failed_response: Optional[bool] = None,
+    pydp_object,
+    user_id: str,
+    timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
+    show_full_error: bool = True,
+    return_json: bool = True,
+    allow_failed_response: Optional[bool] = None,
 ):
     """Enable a user that is currently disabled.
 
@@ -206,18 +226,24 @@ def enable_user(
              :py:exc:`errors.exceptions.InvalidFieldError`,
              :py:exc:`errors.exceptions.MissingRequiredDataError`
     """
-    return _update_user_status(_pydp_object=pydp_object, _user_id=user_id, _action=const.ARGUMENT_VALUES.ENABLE,
-                               _timeout=timeout, _show_full_error=show_full_error, _return_json=return_json,
-                               _allow_failed_response=allow_failed_response)
+    return _update_user_status(
+        _pydp_object=pydp_object,
+        _user_id=user_id,
+        _action=const.ARGUMENT_VALUES.ENABLE,
+        _timeout=timeout,
+        _show_full_error=show_full_error,
+        _return_json=return_json,
+        _allow_failed_response=allow_failed_response,
+    )
 
 
 def disable_user(
-        pydp_object,
-        user_id: str,
-        timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
-        show_full_error: bool = True,
-        return_json: bool = True,
-        allow_failed_response: Optional[bool] = None,
+    pydp_object,
+    user_id: str,
+    timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
+    show_full_error: bool = True,
+    return_json: bool = True,
+    allow_failed_response: Optional[bool] = None,
 ):
     """Disable a user that is currently enabled.
 
@@ -242,18 +268,24 @@ def disable_user(
              :py:exc:`errors.exceptions.InvalidFieldError`,
              :py:exc:`errors.exceptions.MissingRequiredDataError`
     """
-    return _update_user_status(_pydp_object=pydp_object, _user_id=user_id, _action=const.ARGUMENT_VALUES.DISABLE,
-                               _timeout=timeout, _show_full_error=show_full_error, _return_json=return_json,
-                               _allow_failed_response=allow_failed_response)
+    return _update_user_status(
+        _pydp_object=pydp_object,
+        _user_id=user_id,
+        _action=const.ARGUMENT_VALUES.DISABLE,
+        _timeout=timeout,
+        _show_full_error=show_full_error,
+        _return_json=return_json,
+        _allow_failed_response=allow_failed_response,
+    )
 
 
 def synchronize_user(
-        pydp_object,
-        user_id: str,
-        timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
-        show_full_error: bool = True,
-        return_json: bool = True,
-        allow_failed_response: Optional[bool] = None,
+    pydp_object,
+    user_id: str,
+    timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
+    show_full_error: bool = True,
+    return_json: bool = True,
+    allow_failed_response: Optional[bool] = None,
 ):
     """Synchronize the details of a user between an identity source and the Cloud Access Service.
 
@@ -284,38 +316,52 @@ def synchronize_user(
     # TODO: Test to see if Content-Length header must be explicitly defined
 
     # Perform the API call and return the response
-    return api.post(pydp_object=pydp_object, endpoint=endpoint, payload=payload, api_type=const.ADMIN_API_TYPE,
-                    timeout=timeout, show_full_error=show_full_error, return_json=return_json,
-                    allow_failed_response=allow_failed_response)
+    return api.post(
+        pydp_object=pydp_object,
+        endpoint=endpoint,
+        payload=payload,
+        api_type=const.ADMIN_API_TYPE,
+        timeout=timeout,
+        show_full_error=show_full_error,
+        return_json=return_json,
+        allow_failed_response=allow_failed_response,
+    )
 
 
 def _update_mark_deleted(
-        _pydp_object,
-        _user_id: str,
-        _mark_deleted: bool,
-        _timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
-        _show_full_error: bool = True,
-        _return_json: bool = True,
-        _allow_failed_response: Optional[bool] = None,
+    _pydp_object,
+    _user_id: str,
+    _mark_deleted: bool,
+    _timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
+    _show_full_error: bool = True,
+    _return_json: bool = True,
+    _allow_failed_response: Optional[bool] = None,
 ):
     """Mark (or unmark) a specific user as deleted."""
     # Define the API endpoint to call and other API details
     _endpoint: str = const.REST_PATHS.USER_MARK_DELETED.format(user_id=_user_id)
     _payload: dict[str, bool] = {const.QUERY_PARAMS.MARK_DELETED: _mark_deleted}
-    
+
     # Perform the API call and return the response
-    return api.put(pydp_object=_pydp_object, endpoint=_endpoint, payload=_payload, api_type=const.ADMIN_API_TYPE,
-                   timeout=_timeout, show_full_error=_show_full_error, return_json=_return_json,
-                   allow_failed_response=_allow_failed_response)
+    return api.put(
+        pydp_object=_pydp_object,
+        endpoint=_endpoint,
+        payload=_payload,
+        api_type=const.ADMIN_API_TYPE,
+        timeout=_timeout,
+        show_full_error=_show_full_error,
+        return_json=_return_json,
+        allow_failed_response=_allow_failed_response,
+    )
 
 
 def mark_deleted(
-        pydp_object,
-        user_id: str,
-        timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
-        show_full_error: bool = True,
-        return_json: bool = True,
-        allow_failed_response: Optional[bool] = None,
+    pydp_object,
+    user_id: str,
+    timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
+    show_full_error: bool = True,
+    return_json: bool = True,
+    allow_failed_response: Optional[bool] = None,
 ):
     """Mark a specific user to be deleted during the next automated bulk deletion process.
 
@@ -340,18 +386,24 @@ def mark_deleted(
              :py:exc:`errors.exceptions.InvalidFieldError`,
              :py:exc:`errors.exceptions.MissingRequiredDataError`
     """
-    return _update_mark_deleted(pydp_object, _user_id=user_id, _mark_deleted=True, _timeout=timeout,
-                                _show_full_error=show_full_error, _return_json=return_json,
-                                _allow_failed_response=allow_failed_response)
+    return _update_mark_deleted(
+        pydp_object,
+        _user_id=user_id,
+        _mark_deleted=True,
+        _timeout=timeout,
+        _show_full_error=show_full_error,
+        _return_json=return_json,
+        _allow_failed_response=allow_failed_response,
+    )
 
 
 def unmark_deleted(
-        pydp_object,
-        user_id: str,
-        timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
-        show_full_error: bool = True,
-        return_json: bool = True,
-        allow_failed_response: Optional[bool] = None,
+    pydp_object,
+    user_id: str,
+    timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
+    show_full_error: bool = True,
+    return_json: bool = True,
+    allow_failed_response: Optional[bool] = None,
 ):
     """Unmark a specific user that was flagged to be deleted.
 
@@ -376,9 +428,15 @@ def unmark_deleted(
              :py:exc:`errors.exceptions.InvalidFieldError`,
              :py:exc:`errors.exceptions.MissingRequiredDataError`
     """
-    return _update_mark_deleted(pydp_object, _user_id=user_id, _mark_deleted=False, _timeout=timeout,
-                                _show_full_error=show_full_error, _return_json=return_json,
-                                _allow_failed_response=allow_failed_response)
+    return _update_mark_deleted(
+        pydp_object,
+        _user_id=user_id,
+        _mark_deleted=False,
+        _timeout=timeout,
+        _show_full_error=show_full_error,
+        _return_json=return_json,
+        _allow_failed_response=allow_failed_response,
+    )
 
 
 # def _add_remove_high_risk_users(_pydp_object, _users_list, _action, _timeout=const.DEFAULT_API_TIMEOUT_SECONDS,

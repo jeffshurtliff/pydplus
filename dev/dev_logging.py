@@ -6,7 +6,7 @@
 :Example:           ``logger = setup_dev_logging('pydplus.console')``
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     22 Mar 2026
+:Modified Date:     30 Mar 2026
 """
 
 from __future__ import annotations

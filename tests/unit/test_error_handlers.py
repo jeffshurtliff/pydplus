@@ -4,7 +4,7 @@
 :Synopsis:          Unit tests for pydplus error handler utilities
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff (via GPT-5.3-codex)
-:Modified Date:     09 Mar 2026
+:Modified Date:     30 Mar 2026
 """
 
 from __future__ import annotations
@@ -12,7 +12,6 @@ from __future__ import annotations
 import pytest
 
 from pydplus.errors import handlers
-
 
 pytestmark = pytest.mark.unit
 

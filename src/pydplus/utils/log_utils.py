@@ -5,8 +5,8 @@
 :Usage:             ``from pydplus.utils import log_utils``
 :Example:           ``logger = log_utils.initialize_logging(__name__)``
 :Created By:        Jeff Shurtliff
-:Last Modified:     Jeff Shurtliff (via GPT-5.3-codex)
-:Modified Date:     16 Mar 2026
+:Last Modified:     Jeff Shurtliff
+:Modified Date:     30 Mar 2026
 """
 
 from __future__ import annotations
@@ -18,46 +18,51 @@ from pathlib import Path
 from types import MappingProxyType
 from typing import Dict, Mapping, Optional, Tuple, Union
 
-
-LOGGING_DEFAULTS: Mapping[str, str] = MappingProxyType({
-    'logger_name': __name__,
-    'log_level': 'info',
-    'format': '%(asctime)s - %(levelname)s - %(name)s - %(message)s',
-    'date_format': '%Y-%m-%d %I:%M:%S',
-})
-HANDLER_DEFAULTS: Mapping[str, Union[str, int]] = MappingProxyType({
-    'file_log_level': 'info',
-    'console_log_level': 'warning',
-    'syslog_log_level': 'info',
-    'syslog_address': 'localhost',
-    'syslog_port': 514,
-})
-LOG_LEVELS: Mapping[str, int] = MappingProxyType({
-    'debug': logging.DEBUG,
-    'info': logging.INFO,
-    'warning': logging.WARNING,
-    'error': logging.ERROR,
-    'critical': logging.CRITICAL,
-})
+LOGGING_DEFAULTS: Mapping[str, str] = MappingProxyType(
+    {
+        'logger_name': __name__,
+        'log_level': 'info',
+        'format': '%(asctime)s - %(levelname)s - %(name)s - %(message)s',
+        'date_format': '%Y-%m-%d %I:%M:%S',
+    }
+)
+HANDLER_DEFAULTS: Mapping[str, Union[str, int]] = MappingProxyType(
+    {
+        'file_log_level': 'info',
+        'console_log_level': 'warning',
+        'syslog_log_level': 'info',
+        'syslog_address': 'localhost',
+        'syslog_port': 514,
+    }
+)
+LOG_LEVELS: Mapping[str, int] = MappingProxyType(
+    {
+        'debug': logging.DEBUG,
+        'info': logging.INFO,
+        'warning': logging.WARNING,
+        'error': logging.ERROR,
+        'critical': logging.CRITICAL,
+    }
+)
 MANAGED_HANDLER_ATTR = '_pydplus_managed_handler'
 
 
 def initialize_logging(
-        logger_name: Optional[str] = None,
-        log_level: Optional[Union[str, int]] = None,
-        formatter: Optional[Union[str, logging.Formatter]] = None,
-        debug: Optional[bool] = None,
-        no_output: Optional[bool] = None,
-        file_output: Optional[bool] = None,
-        file_log_level: Optional[Union[str, int]] = None,
-        log_file: Optional[str] = None,
-        overwrite_log_files: Optional[bool] = None,
-        console_output: Optional[bool] = None,
-        console_log_level: Optional[Union[str, int]] = None,
-        syslog_output: Optional[bool] = None,
-        syslog_log_level: Optional[Union[str, int]] = None,
-        syslog_address: Optional[str] = None,
-        syslog_port: Optional[int] = None,
+    logger_name: Optional[str] = None,
+    log_level: Optional[Union[str, int]] = None,
+    formatter: Optional[Union[str, logging.Formatter]] = None,
+    debug: Optional[bool] = None,
+    no_output: Optional[bool] = None,
+    file_output: Optional[bool] = None,
+    file_log_level: Optional[Union[str, int]] = None,
+    log_file: Optional[str] = None,
+    overwrite_log_files: Optional[bool] = None,
+    console_output: Optional[bool] = None,
+    console_log_level: Optional[Union[str, int]] = None,
+    syslog_output: Optional[bool] = None,
+    syslog_log_level: Optional[Union[str, int]] = None,
+    syslog_address: Optional[str] = None,
+    syslog_port: Optional[int] = None,
 ) -> logging.Logger:
     """Initialize and configure a logger instance.
 
@@ -78,15 +83,28 @@ def initialize_logging(
     :param syslog_port: Port for the syslog endpoint.
     :returns: A configured :py:class:`logging.Logger` instance.
     """
-    logger_name, log_levels, formatter = _apply_defaults(logger_name, formatter, debug, log_level, file_log_level,
-                                                         console_log_level, syslog_log_level)
+    logger_name, log_levels, formatter = _apply_defaults(
+        logger_name, formatter, debug, log_level, file_log_level, console_log_level, syslog_log_level
+    )
     log_level, file_log_level, console_log_level, syslog_log_level = _get_log_levels_from_dict(log_levels)
     logger = logging.getLogger(logger_name)
     logger = _set_logging_level(logger, log_level)
     _remove_managed_handlers(logger)
-    logger = _add_handlers(logger, formatter, no_output, file_output, file_log_level, log_file, overwrite_log_files,
-                           console_output, console_log_level, syslog_output, syslog_log_level, syslog_address,
-                           syslog_port)
+    logger = _add_handlers(
+        logger,
+        formatter,
+        no_output,
+        file_output,
+        file_log_level,
+        log_file,
+        overwrite_log_files,
+        console_output,
+        console_log_level,
+        syslog_output,
+        syslog_log_level,
+        syslog_address,
+        syslog_port,
+    )
     return logger
 
 
@@ -96,6 +114,7 @@ class LessThanFilter(logging.Filter):
     .. seealso:: `Zoey Greer <https://stackoverflow.com/users/5124424/zoey-greer>`_ is the original author of
                  this class which was provided on `Stack Overflow <https://stackoverflow.com/a/31459386>`_.
     """
+
     def __init__(self, exclusive_maximum: int, name: str = '') -> None:
         """Instantiate a filter with an exclusive maximum log level.
 
@@ -114,13 +133,13 @@ class LessThanFilter(logging.Filter):
 
 
 def _apply_defaults(
-        _logger_name: Optional[str],
-        _formatter: Optional[Union[str, logging.Formatter]],
-        _debug: Optional[bool],
-        _log_level: Optional[Union[str, int]],
-        _file_level: Optional[Union[str, int]],
-        _console_level: Optional[Union[str, int]],
-        _syslog_level: Optional[Union[str, int]],
+    _logger_name: Optional[str],
+    _formatter: Optional[Union[str, logging.Formatter]],
+    _debug: Optional[bool],
+    _log_level: Optional[Union[str, int]],
+    _file_level: Optional[Union[str, int]],
+    _console_level: Optional[Union[str, int]],
+    _syslog_level: Optional[Union[str, int]],
 ) -> Tuple[str, Dict[str, str], logging.Formatter]:
     """Apply default values to the configuration settings if not explicitly defined.
 
@@ -164,8 +183,10 @@ def _get_log_levels_from_dict(_log_levels: Mapping[str, str]) -> Tuple[str, str,
     return _general, _file, _console, _syslog
 
 
-def _set_logging_level(_logger: Union[logging.Logger, logging.Handler], _log_level: Optional[Union[str, int]]
-                       ) -> Union[logging.Logger, logging.Handler]:
+def _set_logging_level(
+    _logger: Union[logging.Logger, logging.Handler],
+    _log_level: Optional[Union[str, int]],
+) -> Union[logging.Logger, logging.Handler]:
     """Set the logging level for a :py:class:`logging.Logger` instance.
 
     :param _logger: The :py:class:`logging.Logger` or :py:class:`logging.Handler` instance
@@ -178,19 +199,19 @@ def _set_logging_level(_logger: Union[logging.Logger, logging.Handler], _log_lev
 
 
 def _add_handlers(
-        _logger: logging.Logger,
-        _formatter: logging.Formatter,
-        _no_output: Optional[bool],
-        _file_output: Optional[bool],
-        _file_log_level: Optional[str],
-        _log_file: Optional[str],
-        _overwrite_log_files: Optional[bool],
-        _console_output: Optional[bool],
-        _console_log_level: Optional[str],
-        _syslog_output: Optional[bool],
-        _syslog_log_level: Optional[str],
-        _syslog_address: Optional[str],
-        _syslog_port: Optional[int],
+    _logger: logging.Logger,
+    _formatter: logging.Formatter,
+    _no_output: Optional[bool],
+    _file_output: Optional[bool],
+    _file_log_level: Optional[str],
+    _log_file: Optional[str],
+    _overwrite_log_files: Optional[bool],
+    _console_output: Optional[bool],
+    _console_log_level: Optional[str],
+    _syslog_output: Optional[bool],
+    _syslog_log_level: Optional[str],
+    _syslog_address: Optional[str],
+    _syslog_port: Optional[int],
 ) -> logging.Logger:
     """Add output handlers to a logger instance.
 
@@ -225,11 +246,11 @@ def _add_handlers(
 
 
 def _add_file_handler(
-        _logger: logging.Logger,
-        _log_level: Optional[str],
-        _log_file: Optional[str],
-        _overwrite: Optional[bool],
-        _formatter: logging.Formatter,
+    _logger: logging.Logger,
+    _log_level: Optional[str],
+    _log_file: Optional[str],
+    _overwrite: Optional[bool],
+    _formatter: logging.Formatter,
 ) -> logging.Logger:
     """Add a :py:class:`logging.FileHandler` to the :py:class:`logging.Logger` instance.
 
@@ -319,11 +340,11 @@ def _add_split_stream_handlers(_logger: logging.Logger, _log_level: str, _format
 
 
 def _add_syslog_handler(
-        _logger: logging.Logger,
-        _log_level: Optional[str],
-        _formatter: logging.Formatter,
-        _address: Optional[str],
-        _port: Optional[int],
+    _logger: logging.Logger,
+    _log_level: Optional[str],
+    _formatter: logging.Formatter,
+    _address: Optional[str],
+    _port: Optional[int],
 ) -> logging.Logger:
     """Add a :py:class:`logging.handlers.SysLogHandler` to the logger instance.
 

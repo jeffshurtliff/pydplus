@@ -6,7 +6,7 @@
 :Example:           ``encoded_string = core_utils.encode_url(decoded_string)``
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     27 Mar 2026
+:Modified Date:     30 Mar 2026
 """
 
 from __future__ import annotations
@@ -19,8 +19,8 @@ import urllib.parse
 from collections.abc import Iterable
 from typing import Any, Optional, Tuple
 
-from .. import errors
 from .. import constants as const
+from .. import errors
 from ..errors.handlers import get_exception_type
 
 logger = logging.getLogger(__name__)
@@ -214,15 +214,13 @@ def get_env_variable_name_by_environment(field: str, env: Optional[str] = None) 
 
     # Retrieve and return the appropriate environment variable name
     try:
-        if (env.upper() == const.ENV_VARIABLES.CUSTOM_ENVIRONMENT
-                or env.upper() not in const.ENV_VARIABLES.VALID_ENVIRONMENTS):
+        if env.upper() == const.ENV_VARIABLES.CUSTOM_ENVIRONMENT or env.upper() not in const.ENV_VARIABLES.VALID_ENVIRONMENTS:
             var_name = const.ENV_VARIABLES.MAPPING[const.ENV_VARIABLES.CUSTOM_ENVIRONMENT].get(field).format(env_name=env.upper())
         else:
             var_name = const.ENV_VARIABLES.MAPPING[env.upper()].get(field)
     except Exception as exc:
         exc_type = get_exception_type(exc)
-        error_msg = (f"Failed to get the environment variable name for the given environment due to {exc_type} "
-                     f"exception: {exc}")
+        error_msg = f'Failed to get the environment variable name for the given environment due to {exc_type} exception: {exc}'
         logger.exception(error_msg)
         raise RuntimeError(error_msg)
     return var_name
@@ -258,15 +256,15 @@ def normalize_oauth_scope(scope_value: Any, required: bool = False) -> Optional[
             if not isinstance(scope, str):
                 error_msg = (
                     f"The OAuth '{const.CONNECTION_INFO.OAUTH_SCOPE}' values must be strings "
-                    f"(provided element type: {type(scope)})"
+                    f'(provided element type: {type(scope)})'
                 )
                 logger.error(error_msg)
                 raise TypeError(error_msg)
             parsed_scopes.append(scope.strip())
     else:
         error_msg = (
-            f"The OAuth '{const.CONNECTION_INFO.OAUTH_SCOPE}' value must be provided as a string or iterable "
-            f"(provided: {type(scope_value)})"
+            f"The OAuth '{const.CONNECTION_INFO.OAUTH_SCOPE}' value must be provided as a string "
+            f'or iterable (provided: {type(scope_value)})'
         )
         logger.error(error_msg)
         raise TypeError(error_msg)

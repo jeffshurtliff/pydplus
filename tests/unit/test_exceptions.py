@@ -4,7 +4,7 @@
 :Synopsis:          Unit tests for pydplus custom exception classes
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff (via GPT-5.3-codex)
-:Modified Date:     16 Mar 2026
+:Modified Date:     30 Mar 2026
 """
 
 from __future__ import annotations
@@ -12,7 +12,6 @@ from __future__ import annotations
 import pytest
 
 from pydplus.errors import exceptions
-
 
 pytestmark = pytest.mark.unit
 
@@ -46,14 +45,12 @@ pytestmark = pytest.mark.unit
         (exceptions.InvalidEndpointError, 'The supplied endpoint for the API is not recognized.'),
         (
             exceptions.InvalidLookupTypeError,
-            "The supplied lookup type for the API is not recognized. "
-            "(Examples of valid lookup types include 'id' and 'email')",
+            "The supplied lookup type for the API is not recognized. (Examples of valid lookup types include 'id' and 'email')",
         ),
         (exceptions.InvalidPayloadValueError, 'An invalid payload value was provided.'),
         (
             exceptions.InvalidRequestTypeError,
-            "The supplied request type for the API is not recognized. "
-            "(Examples of valid request types include 'POST' and 'PUT')",
+            "The supplied request type for the API is not recognized. (Examples of valid request types include 'POST' and 'PUT')",
         ),
         (
             exceptions.LookupMismatchError,
@@ -150,9 +147,7 @@ def test_feature_not_configured_error_supports_feature_and_identifier() -> None:
 
 def test_invalid_parameter_and_field_errors_support_val_keyword() -> None:
     """Ensure invalid parameter and field classes render val-specific details."""
-    assert str(exceptions.InvalidParameterError(val='verify_ssl')) == (
-        "The 'verify_ssl' parameter that was provided is invalid."
-    )
+    assert str(exceptions.InvalidParameterError(val='verify_ssl')) == ("The 'verify_ssl' parameter that was provided is invalid.")
     assert str(exceptions.InvalidFieldError(val='userStatus')) == "The 'userStatus' field that was provided is invalid."
 
 
@@ -178,9 +173,7 @@ def test_missing_required_data_error_covers_init_and_param_paths() -> None:
     assert str(exceptions.MissingRequiredDataError('initialize')) == (
         'The object failed to initialize as it is missing one or more required arguments.'
     )
-    assert str(exceptions.MissingRequiredDataError(param='base_url')) == (
-        "The required parameter 'base_url' is not defined"
-    )
+    assert str(exceptions.MissingRequiredDataError(param='base_url')) == ("The required parameter 'base_url' is not defined")
 
 
 def test_unknown_file_type_error_supports_file_keyword() -> None:
@@ -235,15 +228,11 @@ def test_value_error_mixin_exception_classes_are_instances_of_value_error() -> N
 
 def test_construct_api_custom_message_helper_covers_all_paths() -> None:
     """Ensure custom API message helper handles all status/message combinations."""
-    assert exceptions._construct_api_custom_message('get') == (
-        'The GET request did not return a successful response.'
-    )
+    assert exceptions._construct_api_custom_message('get') == ('The GET request did not return a successful response.')
     assert exceptions._construct_api_custom_message('get', _message='bad request') == (
         'The GET request failed with the following message: bad request'
     )
-    assert exceptions._construct_api_custom_message('get', _status_code=401) == (
-        'The GET request returned the 401 status code.'
-    )
+    assert exceptions._construct_api_custom_message('get', _status_code=401) == ('The GET request returned the 401 status code.')
     assert exceptions._construct_api_custom_message('get', _message='bad request', _status_code=401) == (
         'The GET request returned the 401 status code with the following message: bad request'
     )
