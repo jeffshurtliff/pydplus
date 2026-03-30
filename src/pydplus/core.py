@@ -5,7 +5,7 @@
 :Usage:             ``from pydplus import PyDPlus``
 :Example:           ``pydp = PyDPlus()``
 :Created By:        Jeff Shurtliff
-:Last Modified:     Jeff Shurtliff
+:Last Modified:     Jeff Shurtliff (via GPT-5.3-Codex)
 :Modified Date:     29 Mar 2026
 """
 
@@ -16,7 +16,7 @@ import os
 import urllib.parse
 from pathlib import Path
 from typing import Any, Optional, Union, Tuple
-from collections.abc import Mapping
+from collections.abc import Iterable, Mapping
 
 from . import auth, api, errors
 from . import constants as const
@@ -77,7 +77,8 @@ class PyDPlus(object):
     :param oauth_scope: One or more OAuth scopes to request in token requests
                         (``+``-delimited string or iterable of scope strings)
     :type oauth_scope: str, tuple, list, set, frozenset, None
-    :param oauth_scope_preset: A preset string associated with grouping of scope permissions
+    :param oauth_scope_preset: One or more scope preset names to merge with explicit OAuth scopes.
+                               Presets can also be provided through helper settings or environment variables.
                                (e.g. ``all``, ``user_read_only``, etc.)
     :type oauth_scope_preset: str, tuple, list, set, frozenset, None
     :param oauth_api_type: Defines which API base URL should be used when inferring the OAuth issuer URL
@@ -780,6 +781,11 @@ class PyDPlus(object):
                 _env_connection_info = self._parse_env_connection_info()
                 _connection_info = self._merge_connection_variables(_connection_info, _env_connection_info)
 
+            _connection_info = self._define_oauth_scope_from_presets(
+                _connection_info=_connection_info,
+                _oauth_scope_preset_from_arg=_oauth_scope_preset,
+            )
+
             # Add missing field values where possible and when needed
             _connection_info = self._populate_missing_connection_details(_connection_info)
 
@@ -834,6 +840,68 @@ class PyDPlus(object):
             }
 
         return _env_connection_info
+
+    @staticmethod
+    def _parse_oauth_scope_preset_values(
+            _oauth_scope_preset: Union[Optional[str], Optional[tuple[str]], Optional[list[str]], Optional[set[str]]],
+    ) -> list[str]:
+        """Parse OAuth scope preset values into a normalized list."""
+        if _oauth_scope_preset is None:
+            return []
+
+        _parsed_preset_values: list[str] = []
+        if isinstance(_oauth_scope_preset, str):
+            _parsed_preset_values.extend(
+                _oauth_scope_preset.replace('+', ' ').replace(',', ' ').split()
+            )
+            return _parsed_preset_values
+
+        if isinstance(_oauth_scope_preset, Iterable):
+            for _scope_preset_value in _oauth_scope_preset:
+                if not isinstance(_scope_preset_value, str):
+                    _error_msg = ("The 'oauth_scope_preset' values must be strings "
+                                  f"(provided element type: {type(_scope_preset_value)})")
+                    logger.error(_error_msg)
+                    raise TypeError(_error_msg)
+                _parsed_preset_values.extend(
+                    _scope_preset_value.replace('+', ' ').replace(',', ' ').split()
+                )
+            return _parsed_preset_values
+
+        _error_msg = ("The 'oauth_scope_preset' value must be supplied as a string or iterable of strings "
+                      f"(provided: {type(_oauth_scope_preset)})")
+        logger.error(_error_msg)
+        raise TypeError(_error_msg)
+
+    def _define_oauth_scope_from_presets(
+            self,
+            _connection_info: dict[str, dict[str, Any]],
+            _oauth_scope_preset_from_arg: Union[Optional[str], Optional[tuple[str]], Optional[list[str]], Optional[set[str]]],
+    ) -> dict[str, dict[str, Any]]:
+        """Define OAuth scopes by merging explicit scopes with any presets from all supported sources."""
+        _combined_scope_presets: list[str] = []
+        _seen_scope_presets: set[str] = set()
+
+        for _scope_preset_values in (
+                _oauth_scope_preset_from_arg,
+                self._helper_settings.get(const.HELPER_SETTINGS.OAUTH_SCOPE_PRESET),
+                self._env_variables.get(const.ENV_VARIABLES.OAUTH_SCOPE_PRESET_FIELD),
+        ):
+            for _scope_preset_value in self._parse_oauth_scope_preset_values(_scope_preset_values):
+                _normalized_scope_preset_value = _scope_preset_value.strip().lower()
+                if _normalized_scope_preset_value and _normalized_scope_preset_value not in _seen_scope_presets:
+                    _combined_scope_presets.append(_normalized_scope_preset_value)
+                    _seen_scope_presets.add(_normalized_scope_preset_value)
+
+        if not _combined_scope_presets:
+            return _connection_info
+
+        _oauth_section = _connection_info.get(const.CONNECTION_INFO.OAUTH, {})
+        _existing_scope = _oauth_section.get(const.CONNECTION_INFO.OAUTH_SCOPE)
+        _merged_oauth_scope = auth._get_scope_from_preset(_combined_scope_presets, _existing_scope)
+        _oauth_section[const.CONNECTION_INFO.OAUTH_SCOPE] = core_utils.normalize_oauth_scope(_merged_oauth_scope)
+        _connection_info[const.CONNECTION_INFO.OAUTH] = _oauth_section
+        return _connection_info
 
     @staticmethod
     def _merge_connection_variables(

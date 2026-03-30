@@ -38,6 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated helper/environment constant mappings to include OAuth private-key path, file, and inline JWK fields.
 - Added explicit `oauth_issuer_url` support and updated OAuth issuer inference defaults to prefer Authentication API hosts for `/oauth/token` requests, while retaining `oauth_api_type` overrides.
 - Updated OAuth client-credentials handling to require explicit scopes, accept `+`-delimited/space-delimited/iterable scope inputs, normalize internally to `+`-delimited values, send space-delimited `scope` values to `/oauth/token` with explicit form content-type, validate against `const.OAUTH_SCOPES`, and include scope-aware token caching behavior.
+- Updated OAuth scope-preset handling so presets can be defined via helper settings and environment variables, and are merged additively with explicit scopes instead of replacing them.
 - Updated `pydplus.utils.core_utils.get_random_string()` to use the `secrets` module for cryptographically secure random string generation.
 
 ---
