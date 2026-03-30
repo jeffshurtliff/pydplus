@@ -3,8 +3,8 @@
 :Module:            pydplus.constants
 :Synopsis:          Constants that are utilized throughout the package
 :Created By:        Jeff Shurtliff
-:Last Modified:     Jeff Shurtliff
-:Modified Date:     28 Mar 2026
+:Last Modified:     Jeff Shurtliff (via GPT-5.3-Codex)
+:Modified Date:     29 Mar 2026
 """
 
 from __future__ import annotations
@@ -221,6 +221,7 @@ class HelperSettings:
     CONNECTION_TYPE: ClassVar[str] = 'connection_type'
     STRICT_MODE: ClassVar[str] = 'strict_mode'
     VERIFY_SSL: str = 'verify_ssl'
+    OAUTH_SCOPE_PRESET: ClassVar[str] = 'oauth_scope_preset'
     ENV_VARIABLES: ClassVar[str] = 'env_variables'
     ROOT_LEVEL_BASIC_FIELDS: ClassVar[frozenset[str]] = frozenset({
         ENV_NAME,
@@ -229,6 +230,7 @@ class HelperSettings:
         CONNECTION_TYPE,
         STRICT_MODE,
         VERIFY_SSL,
+        OAUTH_SCOPE_PRESET,
     })
 
     # Base URL fields
@@ -254,6 +256,7 @@ class HelperSettings:
     ENV_OAUTH_ISSUER_URL: ClassVar[str] = 'oauth_issuer_url'
     ENV_OAUTH_CLIENT_ID: ClassVar[str] = 'oauth_client_id'
     ENV_OAUTH_SCOPE: ClassVar[str] = 'oauth_scope'
+    ENV_OAUTH_SCOPE_PRESET: ClassVar[str] = 'oauth_scope_preset'
     ENV_OAUTH_GRANT_TYPE: ClassVar[str] = 'oauth_grant_type'
     ENV_OAUTH_CLIENT_AUTH: ClassVar[str] = 'oauth_client_authentication'
     ENV_OAUTH_PRIVATE_KEY_PATH: ClassVar[str] = 'oauth_private_key_path'
@@ -278,6 +281,7 @@ class HelperSettings:
     ENV_DEFAULT_OAUTH_ISSUER_URL: ClassVar[str] = 'PYDPLUS_OAUTH_ISSUER_URL'
     ENV_DEFAULT_OAUTH_CLIENT_ID: ClassVar[str] = 'PYDPLUS_OAUTH_CLIENT_ID'
     ENV_DEFAULT_OAUTH_SCOPE: ClassVar[str] = 'PYDPLUS_OAUTH_SCOPE'
+    ENV_DEFAULT_OAUTH_SCOPE_PRESET: ClassVar[str] = 'PYDPLUS_OAUTH_SCOPE_PRESET'
     ENV_DEFAULT_OAUTH_GRANT_TYPE: ClassVar[str] = 'PYDPLUS_OAUTH_GRANT_TYPE'
     ENV_DEFAULT_OAUTH_CLIENT_AUTH: ClassVar[str] = 'PYDPLUS_OAUTH_CLIENT_AUTH'
     ENV_DEFAULT_OAUTH_PRIVATE_KEY_PATH: ClassVar[str] = 'PYDPLUS_OAUTH_PRIVATE_KEY_PATH'
@@ -303,6 +307,7 @@ class HelperSettings:
         ENV_OAUTH_ISSUER_URL: ENV_DEFAULT_OAUTH_ISSUER_URL,
         ENV_OAUTH_CLIENT_ID: ENV_DEFAULT_OAUTH_CLIENT_ID,
         ENV_OAUTH_SCOPE: ENV_DEFAULT_OAUTH_SCOPE,
+        ENV_OAUTH_SCOPE_PRESET: ENV_DEFAULT_OAUTH_SCOPE_PRESET,
         ENV_OAUTH_GRANT_TYPE: ENV_DEFAULT_OAUTH_GRANT_TYPE,
         ENV_OAUTH_CLIENT_AUTH: ENV_DEFAULT_OAUTH_CLIENT_AUTH,
         ENV_OAUTH_PRIVATE_KEY_PATH: ENV_DEFAULT_OAUTH_PRIVATE_KEY_PATH,
@@ -386,6 +391,7 @@ class EnvVariables:
     OAUTH_ISSUER_URL: ClassVar[str] = 'PYDPLUS_OAUTH_ISSUER_URL'
     OAUTH_CLIENT_ID: ClassVar[str] = 'PYDPLUS_OAUTH_CLIENT_ID'
     OAUTH_SCOPE: ClassVar[str] = 'PYDPLUS_OAUTH_SCOPE'
+    OAUTH_SCOPE_PRESET: ClassVar[str] = 'PYDPLUS_OAUTH_SCOPE_PRESET'
     OAUTH_GRANT_TYPE: ClassVar[str] = 'PYDPLUS_OAUTH_GRANT_TYPE'
     OAUTH_CLIENT_AUTH: ClassVar[str] = 'PYDPLUS_OAUTH_CLIENT_AUTH'
     OAUTH_PRIVATE_KEY_PATH: ClassVar[str] = 'PYDPLUS_OAUTH_PRIVATE_KEY_PATH'
@@ -417,6 +423,7 @@ class EnvVariables:
     CUSTOM_OAUTH_ISSUER_URL: ClassVar[str] = 'PYDPLUS_{env_name}_OAUTH_ISSUER_URL'                  # Vars: env_name
     CUSTOM_OAUTH_CLIENT_ID: ClassVar[str] = 'PYDPLUS_{env_name}_OAUTH_CLIENT_ID'                    # Vars: env_name
     CUSTOM_OAUTH_SCOPE: ClassVar[str] = 'PYDPLUS_{env_name}_OAUTH_SCOPE'                            # Vars: env_name
+    CUSTOM_OAUTH_SCOPE_PRESET: ClassVar[str] = 'PYDPLUS_{env_name}_OAUTH_SCOPE_PRESET'              # Vars: env_name
     CUSTOM_OAUTH_GRANT_TYPE: ClassVar[str] = 'PYDPLUS_{env_name}_OAUTH_GRANT_TYPE'                  # Vars: env_name
     CUSTOM_OAUTH_CLIENT_AUTH: ClassVar[str] = 'PYDPLUS_{env_name}_OAUTH_CLIENT_AUTH'                # Vars: env_name
     CUSTOM_OAUTH_PRIVATE_KEY_PATH: ClassVar[str] = 'PYDPLUS_{env_name}_OAUTH_PRIVATE_KEY_PATH'      # Vars: env_name
@@ -448,6 +455,7 @@ class EnvVariables:
     PROD_OAUTH_ISSUER_URL: ClassVar[str] = CUSTOM_OAUTH_ISSUER_URL.format(env_name=PROD_ENVIRONMENT)
     PROD_OAUTH_CLIENT_ID: ClassVar[str] = CUSTOM_OAUTH_CLIENT_ID.format(env_name=PROD_ENVIRONMENT)
     PROD_OAUTH_SCOPE: ClassVar[str] = CUSTOM_OAUTH_SCOPE.format(env_name=PROD_ENVIRONMENT)
+    PROD_OAUTH_SCOPE_PRESET: ClassVar[str] = CUSTOM_OAUTH_SCOPE_PRESET.format(env_name=PROD_ENVIRONMENT)
     PROD_OAUTH_GRANT_TYPE: ClassVar[str] = CUSTOM_OAUTH_GRANT_TYPE.format(env_name=PROD_ENVIRONMENT)
     PROD_OAUTH_CLIENT_AUTH: ClassVar[str] = CUSTOM_OAUTH_CLIENT_AUTH.format(env_name=PROD_ENVIRONMENT)
     PROD_OAUTH_PRIVATE_KEY_PATH: ClassVar[str] = CUSTOM_OAUTH_PRIVATE_KEY_PATH.format(env_name=PROD_ENVIRONMENT)
@@ -479,6 +487,7 @@ class EnvVariables:
     DEV_OAUTH_ISSUER_URL: ClassVar[str] = CUSTOM_OAUTH_ISSUER_URL.format(env_name=DEV_ENVIRONMENT)
     DEV_OAUTH_CLIENT_ID: ClassVar[str] = CUSTOM_OAUTH_CLIENT_ID.format(env_name=DEV_ENVIRONMENT)
     DEV_OAUTH_SCOPE: ClassVar[str] = CUSTOM_OAUTH_SCOPE.format(env_name=DEV_ENVIRONMENT)
+    DEV_OAUTH_SCOPE_PRESET: ClassVar[str] = CUSTOM_OAUTH_SCOPE_PRESET.format(env_name=DEV_ENVIRONMENT)
     DEV_OAUTH_GRANT_TYPE: ClassVar[str] = CUSTOM_OAUTH_GRANT_TYPE.format(env_name=DEV_ENVIRONMENT)
     DEV_OAUTH_CLIENT_AUTH: ClassVar[str] = CUSTOM_OAUTH_CLIENT_AUTH.format(env_name=DEV_ENVIRONMENT)
     DEV_OAUTH_PRIVATE_KEY_PATH: ClassVar[str] = CUSTOM_OAUTH_PRIVATE_KEY_PATH.format(env_name=DEV_ENVIRONMENT)
@@ -503,6 +512,7 @@ class EnvVariables:
     OAUTH_ISSUER_URL_FIELD: ClassVar[str] = 'oauth_issuer_url'
     OAUTH_CLIENT_ID_FIELD: ClassVar[str] = 'oauth_client_id'
     OAUTH_SCOPE_FIELD: ClassVar[str] = 'oauth_scope'
+    OAUTH_SCOPE_PRESET_FIELD: ClassVar[str] = 'oauth_scope_preset'
     OAUTH_GRANT_TYPE_FIELD: ClassVar[str] = 'oauth_grant_type'
     OAUTH_CLIENT_AUTH_FIELD: ClassVar[str] = 'oauth_client_authentication'
     OAUTH_PRIVATE_KEY_PATH_FIELD: ClassVar[str] = 'oauth_private_key_path'
@@ -528,6 +538,7 @@ class EnvVariables:
             OAUTH_ISSUER_URL_FIELD: OAUTH_ISSUER_URL,
             OAUTH_CLIENT_ID_FIELD: OAUTH_CLIENT_ID,
             OAUTH_SCOPE_FIELD: OAUTH_SCOPE,
+            OAUTH_SCOPE_PRESET_FIELD: OAUTH_SCOPE_PRESET,
             OAUTH_GRANT_TYPE_FIELD: OAUTH_GRANT_TYPE,
             OAUTH_CLIENT_AUTH_FIELD: OAUTH_CLIENT_AUTH,
             OAUTH_PRIVATE_KEY_PATH_FIELD: OAUTH_PRIVATE_KEY_PATH,
@@ -550,6 +561,7 @@ class EnvVariables:
             OAUTH_ISSUER_URL_FIELD: PROD_OAUTH_ISSUER_URL,
             OAUTH_CLIENT_ID_FIELD: PROD_OAUTH_CLIENT_ID,
             OAUTH_SCOPE_FIELD: PROD_OAUTH_SCOPE,
+            OAUTH_SCOPE_PRESET_FIELD: PROD_OAUTH_SCOPE_PRESET,
             OAUTH_GRANT_TYPE_FIELD: PROD_OAUTH_GRANT_TYPE,
             OAUTH_CLIENT_AUTH_FIELD: PROD_OAUTH_CLIENT_AUTH,
             OAUTH_PRIVATE_KEY_PATH_FIELD: PROD_OAUTH_PRIVATE_KEY_PATH,
@@ -572,6 +584,7 @@ class EnvVariables:
             OAUTH_ISSUER_URL_FIELD: DEV_OAUTH_ISSUER_URL,
             OAUTH_CLIENT_ID_FIELD: DEV_OAUTH_CLIENT_ID,
             OAUTH_SCOPE_FIELD: DEV_OAUTH_SCOPE,
+            OAUTH_SCOPE_PRESET_FIELD: DEV_OAUTH_SCOPE_PRESET,
             OAUTH_GRANT_TYPE_FIELD: DEV_OAUTH_GRANT_TYPE,
             OAUTH_CLIENT_AUTH_FIELD: DEV_OAUTH_CLIENT_AUTH,
             OAUTH_PRIVATE_KEY_PATH_FIELD: DEV_OAUTH_PRIVATE_KEY_PATH,
@@ -594,6 +607,7 @@ class EnvVariables:
             OAUTH_ISSUER_URL_FIELD: CUSTOM_OAUTH_ISSUER_URL,
             OAUTH_CLIENT_ID_FIELD: CUSTOM_OAUTH_CLIENT_ID,
             OAUTH_SCOPE_FIELD: CUSTOM_OAUTH_SCOPE,
+            OAUTH_SCOPE_PRESET_FIELD: CUSTOM_OAUTH_SCOPE_PRESET,
             OAUTH_GRANT_TYPE_FIELD: CUSTOM_OAUTH_GRANT_TYPE,
             OAUTH_CLIENT_AUTH_FIELD: CUSTOM_OAUTH_CLIENT_AUTH,
             OAUTH_PRIVATE_KEY_PATH_FIELD: CUSTOM_OAUTH_PRIVATE_KEY_PATH,
@@ -628,6 +642,7 @@ class EnvVariables:
         OAUTH_ISSUER_URL_FIELD,
         OAUTH_CLIENT_ID_FIELD,
         OAUTH_SCOPE_FIELD,
+        OAUTH_SCOPE_PRESET_FIELD,
         OAUTH_GRANT_TYPE_FIELD,
         OAUTH_CLIENT_AUTH_FIELD,
         OAUTH_PRIVATE_KEY_PATH_FIELD,

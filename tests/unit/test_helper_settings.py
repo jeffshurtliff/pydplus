@@ -4,7 +4,7 @@
 :Synopsis:          Unit tests for helper configuration functions in pydplus.utils.helper
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff (via GPT-5.3-codex)
-:Modified Date:     25 Mar 2026
+:Modified Date:     29 Mar 2026
 """
 
 from __future__ import annotations
@@ -168,6 +168,7 @@ def test_get_helper_settings_parses_root_and_nested_settings(tmp_path: Path) -> 
         const.HELPER_SETTINGS.TENANT_NAME: 'tenant-a',
         const.HELPER_SETTINGS.BASE_URL: 'https://idp.example.com',
         const.HELPER_SETTINGS.CONNECTION_TYPE: const.CONNECTION_INFO.OAUTH,
+        const.HELPER_SETTINGS.OAUTH_SCOPE_PRESET: 'user_read_only',
         const.HELPER_SETTINGS.STRICT_MODE: 'yes',
         const.HELPER_SETTINGS.BASE_URLS: {
             const.HELPER_SETTINGS.ADMIN: 'https://admin.example.com',
@@ -196,6 +197,7 @@ def test_get_helper_settings_parses_root_and_nested_settings(tmp_path: Path) -> 
     assert settings[const.HELPER_SETTINGS.TENANT_NAME] == 'tenant-a'
     assert settings[const.HELPER_SETTINGS.BASE_URL] == 'https://idp.example.com'
     assert settings[const.HELPER_SETTINGS.CONNECTION_TYPE] == const.CONNECTION_INFO.OAUTH
+    assert settings[const.HELPER_SETTINGS.OAUTH_SCOPE_PRESET] == 'user_read_only'
     assert settings[const.HELPER_SETTINGS.STRICT_MODE] is True
     assert settings[const.HELPER_SETTINGS.VERIFY_SSL] is True
     assert settings[const.HELPER_SETTINGS.ADMIN_BASE_URL] == 'https://admin.example.com'

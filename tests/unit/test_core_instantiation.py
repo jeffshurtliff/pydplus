@@ -108,6 +108,58 @@ def test_compile_connection_info_ignores_invalid_oauth_scope_preset_values(sampl
     }
 
 
+def test_instantiate_core_object_merges_helper_oauth_scope_preset_with_explicit_scope(tmp_path: Path) -> None:
+    """Ensure helper-defined scope presets are merged with explicitly provided OAuth scopes."""
+    helper_payload = {
+        const.HELPER_SETTINGS.CONNECTION_TYPE: const.CONNECTION_INFO.OAUTH,
+        const.HELPER_SETTINGS.BASE_URLS: {
+            const.HELPER_SETTINGS.ADMIN: 'https://example-company.access.securid.com',
+        },
+        const.HELPER_SETTINGS.OAUTH_SCOPE_PRESET: 'user_read_only',
+    }
+    helper_file = tmp_path / 'helper.json'
+    helper_file.write_text(json.dumps(helper_payload), encoding='utf-8')
+
+    pydp_object = PyDPlus(
+        helper=str(helper_file),
+        oauth_client_id='oauth-client-id',
+        oauth_private_key_jwk='{"kty":"RSA","n":"abc","e":"AQAB","d":"xyz"}',
+        oauth_scope=const.OAUTH_SCOPES.USER_MANAGE,
+        auto_connect=False,
+    )
+    parsed_scopes = pydp_object.connection_info[const.CONNECTION_INFO.OAUTH][const.CONNECTION_INFO.OAUTH_SCOPE]
+    parsed_scopes = parsed_scopes.split('+')
+
+    assert set(parsed_scopes) == {
+        const.OAUTH_SCOPES.USER_MANAGE,
+        const.OAUTH_SCOPES.USER_READ,
+        const.OAUTH_SCOPES.USER_RISKY_READ,
+    }
+
+
+def test_instantiate_core_object_merges_env_oauth_scope_preset_with_explicit_scope(monkeypatch) -> None:
+    """Ensure environment-defined scope presets are merged with explicitly provided OAuth scopes."""
+    monkeypatch.setenv(const.ENV_VARIABLES.OAUTH_SCOPE_PRESET, 'group_read_only user_read_only')
+
+    pydp_object = PyDPlus(
+        base_admin_url='https://example-company.access.securid.com',
+        oauth_client_id='oauth-client-id',
+        oauth_private_key_jwk='{"kty":"RSA","n":"abc","e":"AQAB","d":"xyz"}',
+        oauth_scope=const.OAUTH_SCOPES.USER_MANAGE,
+        auto_connect=False,
+    )
+    parsed_scopes = pydp_object.connection_info[const.CONNECTION_INFO.OAUTH][const.CONNECTION_INFO.OAUTH_SCOPE]
+    parsed_scopes = parsed_scopes.split('+')
+
+    assert set(parsed_scopes) == {
+        const.OAUTH_SCOPES.USER_MANAGE,
+        const.OAUTH_SCOPES.USER_READ,
+        const.OAUTH_SCOPES.USER_RISKY_READ,
+        const.OAUTH_SCOPES.GROUP_READ,
+        const.OAUTH_SCOPES.GROUP_USERS_READ,
+    }
+
+
 def test_compile_connection_info_defaults_to_auth_base_url_for_oauth_issuer(sample_base_url: str) -> None:
     """Ensure OAuth issuer_url defaults to auth_base_url when both admin and auth URLs are defined."""
     connection_info = compile_connection_info(
