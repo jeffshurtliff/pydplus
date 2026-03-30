@@ -21,6 +21,21 @@ Integration tests are opt-in and skipped by default. To run them:
 poetry run pytest --run-integration -m integration -q
 ```
 
+## Linting and Formatting
+
+This project uses Ruff for linting, import sorting, and formatting.
+The repository line-length standard is `130` characters.
+
+Use line-length overrides only for comments or special situations where wrapping harms readability.
+Prefer targeted per-line `# noqa: E501` over broad file-level or global ignores.
+
+```bash
+poetry run ruff check .
+poetry run ruff check . --fix
+poetry run ruff format .
+poetry run ruff format . --check
+```
+
 ## Coverage
 
 Coverage is enabled via pytest defaults in `pyproject.toml` and generated on each run.

@@ -6,7 +6,7 @@
 :Example:           ``pydp = PyDPlus()``
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     29 Mar 2026
+:Modified Date:     30 Mar 2026
 """
 
 from __future__ import annotations
@@ -14,21 +14,21 @@ from __future__ import annotations
 import logging
 import os
 import urllib.parse
-from pathlib import Path
-from typing import Any, Optional, Union, Tuple
 from collections.abc import Iterable, Mapping
+from pathlib import Path
+from typing import Any, Optional, Tuple, Union
 
-from . import auth, api, errors
+from . import api, auth, errors
 from . import constants as const
-from .credentials import IDPlusLegacyKeyMaterial
 from . import users as users_module
+from .credentials import IDPlusLegacyKeyMaterial
 from .utils import core_utils
 from .utils.helper import get_helper_settings
 
 logger = logging.getLogger(__name__)
 
 
-class PyDPlus(object):
+class PyDPlus:
     """Class for the core client object.
 
     :param connection_info: Dictionary that defines the connection info to use
@@ -105,30 +105,31 @@ class PyDPlus(object):
              :py:exc:`pydplus.errors.exceptions.MissingRequiredDataError`,
              :py:exc:`pydplus.errors.exceptions.APIConnectionError`
     """
+
     def __init__(
-            self,
-            connection_info: Optional[dict] = None,
-            connection_type: Optional[str] = None,
-            tenant_name: Optional[str] = None,
-            base_url: Optional[str] = None,
-            base_admin_url: Optional[str] = None,
-            base_auth_url: Optional[str] = None,
-            env: Optional[str] = None,
-            private_key: Optional[str] = None,
-            legacy_access_id: Optional[str] = None,
-            legacy_key_material: Union[Optional[str], Optional[Path], Optional[IDPlusLegacyKeyMaterial]] = None,
-            oauth_client_id: Optional[str] = None,
-            oauth_private_key: Optional[str] = None,
-            oauth_private_key_jwk: Union[Optional[dict], Optional[str]] = None,
-            oauth_scope: Union[Optional[str], Optional[tuple], Optional[list], Optional[set], Optional[frozenset]] = None,
-            oauth_scope_preset: Union[Optional[str], Optional[tuple], Optional[list], Optional[set], Optional[frozenset]] = None,
-            verify_ssl: Optional[bool] = None,
-            auto_connect: bool = const.CLIENT_SETTINGS.DEFAULT_AUTO_CONNECT_VALUE,
-            strict_mode: Optional[bool] = None,
-            env_variables: Optional[dict] = None,
-            helper: Union[Optional[str], Optional[tuple], Optional[list], Optional[set], Optional[dict]] = None,
-            oauth_api_type: Optional[str] = None,
-            oauth_issuer_url: Optional[str] = None,
+        self,
+        connection_info: Optional[dict] = None,
+        connection_type: Optional[str] = None,
+        tenant_name: Optional[str] = None,
+        base_url: Optional[str] = None,
+        base_admin_url: Optional[str] = None,
+        base_auth_url: Optional[str] = None,
+        env: Optional[str] = None,
+        private_key: Optional[str] = None,
+        legacy_access_id: Optional[str] = None,
+        legacy_key_material: Union[Optional[str], Optional[Path], Optional[IDPlusLegacyKeyMaterial]] = None,
+        oauth_client_id: Optional[str] = None,
+        oauth_private_key: Optional[str] = None,
+        oauth_private_key_jwk: Union[Optional[dict], Optional[str]] = None,
+        oauth_scope: Union[Optional[str], Optional[tuple], Optional[list], Optional[set], Optional[frozenset]] = None,
+        oauth_scope_preset: Union[Optional[str], Optional[tuple], Optional[list], Optional[set], Optional[frozenset]] = None,
+        verify_ssl: Optional[bool] = None,
+        auto_connect: bool = const.CLIENT_SETTINGS.DEFAULT_AUTO_CONNECT_VALUE,
+        strict_mode: Optional[bool] = None,
+        env_variables: Optional[dict] = None,
+        helper: Union[Optional[str], Optional[tuple], Optional[list], Optional[set], Optional[dict]] = None,
+        oauth_api_type: Optional[str] = None,
+        oauth_issuer_url: Optional[str] = None,
     ):
         """Instantiate the core client object."""
         # Define the initial properties and settings
@@ -157,10 +158,10 @@ class PyDPlus(object):
         self._get_env_variables()
 
         # Define the strict_mode setting using a passed argument, helper setting, or environment variable
-        self._define_strict_mode(strict_mode)                           # Defines self.strict_mode
+        self._define_strict_mode(strict_mode)  # Defines self.strict_mode
 
         # Define the verify_ssl value either from a user-defined setting or using the default value
-        self._get_verify_ssl_setting(verify_ssl)                        # Defines self.verify_ssl
+        self._get_verify_ssl_setting(verify_ssl)  # Defines self.verify_ssl
 
         # Define the legacy key material when applicable
         self.legacy_key_material = self._parse_legacy_key_material(legacy_key_material, connection_info)
@@ -168,15 +169,15 @@ class PyDPlus(object):
         # Use parsed key material as a base URL fallback when no explicit values were provided
         if self.legacy_key_material:
             if not base_url:
-                base_url = self.legacy_key_material.admin_rest_api_url            # Base URL will be parsed below
+                base_url = self.legacy_key_material.admin_rest_api_url  # Base URL will be parsed below
             if not base_admin_url:
-                base_admin_url = self.legacy_key_material.admin_rest_api_url      # Base Admin URL will be parsed below
+                base_admin_url = self.legacy_key_material.admin_rest_api_url  # Base Admin URL will be parsed below
 
         # Define the base_url value or raise an exception if it cannot be defined
-        self._define_base_url(base_url)                                 # Defines self.base_url
+        self._define_base_url(base_url)  # Defines self.base_url
 
         # Define the admin_base_url (required) and auth_base_url (optional) values
-        self._define_base_urls(base_admin_url, base_auth_url)           # Defines self.admin_base_url, self.auth_base_url
+        self._define_base_urls(base_admin_url, base_auth_url)  # Defines self.admin_base_url, self.auth_base_url
 
         # Define the Administration API base REST URL to use in API calls
         self.admin_base_rest_url = self.admin_base_url + const.REST_PATHS.ADMIN_BASE
@@ -185,7 +186,7 @@ class PyDPlus(object):
         self.auth_base_rest_url = self.auth_base_url + const.REST_PATHS.AUTH_BASE if self.auth_base_url else None
 
         # Define which API type should be used when inferring OAuth issuer URL values
-        self._define_oauth_api_type(oauth_api_type)                    # Defines self.oauth_api_type
+        self._define_oauth_api_type(oauth_api_type)  # Defines self.oauth_api_type
 
         # Check for provided connection info and define the class object attribute
         self._validate_connection_info(
@@ -202,7 +203,7 @@ class PyDPlus(object):
         )
 
         # Define the connection type that should be used to authenticate
-        self._get_connection_type(connection_type)                      # Defines self.connection_type
+        self._get_connection_type(connection_type)  # Defines self.connection_type
 
         # Connect to the tenant (if auto-connect is enabled) and retrieve the base API headers
         if self.auto_connect:
@@ -249,28 +250,38 @@ class PyDPlus(object):
         _env_material_path_key = const.ENV_VARIABLES.LEGACY_KEY_MATERIAL_PATH_FIELD
 
         # Attempt to define the full path using the connection_info dictionary if defined
-        if (_connection_info and isinstance(_connection_info.get(_legacy_key), dict)
-                and isinstance(_connection_info[_legacy_key].get(_material_file_key), str)
-                and _connection_info[_legacy_key][_material_file_key]):
+        if (
+            _connection_info
+            and isinstance(_connection_info.get(_legacy_key), dict)
+            and isinstance(_connection_info[_legacy_key].get(_material_file_key), str)
+            and _connection_info[_legacy_key][_material_file_key]
+        ):
             _key_material_path = _connection_info[_legacy_key][_material_file_key]
 
             # Check if a path is also defined as part of the connection_info dictionary
-            if (isinstance(_connection_info[_legacy_key].get(_material_path_key), str)
-                    and _connection_info[_legacy_key][_material_path_key]):
+            if (
+                isinstance(_connection_info[_legacy_key].get(_material_path_key), str)
+                and _connection_info[_legacy_key][_material_path_key]
+            ):
                 _path_to_material_file = core_utils.ensure_ending_slash(_connection_info[_legacy_key][_material_path_key])
                 _key_material_path = _path_to_material_file + _key_material_path
             logger.debug(f"Defined '{_key_material_path}' as the path to the key material file via connection_info")
 
         # Attempt to define the full path using the helper settings if defined
-        elif (self._helper_settings and _helper_conn_key in self._helper_settings
-              and isinstance(self._helper_settings[_helper_conn_key].get(_legacy_key), dict)
-              and isinstance(self._helper_settings[_helper_conn_key][_legacy_key].get(_material_file_key), str)
-              and self._helper_settings[_helper_conn_key][_legacy_key][_material_file_key]):
+        elif (
+            self._helper_settings
+            and _helper_conn_key in self._helper_settings
+            and isinstance(self._helper_settings[_helper_conn_key].get(_legacy_key), dict)
+            and isinstance(self._helper_settings[_helper_conn_key][_legacy_key].get(_material_file_key), str)
+            and self._helper_settings[_helper_conn_key][_legacy_key][_material_file_key]
+        ):
             _key_material_path = self._helper_settings[_helper_conn_key][_legacy_key][_material_file_key]
 
             # Check if a path is also defined as part of the helper settings
-            if (isinstance(self._helper_settings[_helper_conn_key][_legacy_key].get(_material_path_key), str)
-                    and self._helper_settings[_helper_conn_key][_legacy_key][_material_path_key]):
+            if (
+                isinstance(self._helper_settings[_helper_conn_key][_legacy_key].get(_material_path_key), str)
+                and self._helper_settings[_helper_conn_key][_legacy_key][_material_path_key]
+            ):
                 _path_to_material_file = core_utils.ensure_ending_slash(
                     self._helper_settings[_helper_conn_key][_legacy_key][_material_path_key]
                 )
@@ -278,13 +289,15 @@ class PyDPlus(object):
             logger.debug(f"Defined '{_key_material_path}' as the path to the key material file via helper settings")
 
         # Attempt to define the full path using environment variables if defined
-        elif (self._env_variables and isinstance(self._env_variables.get(_env_material_file_key), str)
-              and self._env_variables[_env_material_file_key]):
+        elif (
+            self._env_variables
+            and isinstance(self._env_variables.get(_env_material_file_key), str)
+            and self._env_variables[_env_material_file_key]
+        ):
             _key_material_path = self._env_variables[_env_material_file_key]
 
             # Check if a path is also defined as an environment variable
-            if (isinstance(self._env_variables.get(_env_material_path_key), str)
-                    and self._env_variables[_env_material_path_key]):
+            if isinstance(self._env_variables.get(_env_material_path_key), str) and self._env_variables[_env_material_path_key]:
                 _path_to_material_file = core_utils.ensure_ending_slash(self._env_variables[_env_material_path_key])
                 _key_material_path = _path_to_material_file + _key_material_path
             logger.debug(f"Defined '{_key_material_path}' as the path to the key material file via environment variables")
@@ -295,9 +308,9 @@ class PyDPlus(object):
         return _key_material_path
 
     def _parse_legacy_key_material(
-            self,
-            _legacy_key_material: Union[Optional[str], Optional[Path], Optional[IDPlusLegacyKeyMaterial]] = None,
-            _connection_info: Optional[dict] = None,
+        self,
+        _legacy_key_material: Union[Optional[str], Optional[Path], Optional[IDPlusLegacyKeyMaterial]] = None,
+        _connection_info: Optional[dict] = None,
     ) -> Optional[IDPlusLegacyKeyMaterial]:
         """Parse and validate the legacy key material if provided."""
         # Attempt to define the legacy key material file path if not defined via argument
@@ -311,15 +324,16 @@ class PyDPlus(object):
             return _legacy_key_material
         if isinstance(_legacy_key_material, (str, Path)):
             return IDPlusLegacyKeyMaterial.from_file(_legacy_key_material)
-        _error_msg = ("The 'legacy_key_material' parameter must be a string path, pathlib.Path value, "
-                      "or IDPlusLegacyKeyMaterial object")
+        _error_msg = (
+            "The 'legacy_key_material' parameter must be a string path, pathlib.Path value, or IDPlusLegacyKeyMaterial object"
+        )
         logger.error(_error_msg)
         raise TypeError(_error_msg)
 
     def _get_env_name(self, _env: Optional[str] = None) -> None:
         """Identify the environment name if defined with an argument or environment variable."""
         setting = 'environment name'
-        methods = const.ARGUMENT_VALUES.PROVIDED_METHODS                # arg, helper, or env
+        methods = const.ARGUMENT_VALUES.PROVIDED_METHODS  # arg, helper, or env
         debug_msg = const._LOG_MESSAGES._CLIENT_SETTING_CONFIGURED
 
         # Attempt to define the environment name using a passed argument
@@ -332,9 +346,12 @@ class PyDPlus(object):
             logger.debug(debug_msg.format(setting=setting, value=self.env, method=methods[0]))
 
         # Attempt to define the environment name using helper settings if configured
-        if (not self.env and self._helper_settings
-                and isinstance(self._helper_settings.get(const.HELPER_SETTINGS.ENV_NAME), str)
-                and self._helper_settings[const.HELPER_SETTINGS.ENV_NAME]):
+        if (
+            not self.env
+            and self._helper_settings
+            and isinstance(self._helper_settings.get(const.HELPER_SETTINGS.ENV_NAME), str)
+            and self._helper_settings[const.HELPER_SETTINGS.ENV_NAME]
+        ):
             self.env = self._helper_settings[const.HELPER_SETTINGS.ENV_NAME].upper()
             logger.debug(debug_msg.format(setting=setting, value=self.env, method=methods[1]))
 
@@ -358,9 +375,7 @@ class PyDPlus(object):
 
         # Check for custom environment variable names provided within the helper settings (or environment-specific)
         elif const.HELPER_SETTINGS.ENV_VARIABLES in self._helper_settings:
-            self._get_env_variable_names(
-                self._helper_settings.get(const.HELPER_SETTINGS.ENV_VARIABLES, {})
-            )
+            self._get_env_variable_names(self._helper_settings.get(const.HELPER_SETTINGS.ENV_VARIABLES, {}))
 
         # Check for environment-specific variable names or use the default
         else:
@@ -380,8 +395,10 @@ class PyDPlus(object):
                     _env_specific_names[_name_key] = _env_specific_value
                 except Exception as _exc:
                     _exc_type = core_utils.get_exception_type(_exc)
-                    _error_msg = (f"Failed to retrieve the '{_name_key}' environment variable name specific to the "
-                                  f"{self.env} environment due to {_exc_type} exception: {_exc}")
+                    _error_msg = (
+                        f"Failed to retrieve the '{_name_key}' environment variable name specific to the "
+                        f'{self.env} environment due to {_exc_type} exception: {_exc}'
+                    )
                     logger.exception(_error_msg)
                     logger.warning(f"Defaulting to the environment variable {_name_value} for '{_name_key}'")
                     _env_specific_names[_name_key] = _name_value
@@ -407,7 +424,7 @@ class PyDPlus(object):
         """Retrieve any defined environment variables to use with the instantiated core object."""
         _env_variables = {}
         for _config_name, _var_name in self._env_variable_names.items():
-            _var_value = os.getenv(_var_name)                               # Returns None if not found
+            _var_value = os.getenv(_var_name)  # Returns None if not found
             _env_variables.update({_config_name: _var_value})
         self._env_variables = _env_variables
 
@@ -428,16 +445,21 @@ class PyDPlus(object):
             logger.debug(debug_msg.format(setting=setting, value=self.strict_mode, method=methods[0]))
 
         # Check the helper settings to see if strict mode was defined
-        elif (self._helper_settings and const.HELPER_SETTINGS.STRICT_MODE in self._helper_settings
-                and isinstance(self._helper_settings[const.HELPER_SETTINGS.STRICT_MODE], bool)
-                and self._helper_settings[const.HELPER_SETTINGS.STRICT_MODE] is not None):
+        elif (
+            self._helper_settings
+            and const.HELPER_SETTINGS.STRICT_MODE in self._helper_settings
+            and isinstance(self._helper_settings[const.HELPER_SETTINGS.STRICT_MODE], bool)
+            and self._helper_settings[const.HELPER_SETTINGS.STRICT_MODE] is not None
+        ):
             self.strict_mode = self._helper_settings.get(const.HELPER_SETTINGS.STRICT_MODE)
             logger.debug(debug_msg.format(setting=setting, value=self.strict_mode, method=methods[1]))
 
         # Check the environment variables to see if strict mode was defined
-        elif (const.ENV_VARIABLES.STRICT_MODE_FIELD in self._env_variables
-              and isinstance(self._env_variables[const.ENV_VARIABLES.STRICT_MODE_FIELD], bool)
-              and self._env_variables[const.ENV_VARIABLES.STRICT_MODE_FIELD] is not None):
+        elif (
+            const.ENV_VARIABLES.STRICT_MODE_FIELD in self._env_variables
+            and isinstance(self._env_variables[const.ENV_VARIABLES.STRICT_MODE_FIELD], bool)
+            and self._env_variables[const.ENV_VARIABLES.STRICT_MODE_FIELD] is not None
+        ):
             self.strict_mode = self._env_variables.get(const.ENV_VARIABLES.STRICT_MODE_FIELD)
             logger.debug(debug_msg.format(setting=setting, value=self.strict_mode, method=methods[2]))
 
@@ -448,8 +470,9 @@ class PyDPlus(object):
 
     def _check_for_connection_type_mismatch(self):
         if self.legacy_key_material and self.connection_type == const.CONNECTION_INFO.OAUTH:
-            _warn_msg = ('Legacy key material was provided but will be ignored as the connection_type was explicitly '
-                         'defined as OAuth')
+            _warn_msg = (
+                'Legacy key material was provided but will be ignored as the connection_type was explicitly defined as OAuth'
+            )
             # TODO: Call method for displaying warnings when a related setting is enabled
             logger.warning(_warn_msg)
 
@@ -483,7 +506,7 @@ class PyDPlus(object):
         """Define the connection type that should be used to authenticate to the RSA ID Plus tenant."""
         self.connection_type = None
         setting = const.CLIENT_SETTINGS.CONNECTION_TYPE
-        methods = const.ARGUMENT_VALUES.PROVIDED_METHODS                    # arg, helper, or env
+        methods = const.ARGUMENT_VALUES.PROVIDED_METHODS  # arg, helper, or env
         debug_msg = const._LOG_MESSAGES._CLIENT_SETTING_CONFIGURED
 
         # Check if the connection type was passed as an argument and leverage it if valid
@@ -498,9 +521,12 @@ class PyDPlus(object):
                 logger.error(_error_msg)
 
         # Attempt to retrieve the connection type via helper settings if present and populated
-        if (not self.connection_type and self._helper_settings
-                and const.HELPER_SETTINGS.CONNECTION_TYPE in self._helper_settings
-                and self._helper_settings[const.HELPER_SETTINGS.CONNECTION_TYPE] is not None):
+        if (
+            not self.connection_type
+            and self._helper_settings
+            and const.HELPER_SETTINGS.CONNECTION_TYPE in self._helper_settings
+            and self._helper_settings[const.HELPER_SETTINGS.CONNECTION_TYPE] is not None
+        ):
             _helper_connection_type = self._helper_settings.get(const.HELPER_SETTINGS.CONNECTION_TYPE)
             if _helper_connection_type in const.CONNECTION_INFO.VALID_CONNECTION_TYPES:
                 self.connection_type = _helper_connection_type
@@ -508,13 +534,16 @@ class PyDPlus(object):
             else:
                 _error_msg = 'The connection_type value in the helper settings is invalid and will be ignored'
                 _expected_types = ','.join(const.CONNECTION_INFO.VALID_CONNECTION_TYPES)
-                _error_msg += f" (Expected: {_expected_types}; Provided: {_helper_connection_type})"
+                _error_msg += f' (Expected: {_expected_types}; Provided: {_helper_connection_type})'
                 logger.error(_error_msg)
 
         # Attempt to retrieve the connection type via environment variable if defined
-        if (not self.connection_type and self._env_variables
-                and const.ENV_VARIABLES.CONNECTION_TYPE_FIELD in self._env_variables
-                and self._env_variables[const.ENV_VARIABLES.CONNECTION_TYPE_FIELD] is not None):
+        if (
+            not self.connection_type
+            and self._env_variables
+            and const.ENV_VARIABLES.CONNECTION_TYPE_FIELD in self._env_variables
+            and self._env_variables[const.ENV_VARIABLES.CONNECTION_TYPE_FIELD] is not None
+        ):
             _env_connection_type = self._env_variables[const.ENV_VARIABLES.CONNECTION_TYPE_FIELD]
             if _env_connection_type in const.CONNECTION_INFO.VALID_CONNECTION_TYPES:
                 self.connection_type = _env_connection_type
@@ -542,13 +571,15 @@ class PyDPlus(object):
 
         # Fallback to default when no complete credential set is detected.
         self.connection_type = const.CONNECTION_INFO.DEFAULT_CONNECTION_TYPE
-        logger.info(f"The default connection_type '{const.CONNECTION_INFO.DEFAULT_CONNECTION_TYPE}' will be used "
-                    "as a complete credential set could not be auto-detected")
+        logger.info(
+            f"The default connection_type '{const.CONNECTION_INFO.DEFAULT_CONNECTION_TYPE}' will be used "
+            'as a complete credential set could not be auto-detected'
+        )
 
     def _get_verify_ssl_setting(self, _verify_ssl_from_arg: Optional[bool]) -> None:
         """Determine the ``verify_ssl`` value from a passed argument, helper setting, or environment variable."""
         setting = const.CLIENT_SETTINGS.VERIFY_SSL
-        methods = const.ARGUMENT_VALUES.PROVIDED_METHODS                            # arg, helper, or env
+        methods = const.ARGUMENT_VALUES.PROVIDED_METHODS  # arg, helper, or env
         debug_msg = const._LOG_MESSAGES._CLIENT_SETTING_CONFIGURED
         default_debug_msg = const._LOG_MESSAGES._WILL_USE_DEFAULT_VALUE
 
@@ -558,20 +589,26 @@ class PyDPlus(object):
             logger.debug(debug_msg.format(setting=setting, value=self.verify_ssl, method=methods[0]))
 
         # Attempt to define the verify_ssl value using Helper Settings if present and populated
-        elif (self._helper_settings and const.HELPER_SETTINGS.VERIFY_SSL in self._helper_settings
-              and self._helper_settings[const.HELPER_SETTINGS.VERIFY_SSL] is not None):
+        elif (
+            self._helper_settings
+            and const.HELPER_SETTINGS.VERIFY_SSL in self._helper_settings
+            and self._helper_settings[const.HELPER_SETTINGS.VERIFY_SSL] is not None
+        ):
             self.verify_ssl = self._helper_settings.get(
                 const.HELPER_SETTINGS.VERIFY_SSL,
-                const.CLIENT_SETTINGS.DEFAULT_VERIFY_SSL_VALUE      # Fallback value
+                const.CLIENT_SETTINGS.DEFAULT_VERIFY_SSL_VALUE,  # Fallback value
             )
             logger.debug(debug_msg.format(setting=setting, value=self.verify_ssl, method=methods[1]))
 
         # Attempt to define the verify_ssl value using an environment variable if defined
-        elif (self._env_variables and const.ENV_VARIABLES.VERIFY_SSL_FIELD in self._env_variables
-              and self._env_variables[const.ENV_VARIABLES.VERIFY_SSL_FIELD] is not None):
+        elif (
+            self._env_variables
+            and const.ENV_VARIABLES.VERIFY_SSL_FIELD in self._env_variables
+            and self._env_variables[const.ENV_VARIABLES.VERIFY_SSL_FIELD] is not None
+        ):
             self.verify_ssl = self._env_variables.get(
                 const.ENV_VARIABLES.VERIFY_SSL_FIELD,
-                const.CLIENT_SETTINGS.DEFAULT_VERIFY_SSL_VALUE      # Fallback value
+                const.CLIENT_SETTINGS.DEFAULT_VERIFY_SSL_VALUE,  # Fallback value
             )
             logger.debug(debug_msg.format(setting=setting, value=self.verify_ssl, method=methods[2]))
 
@@ -591,17 +628,14 @@ class PyDPlus(object):
             if not isinstance(_oauth_api_type_from_arg, str):
                 _error_msg = (
                     f"The '{setting}' argument is an invalid data type "
-                    f"(Expected: str, Provided: {type(_oauth_api_type_from_arg)})"
+                    f'(Expected: str, Provided: {type(_oauth_api_type_from_arg)})'
                 )
                 logger.error(_error_msg)
                 raise TypeError(_error_msg)
             _oauth_api_type = _oauth_api_type_from_arg.strip().lower()
             if _oauth_api_type not in const.VALID_API_TYPES:
                 _valid_values = ','.join(sorted(const.VALID_API_TYPES))
-                _error_msg = (
-                    f"The '{setting}' value '{_oauth_api_type_from_arg}' is invalid "
-                    f"(Expected one of: {_valid_values})"
-                )
+                _error_msg = f"The '{setting}' value '{_oauth_api_type_from_arg}' is invalid (Expected one of: {_valid_values})"
                 logger.error(_error_msg)
                 raise ValueError(_error_msg)
             self.oauth_api_type = _oauth_api_type
@@ -639,7 +673,7 @@ class PyDPlus(object):
         """Define the base_url value from user-defined setting or raise an exception if it cannot be defined."""
         # Attempt to define the base URL value for the Administration API by first checking if defined via argument
         setting = const.CLIENT_SETTINGS.BASE_URL
-        methods = const.ARGUMENT_VALUES.PROVIDED_METHODS                            # arg, helper, or env
+        methods = const.ARGUMENT_VALUES.PROVIDED_METHODS  # arg, helper, or env
         debug_msg = const._LOG_MESSAGES._CLIENT_SETTING_CONFIGURED
 
         if _base_url_from_arg:
@@ -647,14 +681,18 @@ class PyDPlus(object):
             logger.debug(debug_msg.format(setting=setting, value=self.base_url, method=methods[0]))
 
         # Attempt to define the base URL using the helper settings if defined and populated
-        elif (self._helper_settings and const.HELPER_SETTINGS.BASE_URL in self._helper_settings
-              and self._helper_settings[const.HELPER_SETTINGS.BASE_URL]):
+        elif (
+            self._helper_settings
+            and const.HELPER_SETTINGS.BASE_URL in self._helper_settings
+            and self._helper_settings[const.HELPER_SETTINGS.BASE_URL]
+        ):
             self.base_url = core_utils.get_base_url(self._helper_settings.get(const.HELPER_SETTINGS.BASE_URL))
             logger.debug(debug_msg.format(setting=setting, value=self.base_url, method=methods[1]))
 
         # Attempt to define the base URL using an environment variable if defined
-        elif (const.ENV_VARIABLES.BASE_URL_FIELD in self._env_variables
-              and self._env_variables[const.ENV_VARIABLES.BASE_URL_FIELD]):
+        elif (
+            const.ENV_VARIABLES.BASE_URL_FIELD in self._env_variables and self._env_variables[const.ENV_VARIABLES.BASE_URL_FIELD]
+        ):
             self.base_url = core_utils.get_base_url(self._env_variables.get(const.ENV_VARIABLES.BASE_URL_FIELD))
             logger.debug(debug_msg.format(setting=setting, value=self.base_url, method=methods[2]))
 
@@ -663,9 +701,9 @@ class PyDPlus(object):
             self.base_url = None
 
     def _identify_base_url(
-            self,
-            _api_type: str,
-            _base_url_arg: Optional[str] = None,
+        self,
+        _api_type: str,
+        _base_url_arg: Optional[str] = None,
     ) -> str:
         """Identify the base URL for a specific API type and return the value."""
         # Define the lookup field for the applicable base URL
@@ -676,8 +714,7 @@ class PyDPlus(object):
             _base_url = core_utils.get_base_url(_base_url_arg)
 
         # Attempt to define the base URL using the helper settings if defined and populated
-        elif (self._helper_settings and _lookup_field in self._helper_settings
-              and self._helper_settings[_lookup_field]):
+        elif self._helper_settings and _lookup_field in self._helper_settings and self._helper_settings[_lookup_field]:
             _base_url = core_utils.get_base_url(self._helper_settings.get(_lookup_field))
 
         # Attempt to define the base URL using an environment variable if defined
@@ -692,9 +729,9 @@ class PyDPlus(object):
         return _base_url
 
     def _define_base_urls(
-            self,
-            _base_admin_url_arg: Optional[str],
-            _base_auth_url_arg: Optional[str],
+        self,
+        _base_admin_url_arg: Optional[str],
+        _base_auth_url_arg: Optional[str],
     ) -> None:
         """Define the base URLs for the Administration API (required)and the Authentication API (optional)."""
         # Attempt to define the admin_base_url value (required)
@@ -710,8 +747,10 @@ class PyDPlus(object):
 
             # Raise an exception if a base URL could not be defined
             if not self.admin_base_url:
-                _error_msg = ('A base URL for the Administration API must be defined in order to fully instantiate '
-                              'the PyDPlus client object')
+                _error_msg = (
+                    'A base URL for the Administration API must be defined in order to fully '
+                    'instantiate the PyDPlus client object'
+                )
                 logger.error(_error_msg)
                 raise errors.exceptions.MissingRequiredDataError(_error_msg)
 
@@ -741,17 +780,17 @@ class PyDPlus(object):
             self.auth_base_url = core_utils.remove_ending_slash(self.auth_base_url)
 
     def _validate_connection_info(
-            self,
-            _connection_info: Optional[dict] = None,
-            _private_key: Optional[str] = None,
-            _legacy_access_id: Optional[str] = None,
-            _oauth_client_id: Optional[str] = None,
-            _oauth_issuer_url: Optional[str] = None,
-            _oauth_private_key: Optional[str] = None,
-            _oauth_private_key_jwk: Union[Optional[dict], Optional[str]] = None,
-            _oauth_scope: Union[Optional[str], Optional[tuple], Optional[list], Optional[set], Optional[frozenset]] = None,
-            _oauth_scope_preset: Union[Optional[str], Optional[tuple[str]], Optional[list[str]], Optional[set[str]]] = None,
-            _legacy_key_material: Optional[IDPlusLegacyKeyMaterial] = None,
+        self,
+        _connection_info: Optional[dict] = None,
+        _private_key: Optional[str] = None,
+        _legacy_access_id: Optional[str] = None,
+        _oauth_client_id: Optional[str] = None,
+        _oauth_issuer_url: Optional[str] = None,
+        _oauth_private_key: Optional[str] = None,
+        _oauth_private_key_jwk: Union[Optional[dict], Optional[str]] = None,
+        _oauth_scope: Union[Optional[str], Optional[tuple], Optional[list], Optional[set], Optional[frozenset]] = None,
+        _oauth_scope_preset: Union[Optional[str], Optional[tuple[str]], Optional[list[str]], Optional[set[str]]] = None,
+        _legacy_key_material: Optional[IDPlusLegacyKeyMaterial] = None,
     ) -> None:
         """Check for provided connection info and define the class object attribute."""
         if _legacy_key_material and not _legacy_access_id:
@@ -799,8 +838,8 @@ class PyDPlus(object):
 
     @staticmethod
     def _merge_legacy_key_material(
-            _connection_info: Optional[dict],
-            _legacy_key_material: IDPlusLegacyKeyMaterial,
+        _connection_info: Optional[dict],
+        _legacy_key_material: IDPlusLegacyKeyMaterial,
     ) -> dict:
         """Merge legacy key material into connection info without overriding explicit file-path values."""
         if not _connection_info:
@@ -823,10 +862,7 @@ class PyDPlus(object):
         _helper_connection_info: dict[str, dict[str, Any]] = {}
         for _section, _key_list in const.CONNECTION_INFO.CONNECTION_FIELDS.items():
             _section_data = _helper_connection.get(_section, {})
-            _helper_connection_info[_section] = {
-                _key: _section_data.get(_key)
-                for _key in _key_list
-            }
+            _helper_connection_info[_section] = {_key: _section_data.get(_key) for _key in _key_list}
         return _helper_connection_info
 
     def _parse_env_connection_info(self) -> dict[str, dict[str, Any]]:
@@ -834,8 +870,8 @@ class PyDPlus(object):
         _env_connection_info: dict[str, dict[str, Any]] = {}
 
         for _section, _field_mapping in (
-                (const.CONNECTION_INFO.LEGACY, const.HELPER_SETTINGS.ENV_LEGACY_CONNECTION_MAPPING),
-                (const.CONNECTION_INFO.OAUTH, const.HELPER_SETTINGS.ENV_OAUTH_CONNECTION_MAPPING),
+            (const.CONNECTION_INFO.LEGACY, const.HELPER_SETTINGS.ENV_LEGACY_CONNECTION_MAPPING),
+            (const.CONNECTION_INFO.OAUTH, const.HELPER_SETTINGS.ENV_OAUTH_CONNECTION_MAPPING),
         ):
             _env_connection_info[_section] = {
                 _connection_field: self._env_variables.get(_env_variable_field)
@@ -846,7 +882,7 @@ class PyDPlus(object):
 
     @staticmethod
     def _parse_oauth_scope_preset_values(
-            _oauth_scope_preset: Union[Optional[str], Optional[tuple[str]], Optional[list[str]], Optional[set[str]]],
+        _oauth_scope_preset: Union[Optional[str], Optional[tuple[str]], Optional[list[str]], Optional[set[str]]],
     ) -> list[str]:
         """Parse OAuth scope preset values into a normalized list."""
         if _oauth_scope_preset is None:
@@ -854,41 +890,40 @@ class PyDPlus(object):
 
         _parsed_preset_values: list[str] = []
         if isinstance(_oauth_scope_preset, str):
-            _parsed_preset_values.extend(
-                _oauth_scope_preset.replace('+', ' ').replace(',', ' ').split()
-            )
+            _parsed_preset_values.extend(_oauth_scope_preset.replace('+', ' ').replace(',', ' ').split())
             return _parsed_preset_values
 
         if isinstance(_oauth_scope_preset, Iterable):
             for _scope_preset_value in _oauth_scope_preset:
                 if not isinstance(_scope_preset_value, str):
-                    _error_msg = ("The 'oauth_scope_preset' values must be strings "
-                                  f"(provided element type: {type(_scope_preset_value)})")
+                    _error_msg = (
+                        f"The 'oauth_scope_preset' values must be strings (provided element type: {type(_scope_preset_value)})"
+                    )
                     logger.error(_error_msg)
                     raise TypeError(_error_msg)
-                _parsed_preset_values.extend(
-                    _scope_preset_value.replace('+', ' ').replace(',', ' ').split()
-                )
+                _parsed_preset_values.extend(_scope_preset_value.replace('+', ' ').replace(',', ' ').split())
             return _parsed_preset_values
 
-        _error_msg = ("The 'oauth_scope_preset' value must be supplied as a string or iterable of strings "
-                      f"(provided: {type(_oauth_scope_preset)})")
+        _error_msg = (
+            "The 'oauth_scope_preset' value must be supplied as a string or iterable of strings "
+            f'(provided: {type(_oauth_scope_preset)})'
+        )
         logger.error(_error_msg)
         raise TypeError(_error_msg)
 
     def _define_oauth_scope_from_presets(
-            self,
-            _connection_info: dict[str, dict[str, Any]],
-            _oauth_scope_preset_from_arg: Union[Optional[str], Optional[tuple[str]], Optional[list[str]], Optional[set[str]]],
+        self,
+        _connection_info: dict[str, dict[str, Any]],
+        _oauth_scope_preset_from_arg: Union[Optional[str], Optional[tuple[str]], Optional[list[str]], Optional[set[str]]],
     ) -> dict[str, dict[str, Any]]:
         """Define OAuth scopes by merging explicit scopes with any presets from all supported sources."""
         _combined_scope_presets: list[str] = []
         _seen_scope_presets: set[str] = set()
 
         for _scope_preset_values in (
-                _oauth_scope_preset_from_arg,
-                self._helper_settings.get(const.HELPER_SETTINGS.OAUTH_SCOPE_PRESET),
-                self._env_variables.get(const.ENV_VARIABLES.OAUTH_SCOPE_PRESET_FIELD),
+            _oauth_scope_preset_from_arg,
+            self._helper_settings.get(const.HELPER_SETTINGS.OAUTH_SCOPE_PRESET),
+            self._env_variables.get(const.ENV_VARIABLES.OAUTH_SCOPE_PRESET_FIELD),
         ):
             for _scope_preset_value in self._parse_oauth_scope_preset_values(_scope_preset_values):
                 _normalized_scope_preset_value = _scope_preset_value.strip().lower()
@@ -908,8 +943,8 @@ class PyDPlus(object):
 
     @staticmethod
     def _merge_connection_variables(
-            _defined_info: Optional[Mapping[str, Mapping[str, Any]]] = None,
-            _supplemental_info: Optional[Mapping[str, Mapping[str, Any]]] = None,
+        _defined_info: Optional[Mapping[str, Mapping[str, Any]]] = None,
+        _supplemental_info: Optional[Mapping[str, Mapping[str, Any]]] = None,
     ) -> dict[str, dict[str, Any]]:
         """Merge explicit connection values with supplemental helper or environment values."""
         _merged_connection_info: dict[str, dict[str, Any]] = {}
@@ -944,19 +979,24 @@ class PyDPlus(object):
             _issuer_base_url = self.base_url
 
         # Populate the Issuer URL value for OAuth connections if not defined
-        if ((_issuer_url_key not in _partial_connection_info[_oauth_key]
-             or not _partial_connection_info[_oauth_key][_issuer_url_key])
-                and _issuer_base_url is not None):
+        if (
+            _issuer_url_key not in _partial_connection_info[_oauth_key]
+            or not _partial_connection_info[_oauth_key][_issuer_url_key]
+        ) and _issuer_base_url is not None:
             _partial_connection_info[_oauth_key][_issuer_url_key] = const.URLS.OAUTH.format(base_url=_issuer_base_url)
 
         # Populate the Grant Type value for OAuth connections if not defined
-        if (_grant_type_key not in _partial_connection_info[_oauth_key]
-                or not _partial_connection_info[_oauth_key][_grant_type_key]):
+        if (
+            _grant_type_key not in _partial_connection_info[_oauth_key]
+            or not _partial_connection_info[_oauth_key][_grant_type_key]
+        ):
             _partial_connection_info[_oauth_key][_grant_type_key] = const.CONNECTION_INFO.OAUTH_DEFAULT_GRANT_TYPE
 
         # Populate the Client Authentication value for OAuth connections if not defined
-        if (_client_auth_key not in _partial_connection_info[_oauth_key]
-                or not _partial_connection_info[_oauth_key][_client_auth_key]):
+        if (
+            _client_auth_key not in _partial_connection_info[_oauth_key]
+            or not _partial_connection_info[_oauth_key][_client_auth_key]
+        ):
             _partial_connection_info[_oauth_key][_client_auth_key] = const.CONNECTION_INFO.OAUTH_DEFAULT_CLIENT_AUTH
 
         # Return the updated connection info dictionary
@@ -1002,10 +1042,7 @@ class PyDPlus(object):
         if self.connection_type == const.CLIENT_SETTINGS.CONNECTION_TYPE_LEGACY:
             # Connect to the tenant using the legacy API method
             try:
-                base_headers = auth.get_legacy_headers(
-                    base_url=self.base_url,
-                    connection_info=self.connection_info
-                )
+                base_headers = auth.get_legacy_headers(base_url=self.base_url, connection_info=self.connection_info)
                 self._oauth_token_data = None
                 connected = True
             except Exception as exc:
@@ -1030,15 +1067,15 @@ class PyDPlus(object):
         return connected, base_headers
 
     def get(
-            self,
-            endpoint: str,
-            params: Optional[dict] = None,
-            headers: Optional[dict] = None,
-            api_type: str = const.ADMIN_API_TYPE,
-            timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
-            show_full_error: bool = True,
-            return_json: bool = True,
-            allow_failed_response: Optional[bool] = None,
+        self,
+        endpoint: str,
+        params: Optional[dict] = None,
+        headers: Optional[dict] = None,
+        api_type: str = const.ADMIN_API_TYPE,
+        timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
+        show_full_error: bool = True,
+        return_json: bool = True,
+        allow_failed_response: Optional[bool] = None,
     ):
         """Perform a GET request against the ID Plus tenant.
 
@@ -1066,21 +1103,29 @@ class PyDPlus(object):
                  :py:exc:`errors.exceptions.InvalidFieldError`
         """
         self._check_if_connected()
-        return api.get(self, endpoint=endpoint, params=params, headers=headers, api_type=api_type, timeout=timeout,
-                       show_full_error=show_full_error, return_json=return_json,
-                       allow_failed_response=allow_failed_response)
+        return api.get(
+            self,
+            endpoint=endpoint,
+            params=params,
+            headers=headers,
+            api_type=api_type,
+            timeout=timeout,
+            show_full_error=show_full_error,
+            return_json=return_json,
+            allow_failed_response=allow_failed_response,
+        )
 
     def patch(
-            self,
-            endpoint: str,
-            payload: dict,
-            params: Optional[dict] = None,
-            headers: Optional[dict] = None,
-            api_type: str = const.ADMIN_API_TYPE,
-            timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
-            show_full_error: bool = True,
-            return_json: bool = True,
-            allow_failed_response: Optional[bool] = None,
+        self,
+        endpoint: str,
+        payload: dict,
+        params: Optional[dict] = None,
+        headers: Optional[dict] = None,
+        api_type: str = const.ADMIN_API_TYPE,
+        timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
+        show_full_error: bool = True,
+        return_json: bool = True,
+        allow_failed_response: Optional[bool] = None,
     ):
         """Perform a PATCH call with payload against the ID Plus tenant.
 
@@ -1111,21 +1156,30 @@ class PyDPlus(object):
                  :py:exc:`errors.exceptions.InvalidFieldError`
         """
         self._check_if_connected()
-        return api.patch(self, endpoint=endpoint, payload=payload, params=params, headers=headers, api_type=api_type,
-                         timeout=timeout, show_full_error=show_full_error, return_json=return_json,
-                         allow_failed_response=allow_failed_response)
+        return api.patch(
+            self,
+            endpoint=endpoint,
+            payload=payload,
+            params=params,
+            headers=headers,
+            api_type=api_type,
+            timeout=timeout,
+            show_full_error=show_full_error,
+            return_json=return_json,
+            allow_failed_response=allow_failed_response,
+        )
 
     def post(
-            self,
-            endpoint: str,
-            payload: dict,
-            params: Optional[dict] = None,
-            headers: Optional[dict] = None,
-            api_type: str = const.ADMIN_API_TYPE,
-            timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
-            show_full_error: bool = True,
-            return_json: bool = True,
-            allow_failed_response: Optional[bool] = None,
+        self,
+        endpoint: str,
+        payload: dict,
+        params: Optional[dict] = None,
+        headers: Optional[dict] = None,
+        api_type: str = const.ADMIN_API_TYPE,
+        timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
+        show_full_error: bool = True,
+        return_json: bool = True,
+        allow_failed_response: Optional[bool] = None,
     ):
         """Perform a POST call with payload against the ID Plus tenant.
 
@@ -1156,21 +1210,30 @@ class PyDPlus(object):
                  :py:exc:`errors.exceptions.InvalidFieldError`
         """
         self._check_if_connected()
-        return api.post(self, endpoint=endpoint, payload=payload, params=params, headers=headers, api_type=api_type,
-                        timeout=timeout, show_full_error=show_full_error, return_json=return_json,
-                        allow_failed_response=allow_failed_response)
+        return api.post(
+            self,
+            endpoint=endpoint,
+            payload=payload,
+            params=params,
+            headers=headers,
+            api_type=api_type,
+            timeout=timeout,
+            show_full_error=show_full_error,
+            return_json=return_json,
+            allow_failed_response=allow_failed_response,
+        )
 
     def put(
-            self,
-            endpoint: str,
-            payload: dict,
-            params: Optional[dict] = None,
-            headers: Optional[dict] = None,
-            api_type: str = const.ADMIN_API_TYPE,
-            timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
-            show_full_error: bool = True,
-            return_json: bool = True,
-            allow_failed_response: Optional[bool] = None,
+        self,
+        endpoint: str,
+        payload: dict,
+        params: Optional[dict] = None,
+        headers: Optional[dict] = None,
+        api_type: str = const.ADMIN_API_TYPE,
+        timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
+        show_full_error: bool = True,
+        return_json: bool = True,
+        allow_failed_response: Optional[bool] = None,
     ):
         """Perform a PUT call with payload against the ID Plus tenant.
 
@@ -1201,12 +1264,22 @@ class PyDPlus(object):
                  :py:exc:`errors.exceptions.InvalidFieldError`
         """
         self._check_if_connected()
-        return api.put(self, endpoint=endpoint, payload=payload, params=params, headers=headers, api_type=api_type,
-                       timeout=timeout, show_full_error=show_full_error, return_json=return_json,
-                       allow_failed_response=allow_failed_response)
-    
-    class User(object):
+        return api.put(
+            self,
+            endpoint=endpoint,
+            payload=payload,
+            params=params,
+            headers=headers,
+            api_type=api_type,
+            timeout=timeout,
+            show_full_error=show_full_error,
+            return_json=return_json,
+            allow_failed_response=allow_failed_response,
+        )
+
+    class User:
         """Class containing user-related methods."""
+
         def __init__(self, pydp_object) -> None:
             """Initialize the :py:class:`pydplus.core.PyDPlus.User` inner class object.
 
@@ -1217,13 +1290,13 @@ class PyDPlus(object):
             self.pydp_object: PyDPlus = pydp_object
 
         def get_user_details(
-                self,
-                email: str,
-                search_unsynced: Optional[bool] = None,
-                timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
-                show_full_error: bool = True,
-                return_json: bool = True,
-                allow_failed_response: Optional[bool] = None,
+            self,
+            email: str,
+            search_unsynced: Optional[bool] = None,
+            timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
+            show_full_error: bool = True,
+            return_json: bool = True,
+            allow_failed_response: Optional[bool] = None,
         ):
             """Retrieve the details for a specific user based on their email address.
 
@@ -1249,17 +1322,23 @@ class PyDPlus(object):
                      :py:exc:`errors.exceptions.InvalidFieldError`
             """
             self.pydp_object._check_if_connected()
-            return users_module.get_user_details(self.pydp_object, email=email, search_unsynced=search_unsynced,
-                                                 timeout=timeout, show_full_error=show_full_error,
-                                                 return_json=return_json, allow_failed_response=allow_failed_response)
+            return users_module.get_user_details(
+                self.pydp_object,
+                email=email,
+                search_unsynced=search_unsynced,
+                timeout=timeout,
+                show_full_error=show_full_error,
+                return_json=return_json,
+                allow_failed_response=allow_failed_response,
+            )
 
         def get_user_id(
-                self,
-                email: Optional[str] = None,
-                user_details: Optional[dict] = None,
-                search_unsynced: Optional[bool] = None,
-                timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
-                show_full_error: bool = True,
+            self,
+            email: Optional[str] = None,
+            user_details: Optional[dict] = None,
+            search_unsynced: Optional[bool] = None,
+            timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
+            show_full_error: bool = True,
         ) -> str:
             """Retrieve the User ID associated with a specific user.
 
@@ -1284,17 +1363,22 @@ class PyDPlus(object):
                      :py:exc:`errors.exceptions.MissingRequiredDataError`
             """
             self.pydp_object._check_if_connected()
-            return users_module.get_user_id(self.pydp_object, email=email, user_details=user_details,
-                                            search_unsynced=search_unsynced, timeout=timeout,
-                                            show_full_error=show_full_error)
+            return users_module.get_user_id(
+                self.pydp_object,
+                email=email,
+                user_details=user_details,
+                search_unsynced=search_unsynced,
+                timeout=timeout,
+                show_full_error=show_full_error,
+            )
 
         def enable_user(
-                self,
-                user_id: str,
-                timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
-                show_full_error: bool = True,
-                return_json: bool = True,
-                allow_failed_response: Optional[bool] = None,
+            self,
+            user_id: str,
+            timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
+            show_full_error: bool = True,
+            return_json: bool = True,
+            allow_failed_response: Optional[bool] = None,
         ):
             """Enable a user that is currently disabled.
 
@@ -1319,17 +1403,22 @@ class PyDPlus(object):
                      :py:exc:`errors.exceptions.MissingRequiredDataError`
             """
             self.pydp_object._check_if_connected()
-            return users_module.enable_user(self.pydp_object, user_id=user_id, timeout=timeout,
-                                            show_full_error=show_full_error, return_json=return_json,
-                                            allow_failed_response=allow_failed_response)
+            return users_module.enable_user(
+                self.pydp_object,
+                user_id=user_id,
+                timeout=timeout,
+                show_full_error=show_full_error,
+                return_json=return_json,
+                allow_failed_response=allow_failed_response,
+            )
 
         def disable_user(
-                self,
-                user_id: str,
-                timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
-                show_full_error: bool = True,
-                return_json: bool = True,
-                allow_failed_response: Optional[bool] = None,
+            self,
+            user_id: str,
+            timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
+            show_full_error: bool = True,
+            return_json: bool = True,
+            allow_failed_response: Optional[bool] = None,
         ):
             """Disable a user that is currently enabled.
 
@@ -1354,17 +1443,22 @@ class PyDPlus(object):
                      :py:exc:`errors.exceptions.MissingRequiredDataError`
             """
             self.pydp_object._check_if_connected()
-            return users_module.disable_user(self.pydp_object, user_id=user_id, timeout=timeout,
-                                             show_full_error=show_full_error, return_json=return_json,
-                                             allow_failed_response=allow_failed_response)
+            return users_module.disable_user(
+                self.pydp_object,
+                user_id=user_id,
+                timeout=timeout,
+                show_full_error=show_full_error,
+                return_json=return_json,
+                allow_failed_response=allow_failed_response,
+            )
 
         def synchronize_user(
-                self,
-                user_id: str,
-                timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
-                show_full_error: bool = True,
-                return_json: bool = True,
-                allow_failed_response: Optional[bool] = None,
+            self,
+            user_id: str,
+            timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
+            show_full_error: bool = True,
+            return_json: bool = True,
+            allow_failed_response: Optional[bool] = None,
         ):
             """Synchronize the details of a user between an identity source and the Cloud Access Service.
 
@@ -1389,17 +1483,22 @@ class PyDPlus(object):
                      :py:exc:`errors.exceptions.MissingRequiredDataError`
             """
             self.pydp_object._check_if_connected()
-            return users_module.synchronize_user(self.pydp_object, user_id=user_id, timeout=timeout,
-                                                 show_full_error=show_full_error, return_json=return_json,
-                                                 allow_failed_response=allow_failed_response)
+            return users_module.synchronize_user(
+                self.pydp_object,
+                user_id=user_id,
+                timeout=timeout,
+                show_full_error=show_full_error,
+                return_json=return_json,
+                allow_failed_response=allow_failed_response,
+            )
 
         def mark_deleted(
-                self,
-                user_id: str,
-                timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
-                show_full_error: bool = True,
-                return_json: bool = True,
-                allow_failed_response: Optional[bool] = None,
+            self,
+            user_id: str,
+            timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
+            show_full_error: bool = True,
+            return_json: bool = True,
+            allow_failed_response: Optional[bool] = None,
         ):
             """Mark a specific user to be deleted during the next automated bulk deletion process.
 
@@ -1424,17 +1523,22 @@ class PyDPlus(object):
                      :py:exc:`errors.exceptions.MissingRequiredDataError`
             """
             self.pydp_object._check_if_connected()
-            return users_module.mark_deleted(self.pydp_object, user_id=user_id, timeout=timeout,
-                                             show_full_error=show_full_error, return_json=return_json,
-                                             allow_failed_response=allow_failed_response)
+            return users_module.mark_deleted(
+                self.pydp_object,
+                user_id=user_id,
+                timeout=timeout,
+                show_full_error=show_full_error,
+                return_json=return_json,
+                allow_failed_response=allow_failed_response,
+            )
 
         def unmark_deleted(
-                self,
-                user_id: str,
-                timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
-                show_full_error: bool = True,
-                return_json: bool = True,
-                allow_failed_response: Optional[bool] = None,
+            self,
+            user_id: str,
+            timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
+            show_full_error: bool = True,
+            return_json: bool = True,
+            allow_failed_response: Optional[bool] = None,
         ):
             """Unmark a specific user that was flagged to be deleted.
 
@@ -1459,24 +1563,29 @@ class PyDPlus(object):
                      :py:exc:`errors.exceptions.MissingRequiredDataError`
             """
             self.pydp_object._check_if_connected()
-            return users_module.unmark_deleted(self.pydp_object, user_id=user_id, timeout=timeout,
-                                               show_full_error=show_full_error, return_json=return_json,
-                                               allow_failed_response=allow_failed_response)
+            return users_module.unmark_deleted(
+                self.pydp_object,
+                user_id=user_id,
+                timeout=timeout,
+                show_full_error=show_full_error,
+                return_json=return_json,
+                allow_failed_response=allow_failed_response,
+            )
 
 
 def compile_connection_info(
-        base_url: Optional[str] = None,
-        admin_base_url: Optional[str] = None,
-        private_key: Optional[str] = None,
-        legacy_access_id: Optional[str] = None,
-        oauth_client_id: Optional[str] = None,
-        oauth_private_key: Optional[str] = None,
-        oauth_private_key_jwk: Union[Optional[dict], Optional[str]] = None,
-        oauth_scope: Union[Optional[str], Optional[tuple], Optional[list], Optional[set], Optional[frozenset]] = None,
-        oauth_scope_preset: Union[Optional[str], Optional[tuple[str]], Optional[list[str]], Optional[set[str]]] = None,
-        auth_base_url: Optional[str] = None,
-        oauth_api_type: Optional[str] = None,
-        oauth_issuer_url: Optional[str] = None,
+    base_url: Optional[str] = None,
+    admin_base_url: Optional[str] = None,
+    private_key: Optional[str] = None,
+    legacy_access_id: Optional[str] = None,
+    oauth_client_id: Optional[str] = None,
+    oauth_private_key: Optional[str] = None,
+    oauth_private_key_jwk: Union[Optional[dict], Optional[str]] = None,
+    oauth_scope: Union[Optional[str], Optional[tuple], Optional[list], Optional[set], Optional[frozenset]] = None,
+    oauth_scope_preset: Union[Optional[str], Optional[tuple[str]], Optional[list[str]], Optional[set[str]]] = None,
+    auth_base_url: Optional[str] = None,
+    oauth_api_type: Optional[str] = None,
+    oauth_issuer_url: Optional[str] = None,
 ) -> dict:
     """Compile the connection_info dictionary to use when authenticating to the API.
 
@@ -1523,8 +1632,10 @@ def compile_connection_info(
 
     # Validate the OAuth private key JWK payload when provided
     if oauth_private_key_jwk is not None and not isinstance(oauth_private_key_jwk, (dict, str)):
-        _error_msg = ("The 'oauth_private_key_jwk' parameter must be supplied as a dictionary or string "
-                      f"(provided: {type(oauth_private_key_jwk)})")
+        _error_msg = (
+            "The 'oauth_private_key_jwk' parameter must be supplied as a dictionary or string "
+            f'(provided: {type(oauth_private_key_jwk)})'
+        )
         logger.error(_error_msg)
         raise TypeError(_error_msg)
 
@@ -1602,7 +1713,7 @@ def compile_connection_info(
             const.CONNECTION_INFO.OAUTH_PRIVATE_KEY_PATH: oauth_private_key_path,
             const.CONNECTION_INFO.OAUTH_PRIVATE_KEY_FILE: oauth_private_key_file,
             const.CONNECTION_INFO.OAUTH_PRIVATE_KEY_JWK: oauth_private_key_jwk,
-        }
+        },
     }
     return connection_info
 
@@ -1615,8 +1726,7 @@ def _infer_auth_base_url_from_admin_base_url(_admin_base_url: Optional[str]) -> 
         _normalized_admin_base_url = core_utils.get_base_url(_admin_base_url)
     except Exception as _exc:
         _exc_type = core_utils.get_exception_type(_exc)
-        _error_msg = (f'Failed to infer Authentication API base URL from the Administration due to {_exc_type} '
-                      f'exception: {_exc}')
+        _error_msg = f'Failed to infer Authentication API base URL from the Administration due to {_exc_type} exception: {_exc}'
         logger.error(_error_msg)
         return None
     if '.access.' not in _normalized_admin_base_url:

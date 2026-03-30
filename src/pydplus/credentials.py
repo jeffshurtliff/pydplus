@@ -3,8 +3,8 @@
 :Module:            pydplus.credentials
 :Synopsis:          Secure parsing and handling for RSA ID Plus legacy key material
 :Created By:        Jeff Shurtliff
-:Last Modified:     Jeff Shurtliff (via GPT-5.3-codex)
-:Modified Date:     21 Mar 2026
+:Last Modified:     Jeff Shurtliff
+:Modified Date:     30 Mar 2026
 """
 
 from __future__ import annotations
@@ -48,6 +48,7 @@ class IDPlusLegacyKeyMaterial:
     :type description: str, None
     :raises: :py:exc:`pydplus.errors.exceptions.IDPlusCredentialError`
     """
+
     # Define the class variables
     customer_name: str
     access_id: str
@@ -191,7 +192,7 @@ class IDPlusLegacyKeyMaterial:
         else:
             safe_name = customer_slug
 
-        return f"{safe_name}{const.CREDENTIAL_VALUES.DEFAULT_PEM_EXTENSION}"
+        return f'{safe_name}{const.CREDENTIAL_VALUES.DEFAULT_PEM_EXTENSION}'
 
     def private_key_bytes(self) -> bytes:
         """Return the private key as UTF-8 encoded bytes."""
@@ -200,11 +201,7 @@ class IDPlusLegacyKeyMaterial:
     @staticmethod
     def _default_cert_dir() -> Path:
         """Return the default directory for secure private-key persistence."""
-        return (
-            Path.home()
-            / const.CREDENTIAL_VALUES.DEFAULT_CERT_HOME_DIR
-            / const.CREDENTIAL_VALUES.DEFAULT_CERT_SUBDIR
-        )
+        return Path.home() / const.CREDENTIAL_VALUES.DEFAULT_CERT_HOME_DIR / const.CREDENTIAL_VALUES.DEFAULT_CERT_SUBDIR
 
     def write_private_key_pem(
         self,

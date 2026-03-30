@@ -4,7 +4,7 @@
 :Synopsis:          Unit tests for OAuth and legacy authentication helper functions
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff (via GPT-5.3-codex)
-:Modified Date:     27 Mar 2026
+:Modified Date:     30 Mar 2026
 """
 
 from __future__ import annotations
@@ -14,9 +14,8 @@ import json
 
 import pytest
 
-from pydplus import auth, constants as const
-from pydplus import errors
-
+from pydplus import auth, errors
+from pydplus import constants as const
 
 pytestmark = pytest.mark.unit
 

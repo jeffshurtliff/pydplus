@@ -6,16 +6,16 @@
 :Example:           ``jwt_string = auth.get_legacy_jwt_string(base_url, connection_info)``
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     29 Mar 2026
+:Modified Date:     30 Mar 2026
 """
 
 from __future__ import annotations
 
+import datetime
 import json
 import logging
-import datetime
+from typing import Any, Optional, Tuple, Union
 from uuid import uuid4
-from typing import Any, Optional, Union, Tuple
 
 import jwt
 import requests
@@ -53,9 +53,9 @@ def get_legacy_jwt_string(base_url: str, connection_info: dict) -> str:
 
 
 def get_legacy_headers(
-        jwt_string: Optional[str] = None,
-        base_url: Optional[str] = None,
-        connection_info: Optional[dict] = None,
+    jwt_string: Optional[str] = None,
+    base_url: Optional[str] = None,
+    connection_info: Optional[dict] = None,
 ) -> dict[str, str]:
     """Construct the headers to use in legacy API calls.
 
@@ -83,11 +83,11 @@ def get_legacy_headers(
 
 
 def get_oauth_headers(
-        connection_info: dict,
-        verify_ssl: bool = const.DEFAULT_VERIFY_SSL,
-        token_data: Optional[dict[str, Any]] = None,
-        force_refresh: bool = const.AUTH_VALUES.OAUTH_DEFAULT_FORCE_REFRESH,
-        timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
+    connection_info: dict,
+    verify_ssl: bool = const.DEFAULT_VERIFY_SSL,
+    token_data: Optional[dict[str, Any]] = None,
+    force_refresh: bool = const.AUTH_VALUES.OAUTH_DEFAULT_FORCE_REFRESH,
+    timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
 ) -> Tuple[dict[str, str], dict[str, Any]]:
     """Construct OAuth headers for Administration API calls.
 
@@ -136,11 +136,11 @@ def get_oauth_headers(
 
 
 def get_oauth_access_token(
-        connection_info: dict,
-        verify_ssl: bool = const.DEFAULT_VERIFY_SSL,
-        token_data: Optional[dict[str, Any]] = None,
-        force_refresh: bool = const.AUTH_VALUES.OAUTH_DEFAULT_FORCE_REFRESH,
-        timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
+    connection_info: dict,
+    verify_ssl: bool = const.DEFAULT_VERIFY_SSL,
+    token_data: Optional[dict[str, Any]] = None,
+    force_refresh: bool = const.AUTH_VALUES.OAUTH_DEFAULT_FORCE_REFRESH,
+    timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
 ) -> dict[str, Any]:
     """Retrieve an OAuth access token and associated metadata.
 
@@ -193,14 +193,15 @@ def _extract_legacy_connection_info(_connection_info: dict) -> Tuple[str, Option
     _private_key_pem = _connection_info[const.CONNECTION_INFO.LEGACY].get(const.CONNECTION_INFO.LEGACY_PRIVATE_KEY_PEM, '')
     _private_key_full_path = None
     if _private_key_file:
-        _private_key_full_path = f"{core_utils.ensure_ending_slash(_private_key_dir, const.ARGUMENT_VALUES.FILE)}{_private_key_file}"
+        _private_key_full_path = (
+            f'{core_utils.ensure_ending_slash(_private_key_dir, const.ARGUMENT_VALUES.FILE)}{_private_key_file}'
+        )
 
     if not _access_id or (not _private_key_file and not _private_key_pem):
         if not _access_id:
             _missing_var = const.CONNECTION_INFO.LEGACY_ACCESS_ID
         else:
-            _missing_var = (f'{const.CONNECTION_INFO.LEGACY_PRIVATE_KEY_FILE} or '
-                            f'{const.CONNECTION_INFO.LEGACY_PRIVATE_KEY_PEM}')
+            _missing_var = f'{const.CONNECTION_INFO.LEGACY_PRIVATE_KEY_FILE} or {const.CONNECTION_INFO.LEGACY_PRIVATE_KEY_PEM}'
         _error_msg = f'The {_missing_var} value is needed to connect to the tenant'
         logger.error(_error_msg)
         raise errors.exceptions.MissingRequiredDataError(_error_msg)
@@ -230,14 +231,14 @@ def _extract_oauth_connection_info(_connection_info: dict) -> dict[str, Any]:
             missing_var.append(const.CONNECTION_INFO.OAUTH_ISSUER_URL)
         if not client_id:
             missing_var.append(const.CONNECTION_INFO.OAUTH_CLIENT_ID)
-        _error_msg = f"The {' and '.join(missing_var)} value(s) are needed to connect to the tenant via OAuth"
+        _error_msg = f'The {" and ".join(missing_var)} value(s) are needed to connect to the tenant via OAuth'
         logger.error(_error_msg)
         raise errors.exceptions.MissingRequiredDataError(_error_msg)
 
     if grant_type != const.CONNECTION_INFO.OAUTH_GRANT_TYPE_CLIENT_CREDENTIALS:
         _error_msg = (
             f"The OAuth {const.CONNECTION_INFO.OAUTH_GRANT_TYPE} '{grant_type}' is currently unsupported "
-            f"(Only {const.CONNECTION_INFO.OAUTH_GRANT_TYPE_CLIENT_CREDENTIALS} is currently supported)"
+            f'(Only {const.CONNECTION_INFO.OAUTH_GRANT_TYPE_CLIENT_CREDENTIALS} is currently supported)'
         )
         logger.error(_error_msg)
         raise errors.exceptions.FeatureNotConfiguredError(_error_msg)
@@ -257,7 +258,7 @@ def _extract_oauth_connection_info(_connection_info: dict) -> dict[str, Any]:
     else:
         _error_msg = (
             f"The OAuth client authentication method '{client_auth}' is currently unsupported "
-            f"({const.CONNECTION_INFO.OAUTH_DEFAULT_CLIENT_AUTH} is currently the only supported method)"
+            f'({const.CONNECTION_INFO.OAUTH_DEFAULT_CLIENT_AUTH} is currently the only supported method)'
         )
         logger.error(_error_msg)
         raise errors.exceptions.FeatureNotConfiguredError(_error_msg)
@@ -306,9 +307,7 @@ def _load_private_key(_key_path: Optional[str] = None, _key_pem: Optional[str] =
     """
     if _key_pem:
         _private_key = serialization.load_pem_private_key(
-            _key_pem.encode(const.UTF8_ENCODING),
-            password=None,
-            backend=default_backend()
+            _key_pem.encode(const.UTF8_ENCODING), password=None, backend=default_backend()
         )
         return _private_key
 
@@ -322,11 +321,7 @@ def _load_private_key(_key_path: Optional[str] = None, _key_pem: Optional[str] =
         logger.error(_error_msg)
         raise FileNotFoundError(_error_msg)
     with open(_key_path, 'rb') as _key_file:
-        _private_key = serialization.load_pem_private_key(
-            _key_file.read(),
-            password=None,
-            backend=default_backend()
-        )
+        _private_key = serialization.load_pem_private_key(_key_file.read(), password=None, backend=default_backend())
     return _private_key
 
 
@@ -352,8 +347,8 @@ def _normalize_oauth_grant_type(_grant_type: Optional[str]) -> str:
 
     _error_msg = (
         f"Unsupported OAuth {const.CONNECTION_INFO.OAUTH_GRANT_TYPE} value '{_grant_type}' "
-        f"(Only {const.CONNECTION_INFO.OAUTH_DEFAULT_GRANT_TYPE} "
-        f"({const.CONNECTION_INFO.OAUTH_GRANT_TYPE_CLIENT_CREDENTIALS}) is currently supported)"
+        f'(Only {const.CONNECTION_INFO.OAUTH_DEFAULT_GRANT_TYPE} '
+        f'({const.CONNECTION_INFO.OAUTH_GRANT_TYPE_CLIENT_CREDENTIALS}) is currently supported)'
     )
     logger.error(_error_msg)
     raise errors.exceptions.FeatureNotConfiguredError(_error_msg)
@@ -395,9 +390,9 @@ def _resolve_oauth_private_key_path(_key_path: Optional[str], _key_file: str) ->
 
 
 def _load_oauth_private_key_jwk(
-        _key_path: Optional[str] = None,
-        _key_file: Optional[str] = None,
-        _key_jwk: Optional[Any] = None,
+    _key_path: Optional[str] = None,
+    _key_file: Optional[str] = None,
+    _key_jwk: Optional[Any] = None,
 ) -> dict[str, Any]:
     """Load and validate OAuth private key data represented as JWK."""
     _parsed_jwk: Optional[dict[str, Any]] = None
@@ -429,7 +424,7 @@ def _load_oauth_private_key_jwk(
             _error_msg = f'The file {_full_key_path} does not exist and cannot be used for OAuth private-key JWK data'
             logger.error(_error_msg)
             raise FileNotFoundError(_error_msg)
-        with open(_full_key_path, 'r', encoding=const.UTF8_ENCODING) as _jwk_file:
+        with open(_full_key_path, encoding=const.UTF8_ENCODING) as _jwk_file:
             _parsed_jwk = json.load(_jwk_file)
 
     if _parsed_jwk is None:
@@ -448,30 +443,30 @@ def _load_oauth_private_key_jwk(
     _kty_value = _parsed_jwk.get(const.AUTH_FIELDS.JWA_KEY_TYPE)
     if _kty_value == const.AUTH_VALUES.JWA_RSA:
         _required_fields = {
-            const.AUTH_FIELDS.JWA_KEY_TYPE,                 # kty
-            const.AUTH_FIELDS.JWA_RSA_MODULUS,              # n
-            const.AUTH_FIELDS.JWA_RSA_EXPONENT,             # e
-            const.AUTH_FIELDS.JWA_RSA_PRIVATE_EXPONENT,     # d
+            const.AUTH_FIELDS.JWA_KEY_TYPE,  # kty
+            const.AUTH_FIELDS.JWA_RSA_MODULUS,  # n
+            const.AUTH_FIELDS.JWA_RSA_EXPONENT,  # e
+            const.AUTH_FIELDS.JWA_RSA_PRIVATE_EXPONENT,  # d
         }
     elif _kty_value == const.AUTH_VALUES.JWA_EC:
         _required_fields = {
-            const.AUTH_FIELDS.JWA_KEY_TYPE,                 # kty
-            const.AUTH_FIELDS.JWA_EC_CURVE,                 # crv
-            const.AUTH_FIELDS.JWA_EC_X_COORDINATE,          # x
-            const.AUTH_FIELDS.JWA_EC_Y_COORDINATE,          # y
-            const.AUTH_FIELDS.JWA_EC_PRIVATE_KEY,           # d
+            const.AUTH_FIELDS.JWA_KEY_TYPE,  # kty
+            const.AUTH_FIELDS.JWA_EC_CURVE,  # crv
+            const.AUTH_FIELDS.JWA_EC_X_COORDINATE,  # x
+            const.AUTH_FIELDS.JWA_EC_Y_COORDINATE,  # y
+            const.AUTH_FIELDS.JWA_EC_PRIVATE_KEY,  # d
         }
     else:
         _error_msg = (
             f"The OAuth private key JWK type '{_kty_value}' is unsupported "
-            f"(Only {const.AUTH_VALUES.JWA_RSA} and {const.AUTH_VALUES.JWA_EC} key types are supported)"
+            f'(Only {const.AUTH_VALUES.JWA_RSA} and {const.AUTH_VALUES.JWA_EC} key types are supported)'
         )
         logger.error(_error_msg)
         raise errors.exceptions.FeatureNotConfiguredError(_error_msg)
 
     _missing_fields = sorted(_required_fields.difference(_parsed_jwk.keys()))
     if _missing_fields:
-        _error_msg = f"The OAuth private key JWK data is missing required field(s): {', '.join(_missing_fields)}"
+        _error_msg = f'The OAuth private key JWK data is missing required field(s): {", ".join(_missing_fields)}'
         logger.error(_error_msg)
         raise errors.exceptions.MissingRequiredDataError(_error_msg)
 
@@ -490,9 +485,9 @@ def _convert_oauth_jwk_to_signing_key(_private_key_jwk: dict[str, Any]):
 
 
 def _create_private_key_jwt_client_assertion(
-        _client_id: str,
-        _token_endpoint: str,
-        _private_key_jwk: dict[str, Any],
+    _client_id: str,
+    _token_endpoint: str,
+    _private_key_jwk: dict[str, Any],
 ) -> str:
     """Generate a signed private_key_jwt assertion string."""
     _signing_key = _convert_oauth_jwk_to_signing_key(_private_key_jwk)
@@ -509,9 +504,9 @@ def _create_private_key_jwt_client_assertion(
     _algorithm = _private_key_jwk.get(const.AUTH_FIELDS.JWK_ALGORITHM)
     if not _algorithm:
         _algorithm = (
-            const.RSA_KEY_ALGORITHM                                                             # RS256
+            const.RSA_KEY_ALGORITHM  # RS256
             if _private_key_jwk.get(const.AUTH_FIELDS.JWA_KEY_TYPE) == const.RSA_KEY_TYPE
-            else const.EC_KEY_ALGORITHM                                                         # ES256
+            else const.EC_KEY_ALGORITHM  # ES256
         )
 
     _headers = {}
@@ -539,9 +534,9 @@ def _get_oauth_token_endpoint(_issuer_url: str) -> str:
 
 
 def _request_oauth_access_token(
-        oauth_connection_info: dict[str, Any],
-        verify_ssl: bool = const.DEFAULT_VERIFY_SSL,
-        timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
+    oauth_connection_info: dict[str, Any],
+    verify_ssl: bool = const.DEFAULT_VERIFY_SSL,
+    timeout: int = const.DEFAULT_API_TIMEOUT_SECONDS,
 ) -> dict[str, Any]:
     """Request an OAuth access token from the configured token endpoint."""
     _issuer_url = oauth_connection_info[const.CONNECTION_INFO.OAUTH_ISSUER_URL]
@@ -564,18 +559,20 @@ def _request_oauth_access_token(
             _key_file=oauth_connection_info.get(const.CONNECTION_INFO.OAUTH_PRIVATE_KEY_FILE),
             _key_jwk=oauth_connection_info.get(const.CONNECTION_INFO.OAUTH_PRIVATE_KEY_JWK),
         )
-        _request_data.update({
-            const.AUTH_FIELDS.OAUTH_CLIENT_ASSERTION_TYPE: const.AUTH_VALUES.OAUTH_CLIENT_ASSERT_TYPE_JWT_BEARER,
-            const.AUTH_FIELDS.OAUTH_CLIENT_ASSERTION: _create_private_key_jwt_client_assertion(
-                _client_id=_client_id,
-                _token_endpoint=_token_endpoint,
-                _private_key_jwk=_private_key_jwk,
-            ),
-        })
+        _request_data.update(
+            {
+                const.AUTH_FIELDS.OAUTH_CLIENT_ASSERTION_TYPE: const.AUTH_VALUES.OAUTH_CLIENT_ASSERT_TYPE_JWT_BEARER,
+                const.AUTH_FIELDS.OAUTH_CLIENT_ASSERTION: _create_private_key_jwt_client_assertion(
+                    _client_id=_client_id,
+                    _token_endpoint=_token_endpoint,
+                    _private_key_jwk=_private_key_jwk,
+                ),
+            }
+        )
     else:
         _error_msg = (
-            f"The OAuth {const.CONNECTION_INFO.OAUTH_CLIENT_AUTHENTICATION} method '{_client_auth}' is currently "
-            f"unsupported (Private Key JWT is currently the only supported method)"
+            f"The OAuth {const.CONNECTION_INFO.OAUTH_CLIENT_AUTHENTICATION} method '{_client_auth}' is currently unsupported "
+            '(Private Key JWT is currently the only supported method)'
         )
         logger.error(_error_msg)
         raise errors.exceptions.FeatureNotConfiguredError(_error_msg)
@@ -593,9 +590,7 @@ def _request_oauth_access_token(
     )
 
     if _response.status_code >= 300:
-        _error_msg = (
-            f'The OAuth token request failed with a {_response.status_code} status code.\n{_response.text}'
-        )
+        _error_msg = f'The OAuth token request failed with a {_response.status_code} status code.\n{_response.text}'
         logger.error(_error_msg)
         raise errors.exceptions.APIConnectionError(_error_msg)
 
@@ -629,7 +624,7 @@ def _parse_oauth_token_response(_response_data: dict[str, Any]) -> dict[str, Any
         try:
             _expires_in = int(_expires_in)
         except (TypeError, ValueError):
-            _expires_in = const.AUTH_VALUES.OAUTH_DEFAULT_TOKEN_EXPIRATION                              # 3600
+            _expires_in = const.AUTH_VALUES.OAUTH_DEFAULT_TOKEN_EXPIRATION  # 3600
     if _expires_in < 0:
         _expires_in = 0
 
@@ -643,8 +638,8 @@ def _parse_oauth_token_response(_response_data: dict[str, Any]) -> dict[str, Any
 
 
 def _is_oauth_token_valid(
-        _token_data: Optional[dict[str, Any]],
-        _expected_scope: Optional[str] = None,
+    _token_data: Optional[dict[str, Any]],
+    _expected_scope: Optional[str] = None,
 ) -> bool:
     """Return whether cached OAuth token data is still valid."""
     if not _token_data:
@@ -662,7 +657,7 @@ def _is_oauth_token_valid(
         return False
     if not isinstance(_expires_at, (int, float)):
         _error_msg = f"The '{const.AUTH_FIELDS.OAUTH_EXPIRES_AT}' value is an invalid type "
-        _error_msg += f"(Expected: int, float; Provided: {type(_expires_at)})"
+        _error_msg += f'(Expected: int, float; Provided: {type(_expires_at)})'
         logger.error(_error_msg)
         return False
     if _expected_scope is not None and _cached_scope != _expected_scope:
@@ -674,8 +669,8 @@ def _is_oauth_token_valid(
 
 
 def _get_scope_from_preset(
-        _preset: Union[Optional[str], Optional[tuple], Optional[list], Optional[set], Optional[frozenset]] = None,
-        _existing_scope: Union[Optional[str], Optional[tuple], Optional[list], Optional[set], Optional[frozenset]] = None,
+    _preset: Union[Optional[str], Optional[tuple], Optional[list], Optional[set], Optional[frozenset]] = None,
+    _existing_scope: Union[Optional[str], Optional[tuple], Optional[list], Optional[set], Optional[frozenset]] = None,
 ) -> list[str]:
     """Retrieves one or more groupings of OAuth scope permissions based on presets."""
     _merged_scope: list[str] = []
@@ -685,7 +680,6 @@ def _get_scope_from_preset(
         'all': const.OAUTH_SCOPES.ALL_SCOPES,
         'admin': const.OAUTH_SCOPES.ADMIN_API_SCOPES,
         'auth': const.OAUTH_SCOPES.AUTH_API_SCOPES,
-
         # Administration API scopes by type/category
         'agent': const.OAUTH_SCOPES.AGENT_SCOPES,
         'audit': const.OAUTH_SCOPES.AUDIT_SCOPES,
@@ -694,7 +688,6 @@ def _get_scope_from_preset(
         'group': const.OAUTH_SCOPES.GROUP_SCOPES,
         'report': const.OAUTH_SCOPES.REPORT_SCOPES,
         'user': const.OAUTH_SCOPES.USER_SCOPES,
-
         # Read-only scopes
         'all_read_only': const.OAUTH_SCOPES.ALL_READ_ONLY_PRESET,
         'agent_read_only': const.OAUTH_SCOPES.AGENT_READ_ONLY_PRESET,
@@ -703,7 +696,6 @@ def _get_scope_from_preset(
         'group_read_only': const.OAUTH_SCOPES.GROUP_READ_ONLY_PRESET,
         'report_read_only': const.OAUTH_SCOPES.REPORT_READ_ONLY_PRESET,
         'user_read_only': const.OAUTH_SCOPES.USER_READ_ONLY_PRESET,
-
         # TODO: Add additional presets
     }
 
@@ -726,8 +718,9 @@ def _get_scope_from_preset(
     elif isinstance(_preset, (set, frozenset)):
         _preset_values = sorted(_preset)
     else:
-        _error_msg = ("The 'oauth_scope_preset' value must be supplied as a string or iterable of strings "
-                      f"(provided: {type(_preset)})")
+        _error_msg = (
+            f"The 'oauth_scope_preset' value must be supplied as a string or iterable of strings (provided: {type(_preset)})"
+        )
         logger.error(_error_msg)
         raise TypeError(_error_msg)
 
@@ -735,8 +728,7 @@ def _get_scope_from_preset(
     _skipped: list[str] = []
     for _val in _preset_values:
         if not isinstance(_val, str):
-            _error_msg = ("The 'oauth_scope_preset' values must be strings "
-                          f"(provided element type: {type(_val)})")
+            _error_msg = f"The 'oauth_scope_preset' values must be strings (provided element type: {type(_val)})"
             logger.error(_error_msg)
             raise TypeError(_error_msg)
 
@@ -751,8 +743,9 @@ def _get_scope_from_preset(
             logger.warning(f"'{_preset_name}' is not a valid OAuth scope preset and will be ignored")
             _skipped.append(_preset_name)
 
-    _results_msg = (f"Processed {len(_preset_values)} OAuth scope presets "
-                    f"(Added: {','.join(_added)}; Skipped: {','.join(_skipped)})")
+    _results_msg = (
+        f'Processed {len(_preset_values)} OAuth scope presets (Added: {",".join(_added)}; Skipped: {",".join(_skipped)})'
+    )
     if _added or _skipped:
         logger.info(_results_msg)
     else:

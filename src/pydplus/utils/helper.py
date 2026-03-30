@@ -5,8 +5,8 @@
 :Usage:             ``from pydplus.utils import helper``
 :Example:           ``helper_settings = helper.get_settings('/tmp/helper.yml', 'yaml')``
 :Created By:        Jeff Shurtliff
-:Last Modified:     Jeff Shurtliff (via GPT-5.3-codex)
-:Modified Date:     21 Mar 2026
+:Last Modified:     Jeff Shurtliff
+:Modified Date:     30 Mar 2026
 """
 
 from __future__ import annotations
@@ -17,9 +17,9 @@ from typing import Optional, Union
 
 import yaml
 
-from .core_utils import get_file_type
-from .. import errors
 from .. import constants as const
+from .. import errors
+from .core_utils import get_file_type
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +35,7 @@ def import_helper_file(file_path: str, file_type: str) -> dict:
     :raises: :py:exc:`FileNotFoundError`,
              :py:exc:`pydplus.errors.exceptions.InvalidHelperFileTypeError`
     """
-    with open(file_path, 'r') as cfg_file:
+    with open(file_path) as cfg_file:
         if file_type.replace('.', '') in (const.FILE_EXTENSIONS.YML, const.FILE_EXTENSIONS.YAML):
             helper_cfg = yaml.safe_load(cfg_file)
         elif file_type.replace('.', '') == const.FILE_EXTENSIONS.JSON:
@@ -64,18 +64,20 @@ def _get_connection_info(_helper_cfg: dict) -> dict[str, dict]:
     _connection_info = {const.CONNECTION_INFO.LEGACY: {}, const.CONNECTION_INFO.OAUTH: {}}
     for _section, _key_list in const.CONNECTION_INFO.CONNECTION_FIELDS.items():
         for _key in _key_list:
-            if (const.HELPER_SETTINGS.CONNECTION in _helper_cfg
-                    and _section in _helper_cfg[const.HELPER_SETTINGS.CONNECTION]
-                    and _key in _helper_cfg[const.HELPER_SETTINGS.CONNECTION][_section]):
+            if (
+                const.HELPER_SETTINGS.CONNECTION in _helper_cfg
+                and _section in _helper_cfg[const.HELPER_SETTINGS.CONNECTION]
+                and _key in _helper_cfg[const.HELPER_SETTINGS.CONNECTION][_section]
+            ):
                 _connection_info[_section][_key] = _helper_cfg[const.HELPER_SETTINGS.CONNECTION][_section][_key]
     return _connection_info
 
 
 def _collect_values(
-        _top_level_keys: Union[list, tuple, set, frozenset, str],
-        _helper_cfg: dict,
-        _helper_dict: Optional[dict] = None,
-        _ignore_missing: bool = False,
+    _top_level_keys: Union[list, tuple, set, frozenset, str],
+    _helper_cfg: dict,
+    _helper_dict: Optional[dict] = None,
+    _ignore_missing: bool = False,
 ) -> dict:
     """Loop through a list of top-level keys to collect their corresponding values.
 
@@ -90,7 +92,7 @@ def _collect_values(
     :returns: A dictionary with the identified key value pairs
     """
     _helper_dict = {} if not _helper_dict else _helper_dict
-    _top_level_keys = (_top_level_keys, ) if isinstance(_top_level_keys, str) else _top_level_keys
+    _top_level_keys = (_top_level_keys,) if isinstance(_top_level_keys, str) else _top_level_keys
     for _key in _top_level_keys:
         if _key in _helper_cfg:
             _key_val = _helper_cfg[_key]
@@ -107,9 +109,9 @@ def _collect_values(
 
 
 def get_helper_settings(
-        file_path: str,
-        file_type: str = const.FILE_EXTENSIONS.JSON,
-        defined_settings: Optional[dict] = None,
+    file_path: str,
+    file_type: str = const.FILE_EXTENSIONS.JSON,
+    defined_settings: Optional[dict] = None,
 ) -> dict[str, Union[str, bool, dict]]:
     """Return a dictionary of the defined helper settings.
 

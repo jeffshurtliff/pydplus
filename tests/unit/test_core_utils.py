@@ -4,7 +4,7 @@
 :Synopsis:          Unit tests for utility functions in pydplus.utils.core_utils
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff (via GPT-5.3-codex)
-:Modified Date:     27 Mar 2026
+:Modified Date:     30 Mar 2026
 """
 
 from __future__ import annotations
@@ -17,7 +17,6 @@ import pytest
 from pydplus import constants as const
 from pydplus import errors
 from pydplus.utils import core_utils
-
 
 pytestmark = pytest.mark.unit
 
@@ -173,7 +172,7 @@ def test_get_env_variable_name_by_environment_raises_runtime_error_for_unexpecte
 def test_normalize_oauth_scope_normalizes_string_and_removes_duplicates() -> None:
     """Ensure plus-delimited OAuth scope strings are normalized and deduplicated in order."""
     normalized_scope = core_utils.normalize_oauth_scope(
-        f" {const.OAUTH_SCOPES.USER_READ} + {const.OAUTH_SCOPES.USER_MANAGE}+{const.OAUTH_SCOPES.USER_READ} "
+        f' {const.OAUTH_SCOPES.USER_READ} + {const.OAUTH_SCOPES.USER_MANAGE}+{const.OAUTH_SCOPES.USER_READ} '
     )
 
     assert normalized_scope == f'{const.OAUTH_SCOPES.USER_READ}+{const.OAUTH_SCOPES.USER_MANAGE}'
@@ -181,18 +180,14 @@ def test_normalize_oauth_scope_normalizes_string_and_removes_duplicates() -> Non
 
 def test_normalize_oauth_scope_normalizes_iterable_values() -> None:
     """Ensure iterable OAuth scope inputs are normalized into plus-delimited format."""
-    normalized_scope = core_utils.normalize_oauth_scope(
-        (const.OAUTH_SCOPES.USER_READ, const.OAUTH_SCOPES.USER_MANAGE)
-    )
+    normalized_scope = core_utils.normalize_oauth_scope((const.OAUTH_SCOPES.USER_READ, const.OAUTH_SCOPES.USER_MANAGE))
 
     assert normalized_scope == f'{const.OAUTH_SCOPES.USER_READ}+{const.OAUTH_SCOPES.USER_MANAGE}'
 
 
 def test_normalize_oauth_scope_accepts_space_delimited_strings() -> None:
     """Ensure space-delimited OAuth scope strings are normalized into plus-delimited format."""
-    normalized_scope = core_utils.normalize_oauth_scope(
-        f' {const.OAUTH_SCOPES.USER_READ} {const.OAUTH_SCOPES.USER_MANAGE} '
-    )
+    normalized_scope = core_utils.normalize_oauth_scope(f' {const.OAUTH_SCOPES.USER_READ} {const.OAUTH_SCOPES.USER_MANAGE} ')
 
     assert normalized_scope == f'{const.OAUTH_SCOPES.USER_READ}+{const.OAUTH_SCOPES.USER_MANAGE}'
 

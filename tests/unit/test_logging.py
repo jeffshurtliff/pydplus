@@ -4,7 +4,7 @@
 :Synopsis:          Unit tests for pydplus.utils.log_utils
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff (via GPT-5.3-codex)
-:Modified Date:     21 Mar 2026
+:Modified Date:     30 Mar 2026
 """
 
 from __future__ import annotations
@@ -19,7 +19,6 @@ from uuid import uuid4
 import pytest
 
 from pydplus.utils import log_utils
-
 
 pytestmark = pytest.mark.unit
 
@@ -136,12 +135,8 @@ def test_initialize_logging_replaces_managed_handlers_without_removing_user_hand
         console_log_level='error',
     )
 
-    managed_handlers = [
-        handler for handler in logger.handlers if getattr(handler, log_utils.MANAGED_HANDLER_ATTR, False)
-    ]
-    unmanaged_handlers = [
-        handler for handler in logger.handlers if not getattr(handler, log_utils.MANAGED_HANDLER_ATTR, False)
-    ]
+    managed_handlers = [handler for handler in logger.handlers if getattr(handler, log_utils.MANAGED_HANDLER_ATTR, False)]
+    unmanaged_handlers = [handler for handler in logger.handlers if not getattr(handler, log_utils.MANAGED_HANDLER_ATTR, False)]
 
     assert len(managed_handlers) == 1
     assert len(unmanaged_handlers) == 1

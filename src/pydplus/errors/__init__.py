@@ -4,7 +4,7 @@
 :Synopsis:          This module includes custom exceptions and handlers
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     06 May 2025
+:Modified Date:     30 Mar 2026
 """
 
 __all__ = ['exceptions', 'handlers']

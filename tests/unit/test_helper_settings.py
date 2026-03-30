@@ -4,7 +4,7 @@
 :Synopsis:          Unit tests for helper configuration functions in pydplus.utils.helper
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff (via GPT-5.3-codex)
-:Modified Date:     29 Mar 2026
+:Modified Date:     30 Mar 2026
 """
 
 from __future__ import annotations
@@ -17,7 +17,6 @@ import pytest
 from pydplus import constants as const
 from pydplus import errors
 from pydplus.utils import helper
-
 
 pytestmark = pytest.mark.unit
 

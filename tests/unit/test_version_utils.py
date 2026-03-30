@@ -4,7 +4,7 @@
 :Synopsis:          Unit tests for pydplus.utils.version helpers
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff (via GPT-5.3-codex)
-:Modified Date:     09 Mar 2026
+:Modified Date:     30 Mar 2026
 """
 
 from __future__ import annotations
@@ -14,7 +14,6 @@ from importlib.metadata import PackageNotFoundError
 import pytest
 
 from pydplus.utils import version as version_utils
-
 
 pytestmark = pytest.mark.unit
 
