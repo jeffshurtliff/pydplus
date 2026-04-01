@@ -114,22 +114,6 @@ poetry install
 ## Change Log
 The change log can be found in the [documentation](https://pydplus.readthedocs.io/en/latest/CHANGELOG.html).
 
-## Development Quality Checks
-This repository uses [Ruff](https://docs.astral.sh/ruff/) for linting, import sorting, and formatting.
-The standard maximum line length in this package is `130` characters.
-
-Line-length exceptions should be rare and limited to comments or special cases where wrapping harms readability.
-When an exception is required, use a targeted per-line `# noqa: E501`.
-
-```sh
-poetry run ruff check .
-poetry run ruff check . --fix
-poetry run ruff format .
-poetry run ruff format . --check
-```
-
-These checks are enforced in CI via `.github/workflows/ci.yml`.
-
 ## Usage
 PyDPlus is designed for Python-based administration workflows in RSA ID Plus tenants, including:
 
@@ -211,6 +195,27 @@ The documentation is located here: [https://pydplus.readthedocs.io/en/latest/](h
 
 ## Reporting Issues
 Issues can be reported within the [GitHub repository](https://github.com/jeffshurtliff/pydplus/issues).
+
+## Contributing
+Contributions are welcome and appreciated, including bug fixes, documentation improvements, tests, and feature work.
+For full contribution requirements and workflows, please see
+[CONTRIBUTING.md](https://github.com/jeffshurtliff/pydplus/blob/main/CONTRIBUTING.md).
+
+### Development Quality Checks
+This repository uses [Ruff](https://docs.astral.sh/ruff/) for linting, import sorting, and formatting.
+The standard maximum line length for this package is `130` characters.
+
+Line-length exceptions should be rare and limited to comments or special cases where wrapping harms readability.
+When an exception is required, use a targeted per-line `# noqa: E501` comment.
+
+```sh
+poetry run ruff check .
+poetry run ruff check . --fix
+poetry run ruff format .
+poetry run ruff format . --check
+```
+
+These checks are enforced in CI via `.github/workflows/ci.yml`.
 
 ## Donations
 If you would like to donate to this project then you can do so using [this PayPal link](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=XDZ8M6UV6EFK6&item_name=PyDPlus+Python+SDK&currency_code=USD).
