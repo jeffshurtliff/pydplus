@@ -6,7 +6,7 @@
 :Example:           ``helper_settings = helper.get_settings('/tmp/helper.yml', 'yaml')``
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     30 Mar 2026
+:Modified Date:     01 Apr 2026
 """
 
 from __future__ import annotations
@@ -70,6 +70,24 @@ def _get_connection_info(_helper_cfg: dict) -> dict[str, dict]:
                 and _key in _helper_cfg[const.HELPER_SETTINGS.CONNECTION][_section]
             ):
                 _connection_info[_section][_key] = _helper_cfg[const.HELPER_SETTINGS.CONNECTION][_section][_key]
+
+    # Parse helper-only OAuth fields that are not persisted in connection_info.
+    if (
+        const.HELPER_SETTINGS.CONNECTION in _helper_cfg
+        and const.CONNECTION_INFO.OAUTH in _helper_cfg[const.HELPER_SETTINGS.CONNECTION]
+        and isinstance(_helper_cfg[const.HELPER_SETTINGS.CONNECTION][const.CONNECTION_INFO.OAUTH], dict)
+    ):
+        _oauth_section = _helper_cfg[const.HELPER_SETTINGS.CONNECTION][const.CONNECTION_INFO.OAUTH]
+        _scope_preset = _oauth_section.get(const.HELPER_SETTINGS.OAUTH_SCOPE_PRESET)
+        if _scope_preset is None and const.HELPER_SETTINGS.LEGACY_OAUTH_SCOPE_PRESET in _oauth_section:
+            _scope_preset = _oauth_section.get(const.HELPER_SETTINGS.LEGACY_OAUTH_SCOPE_PRESET)
+            logger.warning(
+                f"The helper field '{const.HELPER_SETTINGS.LEGACY_OAUTH_SCOPE_PRESET}' is deprecated in "
+                f"'connection.oauth'; use '{const.HELPER_SETTINGS.OAUTH_SCOPE_PRESET}' instead"
+            )
+        if _scope_preset is not None:
+            _connection_info[const.CONNECTION_INFO.OAUTH][const.HELPER_SETTINGS.OAUTH_SCOPE_PRESET] = _scope_preset
+
     return _connection_info
 
 
@@ -153,6 +171,25 @@ def get_helper_settings(
     # Populate the connection information in the helper dictionary
     if const.HELPER_SETTINGS.CONNECTION in helper_cfg and const.HELPER_SETTINGS.CONNECTION not in defined_settings:
         helper_settings[const.HELPER_SETTINGS.CONNECTION] = _get_connection_info(helper_cfg)
+
+    # Backward compatibility for older helper files that define oauth_scope_preset at the root level.
+    if const.HELPER_SETTINGS.LEGACY_OAUTH_SCOPE_PRESET in helper_cfg and const.HELPER_SETTINGS.CONNECTION not in defined_settings:
+        _legacy_scope_preset = helper_cfg[const.HELPER_SETTINGS.LEGACY_OAUTH_SCOPE_PRESET]
+        if const.HELPER_SETTINGS.CONNECTION not in helper_settings:
+            helper_settings[const.HELPER_SETTINGS.CONNECTION] = {
+                const.CONNECTION_INFO.LEGACY: {},
+                const.CONNECTION_INFO.OAUTH: {},
+            }
+        elif const.CONNECTION_INFO.OAUTH not in helper_settings[const.HELPER_SETTINGS.CONNECTION]:
+            helper_settings[const.HELPER_SETTINGS.CONNECTION][const.CONNECTION_INFO.OAUTH] = {}
+
+        _oauth_section = helper_settings[const.HELPER_SETTINGS.CONNECTION][const.CONNECTION_INFO.OAUTH]
+        if const.HELPER_SETTINGS.OAUTH_SCOPE_PRESET not in _oauth_section:
+            _oauth_section[const.HELPER_SETTINGS.OAUTH_SCOPE_PRESET] = _legacy_scope_preset
+            logger.warning(
+                f"The helper field '{const.HELPER_SETTINGS.LEGACY_OAUTH_SCOPE_PRESET}' is deprecated; "
+                "use 'connection.oauth.scope_preset' instead"
+            )
 
     # Populate the environment variables information in the helper dictionary
     if const.HELPER_SETTINGS.ENV_VARIABLES in helper_cfg and const.HELPER_SETTINGS.ENV_VARIABLES not in defined_settings:

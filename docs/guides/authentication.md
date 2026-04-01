@@ -89,7 +89,6 @@ pydp = PyDPlus(
 ```json
 {
   "connection_type": "oauth",
-  "oauth_scope_preset": "user_read_only",
   "base_urls": {
     "admin": "https://example-company.access.securid.com"
   },
@@ -98,6 +97,7 @@ pydp = PyDPlus(
       "issuer_url": "https://example-company.auth.securid.com/oauth",
       "client_id": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
       "scope": "rsa.user.read+rsa.user.manage",
+      "scope_preset": "user_read_only",
       "grant_type": "Client Credentials",
       "client_authentication": "Private Key JWT",
       "private_key_path": "/path/to/keys",
@@ -158,8 +158,8 @@ OAUTH_SCOPE = [
 
 ### 3) Use OAuth scope presets
 
-Presets are named bundles of scopes passed via `oauth_scope_preset` (argument), `oauth_scope_preset` (helper setting),
-or `PYDPLUS_OAUTH_SCOPE_PRESET` (environment variable).
+Presets are named bundles of scopes passed via `oauth_scope_preset` (argument),
+`connection.oauth.scope_preset` (helper setting), or `PYDPLUS_OAUTH_SCOPE_PRESET` (environment variable).
 
 Supported preset names:
 

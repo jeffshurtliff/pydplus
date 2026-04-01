@@ -5,8 +5,8 @@
 :Usage:             ``from pydplus import PyDPlus``
 :Example:           ``pydp = PyDPlus()``
 :Created By:        Jeff Shurtliff
-:Last Modified:     Jeff Shurtliff
-:Modified Date:     30 Mar 2026
+:Last Modified:     Jeff Shurtliff (via GPT-5.3-codex)
+:Modified Date:     01 Apr 2026
 """
 
 from __future__ import annotations
@@ -919,10 +919,25 @@ class PyDPlus:
         """Define OAuth scopes by merging explicit scopes with any presets from all supported sources."""
         _combined_scope_presets: list[str] = []
         _seen_scope_presets: set[str] = set()
+        _helper_scope_preset = None
+        if (
+            const.HELPER_SETTINGS.CONNECTION in self._helper_settings
+            and isinstance(self._helper_settings[const.HELPER_SETTINGS.CONNECTION], dict)
+            and const.CONNECTION_INFO.OAUTH in self._helper_settings[const.HELPER_SETTINGS.CONNECTION]
+            and isinstance(self._helper_settings[const.HELPER_SETTINGS.CONNECTION][const.CONNECTION_INFO.OAUTH], dict)
+        ):
+            _helper_oauth = self._helper_settings[const.HELPER_SETTINGS.CONNECTION][const.CONNECTION_INFO.OAUTH]
+            _helper_scope_preset = _helper_oauth.get(const.HELPER_SETTINGS.OAUTH_SCOPE_PRESET)
+            if _helper_scope_preset is None:
+                _helper_scope_preset = _helper_oauth.get(const.HELPER_SETTINGS.LEGACY_OAUTH_SCOPE_PRESET)
+
+        # Fallback for any helper settings parsed with older root-level field names.
+        if _helper_scope_preset is None:
+            _helper_scope_preset = self._helper_settings.get(const.HELPER_SETTINGS.LEGACY_OAUTH_SCOPE_PRESET)
 
         for _scope_preset_values in (
             _oauth_scope_preset_from_arg,
-            self._helper_settings.get(const.HELPER_SETTINGS.OAUTH_SCOPE_PRESET),
+            _helper_scope_preset,
             self._env_variables.get(const.ENV_VARIABLES.OAUTH_SCOPE_PRESET_FIELD),
         ):
             for _scope_preset_value in self._parse_oauth_scope_preset_values(_scope_preset_values):
