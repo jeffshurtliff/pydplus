@@ -156,7 +156,9 @@ Legacy API authentication is also supported. See the
 1. Configure default scope permissions in the OAuth client settings in the RSA Cloud Administration Console.
 2. Define scopes explicitly in your code/helper/env configuration (manual string values or constants like
    `const.OAUTH_SCOPES.USER_READ` grouped in an `OAUTH_SCOPE` variable).
-3. Use `oauth_scope_preset` to apply scope bundles (for example `user_read_only` or `group_read_only`).
+3. Use scope presets to apply scope bundles (for example `user_read_only` or `group_read_only`) via
+   `oauth_scope_preset` (argument), `connection.oauth.scope_preset` (helper setting), or `PYDPLUS_OAUTH_SCOPE_PRESET`
+   (environment variable).
 
 In PyDPlus, keep `oauth_scope` explicitly defined (directly, helper file, or environment variable) so token requests
 remain deterministic and validated.

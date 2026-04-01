@@ -4,7 +4,7 @@
 :Synopsis:          Unit tests for helper configuration functions in pydplus.utils.helper
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff (via GPT-5.3-codex)
-:Modified Date:     30 Mar 2026
+:Modified Date:     01 Apr 2026
 """
 
 from __future__ import annotations
@@ -95,6 +95,7 @@ def test_get_connection_info_returns_known_nested_connection_fields_only() -> No
                 const.CONNECTION_INFO.OAUTH_CLIENT_ID: 'oauth-client-id',
                 const.CONNECTION_INFO.OAUTH_SCOPE: const.OAUTH_SCOPES.USER_READ,
                 const.CONNECTION_INFO.OAUTH_GRANT_TYPE: const.CONNECTION_INFO.OAUTH_DEFAULT_GRANT_TYPE,
+                const.HELPER_SETTINGS.OAUTH_SCOPE_PRESET: 'user_read_only',
                 'unexpected': 'ignore-me',
             },
         },
@@ -110,6 +111,7 @@ def test_get_connection_info_returns_known_nested_connection_fields_only() -> No
             const.CONNECTION_INFO.OAUTH_CLIENT_ID: 'oauth-client-id',
             const.CONNECTION_INFO.OAUTH_SCOPE: const.OAUTH_SCOPES.USER_READ,
             const.CONNECTION_INFO.OAUTH_GRANT_TYPE: const.CONNECTION_INFO.OAUTH_DEFAULT_GRANT_TYPE,
+            const.HELPER_SETTINGS.OAUTH_SCOPE_PRESET: 'user_read_only',
         },
     }
 
@@ -167,7 +169,6 @@ def test_get_helper_settings_parses_root_and_nested_settings(tmp_path: Path) -> 
         const.HELPER_SETTINGS.TENANT_NAME: 'tenant-a',
         const.HELPER_SETTINGS.BASE_URL: 'https://idp.example.com',
         const.HELPER_SETTINGS.CONNECTION_TYPE: const.CONNECTION_INFO.OAUTH,
-        const.HELPER_SETTINGS.OAUTH_SCOPE_PRESET: 'user_read_only',
         const.HELPER_SETTINGS.STRICT_MODE: 'yes',
         const.HELPER_SETTINGS.BASE_URLS: {
             const.HELPER_SETTINGS.ADMIN: 'https://admin.example.com',
@@ -184,6 +185,7 @@ def test_get_helper_settings_parses_root_and_nested_settings(tmp_path: Path) -> 
                 const.CONNECTION_INFO.OAUTH_SCOPE: const.OAUTH_SCOPES.USER_READ,
                 const.CONNECTION_INFO.OAUTH_GRANT_TYPE: const.CONNECTION_INFO.OAUTH_DEFAULT_GRANT_TYPE,
                 const.CONNECTION_INFO.OAUTH_CLIENT_AUTHENTICATION: const.CONNECTION_INFO.OAUTH_DEFAULT_CLIENT_AUTH,
+                const.HELPER_SETTINGS.OAUTH_SCOPE_PRESET: 'user_read_only',
             },
         },
         const.HELPER_SETTINGS.ENV_VARIABLES: 'CUSTOM_ENV_VARS',
@@ -196,7 +198,6 @@ def test_get_helper_settings_parses_root_and_nested_settings(tmp_path: Path) -> 
     assert settings[const.HELPER_SETTINGS.TENANT_NAME] == 'tenant-a'
     assert settings[const.HELPER_SETTINGS.BASE_URL] == 'https://idp.example.com'
     assert settings[const.HELPER_SETTINGS.CONNECTION_TYPE] == const.CONNECTION_INFO.OAUTH
-    assert settings[const.HELPER_SETTINGS.OAUTH_SCOPE_PRESET] == 'user_read_only'
     assert settings[const.HELPER_SETTINGS.STRICT_MODE] is True
     assert settings[const.HELPER_SETTINGS.VERIFY_SSL] is True
     assert settings[const.HELPER_SETTINGS.ADMIN_BASE_URL] == 'https://admin.example.com'
@@ -211,8 +212,23 @@ def test_get_helper_settings_parses_root_and_nested_settings(tmp_path: Path) -> 
         const.CONNECTION_INFO.OAUTH_SCOPE: const.OAUTH_SCOPES.USER_READ,
         const.CONNECTION_INFO.OAUTH_GRANT_TYPE: const.CONNECTION_INFO.OAUTH_DEFAULT_GRANT_TYPE,
         const.CONNECTION_INFO.OAUTH_CLIENT_AUTHENTICATION: const.CONNECTION_INFO.OAUTH_DEFAULT_CLIENT_AUTH,
+        const.HELPER_SETTINGS.OAUTH_SCOPE_PRESET: 'user_read_only',
     }
     assert settings[const.HELPER_SETTINGS.ENV_VARIABLES] == 'CUSTOM_ENV_VARS'
+
+
+def test_get_helper_settings_maps_legacy_root_oauth_scope_preset_to_oauth_connection(tmp_path: Path) -> None:
+    """Ensure legacy root-level oauth_scope_preset is mapped to connection.oauth.scope_preset."""
+    helper_payload = {
+        const.HELPER_SETTINGS.LEGACY_OAUTH_SCOPE_PRESET: 'user_read_only',
+    }
+    helper_path = _write_json_file(tmp_path, 'helper_legacy_scope_preset.json', helper_payload)
+
+    settings = helper.get_helper_settings(helper_path, const.FILE_EXTENSIONS.JSON)
+
+    assert settings[const.HELPER_SETTINGS.CONNECTION][const.CONNECTION_INFO.OAUTH][const.HELPER_SETTINGS.OAUTH_SCOPE_PRESET] == (
+        'user_read_only'
+    )
 
 
 def test_get_helper_settings_infers_file_type_for_invalid_file_type(tmp_path: Path, monkeypatch) -> None:

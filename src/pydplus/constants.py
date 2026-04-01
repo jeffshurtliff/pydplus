@@ -4,7 +4,7 @@
 :Synopsis:          Constants that are utilized throughout the package
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff
-:Modified Date:     30 Mar 2026
+:Modified Date:     01 Apr 2026
 """
 
 from __future__ import annotations
@@ -235,7 +235,7 @@ class HelperSettings:
     VALID_YAML_TRUE_VALUES: ClassVar[frozenset[str]] = frozenset({'yes', 'true'})
     VALID_YAML_FALSE_VALUES: ClassVar[frozenset[str]] = frozenset({'no', 'false'})
 
-    # Root-level helper fields
+    # Helper field names
     ENV_NAME: ClassVar[str] = 'env'
     TENANT_NAME: ClassVar[str] = 'tenant_name'
     BASE_URL: ClassVar[str] = 'base_url'
@@ -244,7 +244,8 @@ class HelperSettings:
     CONNECTION_TYPE: ClassVar[str] = 'connection_type'
     STRICT_MODE: ClassVar[str] = 'strict_mode'
     VERIFY_SSL: str = 'verify_ssl'
-    OAUTH_SCOPE_PRESET: ClassVar[str] = 'oauth_scope_preset'
+    OAUTH_SCOPE_PRESET: ClassVar[str] = 'scope_preset'
+    LEGACY_OAUTH_SCOPE_PRESET: ClassVar[str] = 'oauth_scope_preset'
     ENV_VARIABLES: ClassVar[str] = 'env_variables'
     ROOT_LEVEL_BASIC_FIELDS: ClassVar[frozenset[str]] = frozenset(
         {
@@ -254,7 +255,6 @@ class HelperSettings:
             CONNECTION_TYPE,
             STRICT_MODE,
             VERIFY_SSL,
-            OAUTH_SCOPE_PRESET,
         }
     )
 

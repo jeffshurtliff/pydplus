@@ -4,7 +4,7 @@
 :Synopsis:          Unit tests for client object instantiation and connection-info compilation
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff (via GPT-5.3-codex)
-:Modified Date:     30 Mar 2026
+:Modified Date:     01 Apr 2026
 """
 
 from __future__ import annotations
@@ -107,14 +107,47 @@ def test_compile_connection_info_ignores_invalid_oauth_scope_preset_values(sampl
     }
 
 
-def test_instantiate_core_object_merges_helper_oauth_scope_preset_with_explicit_scope(tmp_path: Path) -> None:
+def test_instantiate_core_object_merges_helper_scope_preset_with_explicit_scope(tmp_path: Path) -> None:
     """Ensure helper-defined scope presets are merged with explicitly provided OAuth scopes."""
     helper_payload = {
         const.HELPER_SETTINGS.CONNECTION_TYPE: const.CONNECTION_INFO.OAUTH,
         const.HELPER_SETTINGS.BASE_URLS: {
             const.HELPER_SETTINGS.ADMIN: 'https://example-company.access.securid.com',
         },
-        const.HELPER_SETTINGS.OAUTH_SCOPE_PRESET: 'user_read_only',
+        const.HELPER_SETTINGS.CONNECTION: {
+            const.CONNECTION_INFO.OAUTH: {
+                const.HELPER_SETTINGS.OAUTH_SCOPE_PRESET: 'user_read_only',
+            }
+        },
+    }
+    helper_file = tmp_path / 'helper.json'
+    helper_file.write_text(json.dumps(helper_payload), encoding='utf-8')
+
+    pydp_object = PyDPlus(
+        helper=str(helper_file),
+        oauth_client_id='oauth-client-id',
+        oauth_private_key_jwk='{"kty":"RSA","n":"abc","e":"AQAB","d":"xyz"}',
+        oauth_scope=const.OAUTH_SCOPES.USER_MANAGE,
+        auto_connect=False,
+    )
+    parsed_scopes = pydp_object.connection_info[const.CONNECTION_INFO.OAUTH][const.CONNECTION_INFO.OAUTH_SCOPE]
+    parsed_scopes = parsed_scopes.split('+')
+
+    assert set(parsed_scopes) == {
+        const.OAUTH_SCOPES.USER_MANAGE,
+        const.OAUTH_SCOPES.USER_READ,
+        const.OAUTH_SCOPES.USER_RISKY_READ,
+    }
+
+
+def test_instantiate_core_object_merges_legacy_helper_oauth_scope_preset_with_explicit_scope(tmp_path: Path) -> None:
+    """Ensure legacy helper root-level oauth_scope_preset remains supported for backward compatibility."""
+    helper_payload = {
+        const.HELPER_SETTINGS.CONNECTION_TYPE: const.CONNECTION_INFO.OAUTH,
+        const.HELPER_SETTINGS.BASE_URLS: {
+            const.HELPER_SETTINGS.ADMIN: 'https://example-company.access.securid.com',
+        },
+        const.HELPER_SETTINGS.LEGACY_OAUTH_SCOPE_PRESET: 'user_read_only',
     }
     helper_file = tmp_path / 'helper.json'
     helper_file.write_text(json.dumps(helper_payload), encoding='utf-8')
@@ -145,6 +178,32 @@ def test_instantiate_core_object_merges_env_oauth_scope_preset_with_explicit_sco
         oauth_client_id='oauth-client-id',
         oauth_private_key_jwk='{"kty":"RSA","n":"abc","e":"AQAB","d":"xyz"}',
         oauth_scope=const.OAUTH_SCOPES.USER_MANAGE,
+        auto_connect=False,
+    )
+    parsed_scopes = pydp_object.connection_info[const.CONNECTION_INFO.OAUTH][const.CONNECTION_INFO.OAUTH_SCOPE]
+    parsed_scopes = parsed_scopes.split('+')
+
+    assert set(parsed_scopes) == {
+        const.OAUTH_SCOPES.USER_MANAGE,
+        const.OAUTH_SCOPES.USER_READ,
+        const.OAUTH_SCOPES.USER_RISKY_READ,
+        const.OAUTH_SCOPES.GROUP_READ,
+        const.OAUTH_SCOPES.GROUP_USERS_READ,
+    }
+
+
+def test_instantiate_core_object_merges_env_oauth_scope_preset_with_custom_variable_name(monkeypatch) -> None:
+    """Ensure custom env-variable names can supply oauth_scope_preset values."""
+    monkeypatch.setenv('CUSTOM_SCOPE_PRESET_VAR', 'group_read_only user_read_only')
+
+    pydp_object = PyDPlus(
+        base_admin_url='https://example-company.access.securid.com',
+        oauth_client_id='oauth-client-id',
+        oauth_private_key_jwk='{"kty":"RSA","n":"abc","e":"AQAB","d":"xyz"}',
+        oauth_scope=const.OAUTH_SCOPES.USER_MANAGE,
+        env_variables={
+            const.ENV_VARIABLES.OAUTH_SCOPE_PRESET_FIELD: 'CUSTOM_SCOPE_PRESET_VAR',
+        },
         auto_connect=False,
     )
     parsed_scopes = pydp_object.connection_info[const.CONNECTION_INFO.OAUTH][const.CONNECTION_INFO.OAUTH_SCOPE]
