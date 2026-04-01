@@ -2,7 +2,7 @@
 
 This page explains how to install `pydplus` either from PyPI using `pip` or
 from source by cloning the repository and building a wheel with `poetry`.
-For prerequisites (Python version, Salesforce org access, API permissions), see
+For prerequisites (Python version, RSA ID Plus tenant access, API permissions), see
 the [Overview](overview.md).
 
 ## Install With `pip`

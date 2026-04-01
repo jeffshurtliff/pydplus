@@ -19,7 +19,7 @@ This library requires the following:
 - Python version 3.9 or above (version 3.14 not yet officially supported)
 - An RSA ID Plus tenant (Production or Development)
 - An RSA ID Plus administrative user that has API privileges in the RSA ID Plus tenant
-- Legacy API credentials as needed
+- OAuth client credentials (recommended) or Legacy API credentials
 
 ## License and Support
 

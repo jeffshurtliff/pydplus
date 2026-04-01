@@ -21,28 +21,38 @@ print(pydplus.__version__)
 
 ## 2. Instantiate A Client
 
-Use a helper file for local development and automation so credentials stay out
+OAuth is recommended for new integrations. You can keep credentials in a helper file so secrets stay out
 of your source code.
 
 ```python
-from pydplus import PyDPlus
+from pydplus import PyDPlus, constants as const
 
-pydp = PyDPlus(helper="/path/to/helper.yml")
+pydp = PyDPlus(
+    connection_type="oauth",
+    base_admin_url="https://example-company.access.securid.com",
+    oauth_client_id="XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
+    oauth_private_key="/path/to/oauth-private-key.jwk",
+    oauth_scope=[
+        const.OAUTH_SCOPES.USER_READ,
+        const.OAUTH_SCOPES.USER_MANAGE,
+    ],
+)
 ```
 
-You can also pass credentials directly:
+You can also use a helper file:
 
 ```python
 from pydplus import PyDPlus
 
 pydp = PyDPlus(
-    # Define parameters here
+    helper="/path/to/helper.json",
 )
 ```
 
 :::{tip}
 Need help choosing the authentication pattern? See
-[Authentication Guide](../guides/authentication.md).
+[Authentication Guide](../guides/authentication.md), including OAuth scope presets and
+scope-strategy options.
 :::
 
 ## 3. Retrieve a User ID from an email address

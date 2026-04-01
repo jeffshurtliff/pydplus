@@ -36,7 +36,7 @@ A Python toolset for the RSA ID Plus cloud authentication platform.
         <td>Supported Versions</td>
         <td>
             <a href="https://pypi.org/project/pydplus/">
-                <img alt="PyPI - Python Version" src="https://img.shields.io/pypi/pyversions/pydplus">
+                <img alt="PyPI - Python Versions Supported" src="https://img.shields.io/pypi/pyversions/pydplus">
             </a>
         </td>
     </tr>
@@ -44,7 +44,7 @@ A Python toolset for the RSA ID Plus cloud authentication platform.
         <td>Code Coverage</td>
         <td>
             <a href="https://codecov.io/gh/jeffshurtliff/pydplus">
-                <img src="https://codecov.io/gh/jeffshurtliff/pydplus/branch/main/graph/badge.svg?token=QBynJO48jN" />
+                <img alt="Codecov - Code Coverage" src="https://codecov.io/gh/jeffshurtliff/pydplus/branch/main/graph/badge.svg?token=QBynJO48jN" />
             </a>
         </td>
     </tr>
@@ -52,7 +52,7 @@ A Python toolset for the RSA ID Plus cloud authentication platform.
         <td>Documentation</td>
         <td>
             <a href="https://pydplus.readthedocs.io/en/latest/?badge=latest">
-                <img src="https://readthedocs.org/projects/pydplus/badge/?version=latest" alt="Documentation Status" />
+                <img alt="Documentation Status" src="https://readthedocs.org/projects/pydplus/badge/?version=latest" />
             </a>
         </td>
     </tr>
@@ -76,10 +76,10 @@ A Python toolset for the RSA ID Plus cloud authentication platform.
         <td style="vertical-align: top;">Issues</td>
         <td>
             <a href="https://github.com/jeffshurtliff/pydplus/issues">
-                <img style="margin-bottom:5px;" alt="GitHub open issues" src="https://img.shields.io/github/issues-raw/jeffshurtliff/pydplus"><br />
+                <img style="margin-bottom:5px;" alt="GitHub Open Issues" src="https://img.shields.io/github/issues-raw/jeffshurtliff/pydplus"><br />
             </a>
             <a href="https://github.com/jeffshurtliff/pydplus/issues">
-                <img alt="GitHub closed issues" src="https://img.shields.io/github/issues-closed-raw/jeffshurtliff/pydplus">
+                <img alt="GitHub Closed Issues" src="https://img.shields.io/github/issues-closed-raw/jeffshurtliff/pydplus">
             </a>
         </td>
     </tr>
@@ -87,28 +87,28 @@ A Python toolset for the RSA ID Plus cloud authentication platform.
         <td style="vertical-align: top;">Pull Requests</td>
         <td>
             <a href="https://github.com/jeffshurtliff/pydplus/pulls">
-                <img style="margin-bottom:5px;" alt="GitHub open pull requests" src="https://img.shields.io/github/issues-pr-raw/jeffshurtliff/pydplus"><br />
+                <img style="margin-bottom:5px;" alt="GitHub Open Pull Requests" src="https://img.shields.io/github/issues-pr-raw/jeffshurtliff/pydplus"><br />
             </a>
             <a href="https://github.com/jeffshurtliff/pydplus/pulls">
-                <img alt="GitHub closed pull requests" src="https://img.shields.io/github/issues-pr-closed-raw/jeffshurtliff/pydplus">
+                <img alt="GitHub Closed Pull Requests" src="https://img.shields.io/github/issues-pr-closed-raw/jeffshurtliff/pydplus">
             </a>
         </td>
     </tr>
 </table>
 
 ## Installation
-The package can be installed via pip using the syntax below.
+Install from PyPI:
 
 ```sh
-pip install pydplus --upgrade
+python -m pip install --upgrade pydplus
 ```
 
-You may also clone the repository and install from source using below.
+Install from source:
 
 ```sh
-git clone git://github.com/jeffshurtliff/pydplus.git
-cd pydplus/
-python poetry install
+git clone https://github.com/jeffshurtliff/pydplus.git
+cd pydplus
+poetry install
 ```
 
 ## Change Log
@@ -116,7 +116,7 @@ The change log can be found in the [documentation](https://pydplus.readthedocs.i
 
 ## Development Quality Checks
 This repository uses [Ruff](https://docs.astral.sh/ruff/) for linting, import sorting, and formatting.
-The standard maximum line length is `130` characters.
+The standard maximum line length in this package is `130` characters.
 
 Line-length exceptions should be rare and limited to comments or special cases where wrapping harms readability.
 When an exception is required, use a targeted per-line `# noqa: E501`.
@@ -131,17 +131,77 @@ poetry run ruff format . --check
 These checks are enforced in CI via `.github/workflows/ci.yml`.
 
 ## Usage
-This section provides basic usage instructions for the package.
+PyDPlus is designed for Python-based administration workflows in RSA ID Plus tenants, including:
 
-### Importing the package
-Rather than importing the base package, it is recommended that you import the primary `PyDPlus` class using the 
-syntax below.
+- user lifecycle automation (lookup, disable, mark for deletion)
+- admin reporting and audit integrations
+- helpdesk and identity-operations scripting
+
+### 1) Import the package
 
 ```python
-from pydplus import PyDPlus
+from pydplus import PyDPlus, constants as const
 ```
 
-_To be continued..._
+### 2) Instantiate the client (OAuth example)
+
+`pydplus.PyDPlus` supports both OAuth and Legacy credentials. OAuth (Private Key JWT) is recommended for new usage.
+
+```python
+from pydplus import PyDPlus, constants as const
+
+OAUTH_SCOPE = [
+    const.OAUTH_SCOPES.USER_READ,
+    const.OAUTH_SCOPES.USER_MANAGE,
+]
+
+pydp = PyDPlus(
+    connection_type="oauth",
+    base_admin_url="https://example-company.access.securid.com",
+    oauth_client_id="XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
+    oauth_private_key="/path/to/oauth-private-key.jwk",
+    oauth_scope=OAUTH_SCOPE,
+)
+```
+
+Legacy API authentication is also supported. See the 
+[Authentication](https://pydplus.readthedocs.io/en/latest/guides/authentication.html) guide for both patterns.
+
+### 3) Define OAuth scopes (three practical options)
+
+1. Configure default scope permissions in the OAuth client settings in the RSA Cloud Administration Console.
+2. Define scopes explicitly in your code/helper/env configuration (manual string values or constants like
+   `const.OAUTH_SCOPES.USER_READ` grouped in an `OAUTH_SCOPE` variable).
+3. Use `oauth_scope_preset` to apply scope bundles (for example `user_read_only` or `group_read_only`).
+
+In PyDPlus, keep `oauth_scope` explicitly defined (directly, helper file, or environment variable) so token requests
+remain deterministic and validated.
+
+Presets are additive and merged with explicit scopes:
+
+```python
+pydp = PyDPlus(
+    connection_type="oauth",
+    base_admin_url="https://example-company.access.securid.com",
+    oauth_client_id="XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
+    oauth_private_key="/path/to/oauth-private-key.jwk",
+    oauth_scope=const.OAUTH_SCOPES.USER_MANAGE,
+    oauth_scope_preset=("user_read_only", "group_read_only"),
+)
+```
+
+### 4) Run an API operation
+
+```python
+user_id = pydp.users.get_user_id(email="john.doe@example.com")
+response = pydp.users.disable_user(user_id=user_id)
+```
+
+For deeper coverage, see:
+
+- Quickstart: <https://pydplus.readthedocs.io/en/latest/getting-started/quickstart.html>
+- Authentication guide: <https://pydplus.readthedocs.io/en/latest/guides/authentication.html>
+- Client reference: <https://pydplus.readthedocs.io/en/latest/reference/client.html>
 
 ## Documentation
 The documentation is located here: [https://pydplus.readthedocs.io/en/latest/](https://pydplus.readthedocs.io/en/latest/)
