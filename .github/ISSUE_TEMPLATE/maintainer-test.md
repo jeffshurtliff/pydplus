@@ -53,7 +53,7 @@ List the primary scenarios, edge cases, or risk areas this work should cover.
 Examples:
 - Authentication token refresh failures
 - Pagination boundaries
-- Salesforce API error handling
+- RSA ID Plus API error handling
 - Timeout and retry behavior
 
 ---

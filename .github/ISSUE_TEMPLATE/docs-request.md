@@ -71,7 +71,7 @@ Optional outline or draft content
 ## References (Optional)
 
 Links or references that may help:
-- Salesforce documentation
+- RSA documentation
 - Related PyDPlus docs/pages
 - Prior issues or PRs
 

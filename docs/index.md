@@ -47,7 +47,7 @@ from pydplus import PyDPlus
 
 pydp = PyDPlus(helper="/path/to/helper.yml")
 
-user_id = pydp.users.get_user_id(email='john.doe@edample.com')
+user_id = pydp.users.get_user_id(email='john.doe@example.com')
 print(user_id)
 ```
 

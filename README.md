@@ -1,4 +1,4 @@
-<img src="docs/_static/pydplus-icon-cropped.png"
+<img src="https://raw.githubusercontent.com/jeffshurtliff/pydplus/main/docs/_static/pydplus-icon-cropped.png"
      class="pydplus-c-landing-page-logo" 
      style="background-color: transparent; max-height: 320px;"
      alt="PyDPlus Logo" />
@@ -19,7 +19,7 @@ A Python toolset for the RSA ID Plus cloud authentication platform.
         <td>Latest Beta/RC Release</td>
         <td>
             <a href="https://pypi.org/project/pydplus/#history">
-                <img alt="PyPI" src="https://img.shields.io/badge/pypi-1.0.0b1-blue">
+                <img alt="PyPI" src="https://img.shields.io/badge/pypi-none-blue">
             </a>
         </td>
     </tr>
@@ -51,8 +51,8 @@ A Python toolset for the RSA ID Plus cloud authentication platform.
     <tr>
         <td>Documentation</td>
         <td>
-            <a href="https://pydplus.readthedocs.io/en/latest/?badge=latest">
-                <img alt="Documentation Status" src="https://readthedocs.org/projects/pydplus/badge/?version=latest" />
+            <a href="https://pydplus.readthedocs.io/en/stable/?badge=stable">
+                <img alt="Documentation Status" src="https://readthedocs.org/projects/pydplus/badge/?version=stable" />
             </a>
         </td>
     </tr>
@@ -149,7 +149,7 @@ pydp = PyDPlus(
 ```
 
 Legacy API authentication is also supported. See the 
-[Authentication](https://pydplus.readthedocs.io/en/latest/guides/authentication.html) guide for both patterns.
+[Authentication](https://pydplus.readthedocs.io/en/stable/guides/authentication.html) guide for both patterns.
 
 ### 3) Define OAuth scopes (three practical options)
 
@@ -185,12 +185,12 @@ response = pydp.users.disable_user(user_id=user_id)
 
 For deeper coverage, see:
 
-- Quickstart: <https://pydplus.readthedocs.io/en/latest/getting-started/quickstart.html>
-- Authentication guide: <https://pydplus.readthedocs.io/en/latest/guides/authentication.html>
-- Client reference: <https://pydplus.readthedocs.io/en/latest/reference/client.html>
+- Quickstart: <https://pydplus.readthedocs.io/en/stable/getting-started/quickstart.html>
+- Authentication guide: <https://pydplus.readthedocs.io/en/stable/guides/authentication.html>
+- Client reference: <https://pydplus.readthedocs.io/en/stable/reference/client.html>
 
 ## Documentation
-The documentation is located here: [https://pydplus.readthedocs.io/en/latest/](https://pydplus.readthedocs.io/en/latest/)
+The documentation is located here: [https://pydplus.readthedocs.io/en/stable/](https://pydplus.readthedocs.io/en/stable/)
 
 ## License
 [MIT License](https://github.com/jeffshurtliff/pydplus/blob/main/LICENSE)

@@ -13,6 +13,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 (unreleased-added)=
 ### Added
 
+No unreleased additions at this time.
+
+(unreleased-changed)=
+### Changed
+
+No unreleased changes at this time.
+
+---
+(relnotes-1.0.0)=
+## [1.0.0] - 2026-04-02
+
+This was the first release of the `pydplus` package on PyPI with its original 
+features and functionality.
+
+### Added
+
 - Added shared pytest fixtures and integration-test controls in `tests/conftest.py`.
 - Added unit tests in `tests/unit/test_logging.py` for `pydplus.utils.log_utils`.
 - Added secure RSA ID Plus legacy credential parsing and explicit PEM persistence helpers in `src/pydplus/credentials.py`.
@@ -22,7 +38,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added OAuth unit coverage in `tests/unit/test_auth.py` and `tests/unit/test_api_oauth.py`.
 - Added OAuth scope normalization helpers and strict scope-validation coverage in `tests/unit/test_core_utils.py`.
 
-(unreleased-changed)=
 ### Changed
 
 - Refactored tests into `tests/unit/` and `tests/integration/` with updated testing documentation and default coverage reporting.
@@ -42,14 +57,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated OAuth scope-preset handling so helper files define presets under `connection.oauth.scope_preset`, environment variables use `PYDPLUS_OAUTH_SCOPE_PRESET`, and presets are merged additively with explicit scopes instead of replacing them.
 - Updated `pydplus.utils.core_utils.get_random_string()` to use the `secrets` module for cryptographically secure random string generation.
 
----
-(relnotes-1.0.0)=
-## [1.0.0] - 2026-MM-DD
-
-This was the first release of the `pydplus` package on PyPI with its original 
-features and functionality.
-
 
 <!-- The reference definitions are listed below -->
-[Unreleased]: https://github.com/jeffshurtliff/salespyforce/compare/1.0.0...HEAD
-[1.0.0]: https://github.com/jeffshurtliff/salespyforce/releases/tag/1.0.0
+[Unreleased]: https://github.com/jeffshurtliff/pydplus/compare/1.0.0...HEAD
+[1.0.0]: https://github.com/jeffshurtliff/pydplus/releases/tag/1.0.0

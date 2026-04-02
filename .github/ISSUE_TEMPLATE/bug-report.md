@@ -97,7 +97,7 @@ If this may be security-related, please report it responsibly instead of filing 
 Add any other context that may help diagnose the problem:
 - Workarounds you’ve tried
 - Related issues or PRs
-- Salesforce configuration details (at a high level)
+- RSA ID Plus tenant configuration details (at a high level)
 
 ---
 

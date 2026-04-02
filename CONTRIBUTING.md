@@ -737,6 +737,30 @@ PRs that do not follow naming or structural rules may be closed without review.
 
 ---
 
+## Manual Release Preflight Checklist
+
+Before cutting a release, run the following checks from the repository root:
+
+```bash
+poetry check
+poetry run ruff check .
+poetry run ruff format --check .
+poetry run pytest --run-integration -q
+poetry run bandit -r src
+poetry run sphinx-build -b html docs docs/_build/html
+poetry build
+poetry run python -m twine check dist/*
+```
+
+For manual releases, the maintainer is responsible for final release actions:
+
+- Push/merge release-ready changes to `origin/main`
+- Create the release tag (for example `v1.0.0`)
+- Publish artifacts to PyPI
+- Create the GitHub release notes entry
+
+---
+
 ## Final Notes
 
 Consistency is more important than speed.

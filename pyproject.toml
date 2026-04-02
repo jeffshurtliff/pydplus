@@ -3,7 +3,7 @@
 # --------------------------------------------------------------------
 [project]
 name = "pydplus"
-version = "1.0.0.dev0"
+version = "1.0.0"
 description = "A Python toolset for the RSA ID Plus cloud authentication platform"
 readme = "README.md"
 requires-python = ">=3.9.2,<3.14.0"
@@ -14,11 +14,28 @@ authors = [
 maintainers = [
     { name = "Jeff Shurtliff", email = "jeffshurtliff@gmail.com" }
 ]
-keywords = ["rsa-security", "id-plus", "securid", "authentication-manager", "sso", "mfa", "iam", "identity", "authentication"]
+keywords = [
+    "rsa-security",
+    "id-plus",
+    "rsa-id-plus",
+    "securid",
+    "rsa-securid",
+    "authentication-manager",
+    "rsa-authentication-manager",
+    "cloud-access-service",
+    "single-sign-on",
+    "sso",
+    "mfa",
+    "iam",
+    "identity",
+    "authentication",
+    "multifactor-authentication",
+    "fido",
+]
 
 classifiers = [
     # Project maturity
-    "Development Status :: 4 - Beta",
+    "Development Status :: 5 - Production/Stable",
 
     # License
     "License :: OSI Approved :: MIT License",
@@ -65,8 +82,8 @@ dependencies = [
 [project.urls]
 Homepage = "https://github.com/jeffshurtliff/pydplus"
 Repository = "https://github.com/jeffshurtliff/pydplus"
-Documentation = "https://pydplus.readthedocs.io/en/latest/"                      # Change to stable after first release
-Changelog = "https://pydplus.readthedocs.io/en/latest/CHANGELOG.html"            # Uncomment when docs are ready
+Documentation = "https://pydplus.readthedocs.io/en/stable/"
+Changelog = "https://pydplus.readthedocs.io/en/latest/CHANGELOG.html"
 "Issue Tracker" = "https://github.com/jeffshurtliff/pydplus/issues"
 
 # --------------------------------------------------------------------
@@ -88,6 +105,7 @@ pydata-sphinx-theme = "^0.15.4"
 myst-parser = "^3.0.1"
 sphinx-favicon = "^1.0.1"
 ruff = "^0.15.8"
+twine = "^6.1.0"
 
 [tool.ruff]
 target-version = "py39"
