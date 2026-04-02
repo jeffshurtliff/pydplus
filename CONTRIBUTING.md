@@ -755,7 +755,7 @@ poetry run python -m twine check dist/*
 For manual releases, the maintainer is responsible for final release actions:
 
 - Push/merge release-ready changes to `origin/main`
-- Create the release tag (for example `v1.0.0`)
+- Create the release tag (for example `1.0.0`)
 - Publish artifacts to PyPI
 - Create the GitHub release notes entry
 

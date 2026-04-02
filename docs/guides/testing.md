@@ -50,7 +50,7 @@ poetry run pytest --run-integration --cov=pydplus --cov-report=term-missing --co
 `pygments` is used in this repository for documentation rendering via Sphinx, not
 for `pydplus` runtime request/response processing.
 
-For the current low-severity ReDoS advisory affecting `pygments` lexer behavior:
+For documentation-tooling security hygiene (including the ReDoS advisory patched in `pygments>=2.20.0`):
 
 - Keep `pygments` at the newest available version in the lock file.
 - Only build docs from trusted repository content.

@@ -56,6 +56,7 @@ features and functionality.
 - Updated OAuth client-credentials handling to require explicit scopes, accept `+`-delimited/space-delimited/iterable scope inputs, normalize internally to `+`-delimited values, send space-delimited `scope` values to `/oauth/token` with explicit form content-type, validate against `const.OAUTH_SCOPES`, and include scope-aware token caching behavior.
 - Updated OAuth scope-preset handling so helper files define presets under `connection.oauth.scope_preset`, environment variables use `PYDPLUS_OAUTH_SCOPE_PRESET`, and presets are merged additively with explicit scopes instead of replacing them.
 - Updated `pydplus.utils.core_utils.get_random_string()` to use the `secrets` module for cryptographically secure random string generation.
+- Updated `pygments` from `2.19.2` to `2.20.0` in `poetry.lock`, added an explicit `pygments>=2.20.0` dev constraint in `pyproject.toml`, and pinned `Pygments>=2.20.0` in `docs/requirements.txt` to remediate the Dependabot-reported ReDoS vulnerability affecting versions earlier than `2.20.0`.
 
 
 <!-- The reference definitions are listed below -->
