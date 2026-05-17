@@ -3,10 +3,10 @@
 # --------------------------------------------------------------------
 [project]
 name = "pydplus"
-version = "1.0.1"
+version = "2.0.0.dev0"
 description = "A Python toolset for the RSA ID Plus cloud authentication platform"
 readme = "README.md"
-requires-python = ">=3.9.2,<3.14.0"
+requires-python = ">=3.12,<3.14.0"
 license = { file = "LICENSE" }
 authors = [
     { name = "Jeff Shurtliff", email = "jeffshurtliff@gmail.com" }
@@ -59,9 +59,6 @@ classifiers = [
     # Supported Python versions
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
 ]
@@ -72,14 +69,10 @@ dependencies = [
     "pyjwt>=2.12.0",            # Explicit pin to avoid CVE-2026-32597
     "cryptography>=46.0.7",     # Explicit pin to address known cryptography security advisories
 
-    # Explicit pins to address known urllib3 security advisories while keeping the final Python 3.9-compatible line installable
-    "urllib3>=2.7.0,<3; python_version >= '3.10'",
-    "urllib3>=2.6.3,<2.7; python_version < '3.10'",
+    # Explicit pin to address known urllib3 security advisories
+    "urllib3>=2.7.0,<3",
     "idna>=3.7,<4",             # Explicit pin to avoid CVE-2024-3651
     "certifi>=2024.7.4",        # Explicit pin to mitigate CA removals (e-Tugra, GLOBALTRUST)
-
-    # Backport of tomllib for Python < 3.11
-    "tomli>=2.0.0; python_version < '3.11'",
 ]
 
 [project.urls]
@@ -100,8 +93,8 @@ packages = [
 include = ["LICENSE", "README.md"]
 
 [tool.poetry.group.dev.dependencies]
-pytest = { version = ">=9.0.3", python = ">=3.10,<3.14.0" }
-pytest-cov = { version = "^7.0.0", python = ">=3.10,<3.14.0" }
+pytest = ">=9.0.3"
+pytest-cov = "^7.0.0"
 bandit = { version = "^1.7.8", extras = ["sarif"] }
 Sphinx = "^7.4.7"
 pydata-sphinx-theme = "^0.15.4"
@@ -112,7 +105,7 @@ twine = "^6.1.0"
 pygments = ">=2.20.0"   # Explicit pin to avoid CVE-2026-4539
 
 [tool.ruff]
-target-version = "py39"
+target-version = "py312"
 line-length = 130
 src = ["src", "tests"]
 

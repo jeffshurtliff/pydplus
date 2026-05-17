@@ -16,14 +16,14 @@ such as:
 
 This library requires the following:
 
-- Python version 3.9 or above (version 3.14 not yet officially supported)
+- Python version 3.12 or above (version 3.14 not yet officially supported)
 - An RSA ID Plus tenant (Production or Development)
 - An RSA ID Plus administrative user that has API privileges in the RSA ID Plus tenant
 - OAuth client credentials (recommended) or Legacy API credentials
 
 ```{warning}
-PyDPlus `1.0.1` is the final release line that supports Python 3.9. 
-Future major releases will require Python 3.12 or newer.
+PyDPlus `2.0.0` and newer require Python 3.12 or newer.
+PyDPlus `1.0.1` is the final release line that supports Python 3.9.
 ```
 
 ## License and Support

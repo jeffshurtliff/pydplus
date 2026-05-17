@@ -5,8 +5,8 @@
 :Usage:             ``from pydplus import auth``
 :Example:           ``jwt_string = auth.get_legacy_jwt_string(base_url, connection_info)``
 :Created By:        Jeff Shurtliff
-:Last Modified:     Jeff Shurtliff
-:Modified Date:     30 Mar 2026
+:Last Modified:     Jeff Shurtliff (via GPT-5.5-codex)
+:Modified Date:     17 May 2026
 """
 
 from __future__ import annotations
@@ -287,8 +287,8 @@ def _define_jwt_claims(_access_id: str, _base_url: str) -> dict:
     _lifespan = const.AUTH_VALUES.LEGACY_DEFAULT_EXPIRATION
     _claims_data = {
         const.AUTH_FIELDS.JWT_SUB: _access_id,
-        const.AUTH_FIELDS.JWT_IAT: datetime.datetime.now(datetime.timezone.utc),
-        const.AUTH_FIELDS.JWT_EXP: datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(seconds=_lifespan),
+        const.AUTH_FIELDS.JWT_IAT: datetime.datetime.now(datetime.UTC),
+        const.AUTH_FIELDS.JWT_EXP: datetime.datetime.now(datetime.UTC) + datetime.timedelta(seconds=_lifespan),
         const.AUTH_FIELDS.JWT_AUD: _base_url,
     }
     return _claims_data
@@ -491,7 +491,7 @@ def _create_private_key_jwt_client_assertion(
 ) -> str:
     """Generate a signed private_key_jwt assertion string."""
     _signing_key = _convert_oauth_jwk_to_signing_key(_private_key_jwk)
-    _now = int(datetime.datetime.now(datetime.timezone.utc).timestamp())
+    _now = int(datetime.datetime.now(datetime.UTC).timestamp())
     _jwt_claims = {
         const.AUTH_FIELDS.JWT_ISSUER: _client_id,
         const.AUTH_FIELDS.JWT_SUBJECT: _client_id,
@@ -628,7 +628,7 @@ def _parse_oauth_token_response(_response_data: dict[str, Any]) -> dict[str, Any
     if _expires_in < 0:
         _expires_in = 0
 
-    _now = int(datetime.datetime.now(datetime.timezone.utc).timestamp())
+    _now = int(datetime.datetime.now(datetime.UTC).timestamp())
     return {
         const.AUTH_FIELDS.OAUTH_ACCESS_TOKEN: _access_token,
         const.AUTH_FIELDS.OAUTH_TOKEN_TYPE: _token_type,
@@ -664,7 +664,7 @@ def _is_oauth_token_valid(
         logger.error(f"The cached '{const.AUTH_FIELDS.OAUTH_SCOPE}' does not match the expected value")
         return False
 
-    _now = int(datetime.datetime.now(datetime.timezone.utc).timestamp())
+    _now = int(datetime.datetime.now(datetime.UTC).timestamp())
     return _expires_at > (_now + const.AUTH_VALUES._OAUTH_TOKEN_EXPIRY_BUFFER_SECONDS)
 
 

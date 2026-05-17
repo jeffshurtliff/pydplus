@@ -3,8 +3,8 @@
 :Module:            tests.unit.test_auth
 :Synopsis:          Unit tests for OAuth and legacy authentication helper functions
 :Created By:        Jeff Shurtliff
-:Last Modified:     Jeff Shurtliff (via GPT-5.3-codex)
-:Modified Date:     30 Mar 2026
+:Last Modified:     Jeff Shurtliff (via GPT-5.5-codex)
+:Modified Date:     17 May 2026
 """
 
 from __future__ import annotations
@@ -51,7 +51,7 @@ def _oauth_connection_info(scope: object = const.OAUTH_SCOPES.USER_READ) -> dict
 
 def test_get_oauth_access_token_reuses_valid_cached_token(monkeypatch) -> None:
     """Ensure valid cached OAuth token metadata is returned without token-endpoint calls."""
-    now = int(datetime.datetime.now(datetime.timezone.utc).timestamp())
+    now = int(datetime.datetime.now(datetime.UTC).timestamp())
     cached_token = {
         'access_token': 'cached-token',
         'token_type': 'Bearer',
@@ -210,7 +210,7 @@ def test_parse_oauth_token_response_raises_when_access_token_missing() -> None:
 def test_get_oauth_access_token_refreshes_when_cached_scope_differs(monkeypatch) -> None:
     """Ensure cached OAuth token metadata is not reused when scope values differ."""
     observed = {'called': False}
-    now = int(datetime.datetime.now(datetime.timezone.utc).timestamp())
+    now = int(datetime.datetime.now(datetime.UTC).timestamp())
     cached_token = {
         'access_token': 'cached-token',
         'token_type': 'Bearer',
