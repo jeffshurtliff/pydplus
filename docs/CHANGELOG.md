@@ -18,7 +18,11 @@ No unreleased additions at this time.
 (unreleased-changed)=
 ### Changed
 
-No unreleased changes at this time.
+- Began the `2.0.0` development line by updating the package version to `2.0.0.dev0`.
+- Dropped Python 3.9, 3.10, and 3.11 support; PyDPlus 2.x now requires Python 3.12 or newer.
+- Simplified security-sensitive dependency constraints after dropping older Python support, including the `urllib3>=2.7.0,<3` runtime floor and removal of the `tomli` backport.
+- Updated CI, Read the Docs, and testing documentation to use the Python 3.12+ support matrix.
+- Retained documentation that PyDPlus `1.0.1` is the final release line supporting Python 3.9.
 
 ---
 (relnotes-1.0.1)=
@@ -29,7 +33,7 @@ Dependabot-reported vulnerabilities.
 
 ```{warning}
 It is the **final PyDPlus release line that supports Python 3.9**.
-Future major releases **will require Python 3.12 or newer**.
+PyDPlus `2.0.0` and newer **require Python 3.12 or newer**.
 ```
 
 ### Changed

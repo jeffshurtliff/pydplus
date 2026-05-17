@@ -1,19 +1,18 @@
-# pydplus runtime dependencies (Python >= 3.9)
+# pydplus runtime dependencies (Python >= 3.12)
 # Keep this file minimal; dev/test deps should live in Poetry groups.
 
 # Primary runtime dependencies for the library
 requests>=2.32.5
 PyYAML>=6,<7
-tomli; python_version < "3.11"
 
 # Minimum PyJWT version to avoid CVE-2026-32597
 pyjwt>=2.12.0
 
 # Minimum cryptography version to address known cryptography security advisories
-cryptography>=46.0.6
+cryptography>=46.0.7
 
-# Minimum urllib3 version to avoid CVE-2024-37891 and other known vulnerabilities
-urllib3>=2.6.3,<3
+# Minimum urllib3 version to address known urllib3 security advisories
+urllib3>=2.7.0,<3
 
 # Minimum idna version to avoid CVE-2024-3651
 idna>=3.7,<4

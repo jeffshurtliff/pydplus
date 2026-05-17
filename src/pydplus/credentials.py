@@ -3,8 +3,8 @@
 :Module:            pydplus.credentials
 :Synopsis:          Secure parsing and handling for RSA ID Plus legacy key material
 :Created By:        Jeff Shurtliff
-:Last Modified:     Jeff Shurtliff
-:Modified Date:     30 Mar 2026
+:Last Modified:     Jeff Shurtliff (via GPT-5.5-codex)
+:Modified Date:     17 May 2026
 """
 
 from __future__ import annotations
@@ -13,11 +13,10 @@ import json
 import logging
 import os
 import re
-import sys
 import tempfile
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Mapping, Optional, Union, cast
+from typing import Any, Mapping, Optional, Union
 from urllib.parse import urlparse
 
 from . import constants as const
@@ -25,14 +24,8 @@ from .errors.exceptions import IDPlusCredentialError
 
 logger = logging.getLogger(__name__)
 
-# Define the _slots_dataclass property based on the python version
-if sys.version_info >= (3, 10):
-    _slots_dataclass = cast(Any, dataclass)(slots=True)
-else:
-    _slots_dataclass = dataclass
 
-
-@_slots_dataclass
+@dataclass(slots=True)
 class IDPlusLegacyKeyMaterial:
     """Typed RSA ID Plus legacy credential material parsed from a `.key` JSON file.
 

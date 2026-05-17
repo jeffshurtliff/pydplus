@@ -8,7 +8,7 @@ PyDPlus tests are located in the `tests/` directory and split by scope:
 
 ## Run the Test Suite
 
-Install dependencies and run the default suite (unit tests) with **Python 3.10 or newer**:
+Install dependencies and run the default suite (unit tests) with **Python 3.12 or newer**:
 
 ```bash
 poetry install
@@ -16,9 +16,8 @@ poetry run pytest -q
 ```
 
 ```{warning}
-PyDPlus `1.0.1` is the final release line that supports Python 3.9. Runtime
-packaging still supports Python 3.9, but the remediated `pytest` development
-dependency requires Python 3.10 or newer.
+PyDPlus `2.0.0` and newer require Python 3.12 or newer.
+PyDPlus `1.0.1` is the final release line that supports Python 3.9.
 ```
 
 Integration tests are opt-in and skipped by default. To run them:
