@@ -21,6 +21,27 @@ No unreleased additions at this time.
 No unreleased changes at this time.
 
 ---
+(relnotes-1.0.1)=
+## [1.0.1] - 2026-05-16
+
+This patch release updates security-sensitive runtime and development dependencies to remediate
+Dependabot-reported vulnerabilities. 
+
+```{warning}
+It is the **final PyDPlus release line that supports Python 3.9**.
+Future major releases **will require Python 3.12 or newer**.
+```
+
+### Changed
+
+- Updated the package version to `1.0.1` in `pyproject.toml`.
+- Updated the minimum `urllib3` version to `2.7.0` on Python 3.10 and newer to remediate CVE-2026-44431 and CVE-2026-44432.
+- Retained a Python 3.9-specific `urllib3` constraint below `2.7.0` because `urllib3 2.7.0` requires Python 3.10 or newer.
+- Updated the minimum `cryptography` version to `46.0.7` to remediate CVE-2026-39892.
+- Updated the minimum `pytest` development dependency version to `9.0.3` on Python 3.10 and newer to remediate CVE-2025-71176.
+- Updated CI and testing documentation to reflect that the pytest suite now runs on Python 3.10 and newer while runtime packaging support remains Python 3.9+.
+
+---
 (relnotes-1.0.0)=
 ## [1.0.0] - 2026-04-02
 
@@ -60,5 +81,6 @@ features and functionality.
 
 
 <!-- The reference definitions are listed below -->
-[Unreleased]: https://github.com/jeffshurtliff/pydplus/compare/1.0.0...HEAD
+[Unreleased]: https://github.com/jeffshurtliff/pydplus/compare/1.0.1...HEAD
+[1.0.1]: https://github.com/jeffshurtliff/pydplus/compare/1.0.0...1.0.1
 [1.0.0]: https://github.com/jeffshurtliff/pydplus/releases/tag/1.0.0

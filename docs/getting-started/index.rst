@@ -17,6 +17,12 @@ Before you begin, make sure you have:
 - An RSA ID Plus administrator user with API permissions
 - Legacy API credentials as needed
 
+.. important::
+
+   PyDPlus ``1.0.1`` is the final release line that supports Python 3.9.
+   Future major releases will require Python 3.12 or newer.
+
+
 For deeper task-based walkthroughes after setup, continue to the :doc:`../guides/index` section.
 For method and exception details, see the :doc:`../reference/index` section.
 

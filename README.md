@@ -97,6 +97,9 @@ A Python toolset for the RSA ID Plus cloud authentication platform.
 </table>
 
 ## Installation
+> PyDPlus `1.0.1` is the final release line that supports Python 3.9. 
+> Future major releases will require Python 3.12 or newer.
+
 Install from PyPI:
 
 ```sh
