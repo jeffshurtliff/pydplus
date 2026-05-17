@@ -26,6 +26,11 @@ CHANGELOG
 - Supported Python versions: 3.9+
 - License: MIT
 
+```{warning}
+PyDPlus `1.0.1` is the final release line that supports Python 3.9. 
+Future major releases will require Python 3.12 or newer.
+```
+
 ## What You Can Do
 
 With PyDPlus, you can:

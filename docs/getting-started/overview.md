@@ -21,6 +21,11 @@ This library requires the following:
 - An RSA ID Plus administrative user that has API privileges in the RSA ID Plus tenant
 - OAuth client credentials (recommended) or Legacy API credentials
 
+```{warning}
+PyDPlus `1.0.1` is the final release line that supports Python 3.9. 
+Future major releases will require Python 3.12 or newer.
+```
+
 ## License and Support
 
 PyDPlus is available under the MIT License, which allows for free use, modification, 

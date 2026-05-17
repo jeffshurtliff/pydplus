@@ -43,7 +43,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-          # Default OS/Python matrix for 3.9+
+          # Runtime/package matrix for 3.9+; the pytest suite runs on Python 3.10+.
           os: [ ubuntu-latest, macos-latest ]
           python-version: [ "3.9", "3.10", "3.11", "3.12", "3.13" ]
 
@@ -76,14 +76,17 @@ jobs:
           poetry run ruff format --check .
 
       - name: Run tests
+        if: matrix.python-version != '3.9'
         run: |
           poetry run pytest -q
 
       - name: Coverage (pytest-cov) and report
+        if: matrix.python-version != '3.9'
         run: |
           poetry run pytest --cov-report=xml --cov=pydplus tests/unit tests/integration --color=yes
 
       - name: Upload coverage to Codecov
+        if: matrix.python-version != '3.9'
         uses: codecov/codecov-action@v5
         with:
           files: ./coverage.xml
