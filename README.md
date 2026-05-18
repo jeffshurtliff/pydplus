@@ -24,6 +24,14 @@ A Python toolset for the RSA ID Plus cloud authentication platform.
         </td>
     </tr>
     <tr>
+         <td>Commits Since Latest Release</td>
+         <td>
+            <a href="https://github.com/jeffshurtliff/pydplus/compare/1.0.1...HEAD">
+                <img alt="GitHub commits since latest release" src="https://img.shields.io/github/commits-since/jeffshurtliff/pydplus/latest">
+            </a>
+        </td>
+    </tr>
+    <tr>
         <td>Build Status</td>
         <td>
             <a href="https://github.com/jeffshurtliff/pydplus/blob/main/.github/workflows/ci.yml">
@@ -97,8 +105,10 @@ A Python toolset for the RSA ID Plus cloud authentication platform.
 </table>
 
 ## Installation
-> PyDPlus `2.0.0` and newer require Python 3.12 or newer.
-> PyDPlus `1.0.1` is the final release line that supports Python 3.9.
+
+> [!IMPORTANT]
+> PyDPlus `2.0.0` and newer require Python `3.12+`.<br>
+> PyDPlus `1.0.1` is the final release line that supports Python `3.9`.
 
 Install from PyPI:
 
