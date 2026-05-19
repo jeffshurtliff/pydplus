@@ -96,17 +96,6 @@ A Python toolset for the RSA ID Plus cloud authentication platform.
             </a>
         </td>
     </tr>
-    <tr>
-        <td style="vertical-align: top;">Pull Requests</td>
-        <td>
-            <a href="https://github.com/jeffshurtliff/pydplus/pulls">
-                <img style="margin-bottom:5px;" alt="GitHub Open Pull Requests" src="https://img.shields.io/github/issues-pr-raw/jeffshurtliff/pydplus"><br>
-            </a>
-            <a href="https://github.com/jeffshurtliff/pydplus/pulls">
-                <img alt="GitHub Closed Pull Requests" src="https://img.shields.io/github/issues-pr-closed-raw/jeffshurtliff/pydplus">
-            </a>
-        </td>
-    </tr>
 </table>
 
 ## Installation
