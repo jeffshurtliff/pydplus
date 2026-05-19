@@ -33,6 +33,7 @@ Dependabot-reported vulnerabilities.
 
 ```{warning}
 It is the **final PyDPlus release line that supports Python 3.9**.
+
 PyDPlus `2.0.0` and newer **require Python 3.12 or newer**.
 ```
 

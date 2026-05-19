@@ -20,6 +20,7 @@ Before you begin, make sure you have:
 .. important::
 
    PyDPlus ``2.0.0`` and newer require Python 3.12 or newer.
+
    PyDPlus ``1.0.1`` is the final release line that supports Python 3.9.
 
 

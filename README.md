@@ -4,7 +4,7 @@
      alt="PyDPlus Logo">
 
 # PyDPlus
-A Python toolset for the RSA ID Plus cloud authentication platform.
+A Python toolset for the RSA<sup>&reg;</sup> ID Plus cloud authentication platform.
 
 <table>
     <tr>
@@ -16,10 +16,18 @@ A Python toolset for the RSA ID Plus cloud authentication platform.
         </td>
     </tr>
     <tr>
-        <td>Latest Beta/RC Release</td>
+        <td>Latest Pre-release</td>
         <td>
             <a href="https://pypi.org/project/pydplus/#history">
                 <img alt="PyPI" src="https://img.shields.io/badge/pypi-none-blue">
+            </a>
+        </td>
+    </tr>
+    <tr>
+        <td>Supported Versions (Stable Release)</td>
+        <td>
+            <a href="https://pypi.org/project/pydplus/">
+                <img alt="PyPI - Python Versions Supported (Stable Release)" src="https://img.shields.io/pypi/pyversions/pydplus">
             </a>
         </td>
     </tr>
@@ -37,14 +45,6 @@ A Python toolset for the RSA ID Plus cloud authentication platform.
             <a href="https://github.com/jeffshurtliff/pydplus/blob/main/.github/workflows/ci.yml">
                 <img alt="GitHub Workflow Status" 
                 src="https://img.shields.io/github/actions/workflow/status/jeffshurtliff/pydplus/ci.yml?branch=main">
-            </a>
-        </td>
-    </tr>
-    <tr>
-        <td>Supported Versions (Stable Release)</td>
-        <td>
-            <a href="https://pypi.org/project/pydplus/">
-                <img alt="PyPI - Python Versions Supported (Stable Release)" src="https://img.shields.io/pypi/pyversions/pydplus">
             </a>
         </td>
     </tr>
@@ -118,8 +118,8 @@ cd pydplus
 poetry install
 ```
 
-## Change Log
-The change log can be found in the [documentation](https://pydplus.readthedocs.io/en/latest/CHANGELOG.html).
+## Changelog
+The changelog can be found in the [documentation](https://pydplus.readthedocs.io/en/latest/CHANGELOG.html).
 
 ## Usage
 PyDPlus is designed for Python-based administration workflows in RSA ID Plus tenants, including:
