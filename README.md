@@ -1,7 +1,7 @@
-<img src="https://raw.githubusercontent.com/jeffshurtliff/pydplus/main/docs/_static/pydplus-icon-cropped.png"
+<img src="https://raw.githubusercontent.com/jeffshurtliff/pydplus/main/docs/_static/pydplus-icon-cropped.png" 
      class="pydplus-c-landing-page-logo" 
      style="background-color: transparent; max-height: 320px;"
-     alt="PyDPlus Logo" />
+     alt="PyDPlus Logo">
 
 # PyDPlus
 A Python toolset for the RSA ID Plus cloud authentication platform.
@@ -41,10 +41,10 @@ A Python toolset for the RSA ID Plus cloud authentication platform.
         </td>
     </tr>
     <tr>
-        <td>Supported Versions</td>
+        <td>Supported Versions (Stable Release)</td>
         <td>
             <a href="https://pypi.org/project/pydplus/">
-                <img alt="PyPI - Python Versions Supported" src="https://img.shields.io/pypi/pyversions/pydplus">
+                <img alt="PyPI - Python Versions Supported (Stable Release)" src="https://img.shields.io/pypi/pyversions/pydplus">
             </a>
         </td>
     </tr>
@@ -52,7 +52,7 @@ A Python toolset for the RSA ID Plus cloud authentication platform.
         <td>Code Coverage</td>
         <td>
             <a href="https://codecov.io/gh/jeffshurtliff/pydplus">
-                <img alt="Codecov - Code Coverage" src="https://codecov.io/gh/jeffshurtliff/pydplus/branch/main/graph/badge.svg?token=QBynJO48jN" />
+                <img alt="Codecov - Code Coverage" src="https://codecov.io/gh/jeffshurtliff/pydplus/branch/main/graph/badge.svg?token=QBynJO48jN">
             </a>
         </td>
     </tr>
@@ -60,7 +60,7 @@ A Python toolset for the RSA ID Plus cloud authentication platform.
         <td>Documentation</td>
         <td>
             <a href="https://pydplus.readthedocs.io/en/stable/?badge=stable">
-                <img alt="Documentation Status" src="https://readthedocs.org/projects/pydplus/badge/?version=stable" />
+                <img alt="Documentation Status" src="https://readthedocs.org/projects/pydplus/badge/?version=stable">
             </a>
         </td>
     </tr>
@@ -81,13 +81,18 @@ A Python toolset for the RSA ID Plus cloud authentication platform.
         </td>
     </tr>
     <tr>
-        <td style="vertical-align: top;">Issues</td>
+        <td>Issues</td>
         <td>
             <a href="https://github.com/jeffshurtliff/pydplus/issues">
-                <img style="margin-bottom:5px;" alt="GitHub Open Issues" src="https://img.shields.io/github/issues-raw/jeffshurtliff/pydplus"><br />
+                <img alt="Issues (GitHub)" src="https://img.shields.io/github/issues/jeffshurtliff/pydplus">
             </a>
-            <a href="https://github.com/jeffshurtliff/pydplus/issues">
-                <img alt="GitHub Closed Issues" src="https://img.shields.io/github/issues-closed-raw/jeffshurtliff/pydplus">
+        </td>
+    </tr>
+    <tr>
+        <td>Pull Requests</td>
+        <td>
+            <a href="https://github.com/jeffshurtliff/pydplus/pulls">
+                <img alt="Pull Requests (GitHub)" src="https://img.shields.io/github/issues-pr/jeffshurtliff/pydplus">
             </a>
         </td>
     </tr>
@@ -95,7 +100,7 @@ A Python toolset for the RSA ID Plus cloud authentication platform.
         <td style="vertical-align: top;">Pull Requests</td>
         <td>
             <a href="https://github.com/jeffshurtliff/pydplus/pulls">
-                <img style="margin-bottom:5px;" alt="GitHub Open Pull Requests" src="https://img.shields.io/github/issues-pr-raw/jeffshurtliff/pydplus"><br />
+                <img style="margin-bottom:5px;" alt="GitHub Open Pull Requests" src="https://img.shields.io/github/issues-pr-raw/jeffshurtliff/pydplus"><br>
             </a>
             <a href="https://github.com/jeffshurtliff/pydplus/pulls">
                 <img alt="GitHub Closed Pull Requests" src="https://img.shields.io/github/issues-pr-closed-raw/jeffshurtliff/pydplus">
