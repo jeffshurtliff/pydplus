@@ -66,7 +66,7 @@ classifiers = [
 dependencies = [
     "PyYAML>=6.0.3,<7",
     "requests>=2.32.5",
-    "pyjwt>=2.12.0",            # Explicit pin to avoid CVE-2026-32597
+    "pyjwt>=2.13.0",            # Explicit pin to address known PyJWT security advisories
     "cryptography>=46.0.7",     # Explicit pin to address known cryptography security advisories
 
     # Explicit pin to address known urllib3 security advisories
