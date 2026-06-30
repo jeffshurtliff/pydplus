@@ -30,12 +30,12 @@ logger = logging.getLogger(__name__)
 
 def _log_configured_setting(setting: str, method: str) -> None:
     """Log that a setting was configured without exposing the configured value."""
-    logger.debug("Configured '%s' via %s", setting, method)
+    logger.debug('Configured a client setting')
 
 
 def _log_default_setting(setting: str) -> None:
     """Log that a setting default was selected without exposing the configured value."""
-    logger.debug("Using the default value for '%s'", setting)
+    logger.debug('Using a default client setting')
 
 
 class PyDPlus:
@@ -239,7 +239,7 @@ class PyDPlus:
                 _helper_file_path, _helper_file_type = _helper.values()
             else:
                 _error_msg = "The 'helper' argument can only be supplied as string, tuple, list, set or dict"
-                logger.error(_error_msg)
+                logger.error("The 'helper' argument can only be supplied as string, tuple, list, set or dict")
                 raise TypeError(_error_msg)
             self.helper_path = _helper_file_path
             self._helper_settings = get_helper_settings(_helper_file_path, _helper_file_type)
@@ -337,7 +337,7 @@ class PyDPlus:
         _error_msg = (
             "The 'legacy_key_material' parameter must be a string path, pathlib.Path value, or IDPlusLegacyKeyMaterial object"
         )
-        logger.error(_error_msg)
+        logger.error("The 'legacy_key_material' parameter has an invalid data type")
         raise TypeError(_error_msg)
 
     def _get_env_name(self, _env: Optional[str] = None) -> None:
@@ -349,7 +349,7 @@ class PyDPlus:
         if _env:
             if not isinstance(_env, str):
                 _error_msg = f"The 'env' argument is an invalid data type (Expected: str, Provided: {type(_env)})"
-                logger.error(_error_msg)
+                logger.error("The 'env' argument is an invalid data type")
                 raise TypeError(_error_msg)
             self.env = _env.upper()
             _log_configured_setting(setting, methods[0])
@@ -402,21 +402,16 @@ class PyDPlus:
                 try:
                     _env_specific_value = core_utils.get_env_variable_name_by_environment(_name_key, self.env)
                     _env_specific_names[_name_key] = _env_specific_value
-                except Exception as _exc:
-                    _exc_type = core_utils.get_exception_type(_exc)
-                    _error_msg = (
-                        f"Failed to retrieve the '{_name_key}' environment variable name specific to the "
-                        f'{self.env} environment due to {_exc_type} exception: {_exc}'
-                    )
+                except Exception:
                     logger.exception('Failed to retrieve an environment-specific variable name')
-                    logger.warning(f"Defaulting to the environment variable {_name_value} for '{_name_key}'")
+                    logger.warning('Defaulting to a configured environment variable name')
                     _env_specific_names[_name_key] = _name_value
             _env_variable_names.update(_env_specific_names)
 
         # Update the dictionary to use any defined custom names instead of the default (or env-specific) names
         if _custom_dict and not isinstance(_custom_dict, Mapping):
             _error_msg = 'Unable to parse custom environment variable names because variable is not a dictionary'
-            logger.error(_error_msg)
+            logger.error('Unable to parse custom environment variable names')
             raise TypeError(_error_msg)
         if _custom_dict:
             for _name_key, _name_value in _custom_dict.items():
@@ -424,7 +419,7 @@ class PyDPlus:
                     _env_variable_names[_name_key] = _name_value
                 else:
                     _warn_msg = f"'{_name_key}' is not a recognized environment variable identifier and will be ignored"
-                    logger.warning(_warn_msg)
+                    logger.warning('An unrecognized environment variable identifier was ignored')
 
         # Return the finalized dictionary with the mapped environment variable names
         self._env_variable_names = _env_variable_names
@@ -446,7 +441,7 @@ class PyDPlus:
         if _strict_mode_from_arg is not None:
             if not isinstance(_strict_mode_from_arg, bool):
                 _error_msg = const._LOG_MESSAGES._MUST_BE_DATA_TYPE_ERROR.format(param=setting, data_type='bool')
-                logger.error(_error_msg)
+                logger.error("The 'strict_mode' argument is an invalid data type")
                 raise TypeError(_error_msg)
             self.strict_mode = _strict_mode_from_arg
             _log_configured_setting(setting, methods[0])
@@ -481,7 +476,7 @@ class PyDPlus:
                 'Legacy key material was provided but will be ignored as the connection_type was explicitly defined as OAuth'
             )
             # TODO: Call method for displaying warnings when a related setting is enabled
-            logger.warning(_warn_msg)
+            logger.warning('Legacy key material was provided but will be ignored')
 
     def _has_complete_legacy_connection_info(self) -> bool:
         """Return whether current connection info has the required legacy credentials."""
@@ -632,7 +627,7 @@ class PyDPlus:
                     f"The '{setting}' argument is an invalid data type "
                     f'(Expected: str, Provided: {type(_oauth_api_type_from_arg)})'
                 )
-                logger.error(_error_msg)
+                logger.error("The 'oauth_api_type' argument is an invalid data type")
                 raise TypeError(_error_msg)
             _oauth_api_type = _oauth_api_type_from_arg.strip().lower()
             if _oauth_api_type not in const.VALID_API_TYPES:
@@ -655,7 +650,7 @@ class PyDPlus:
                 _tenant_name = self.tenant_name
             else:
                 _error_msg = 'A tenant name must be defined or specified to construct a base URL'
-                logger.error(_error_msg)
+                logger.error('A tenant name must be defined to construct a base URL')
                 raise errors.exceptions.MissingRequiredDataError(_error_msg)
 
         # Construct the appropriate URL based on the provided API type
@@ -664,8 +659,8 @@ class PyDPlus:
         elif _api_type == const.AUTH_API_TYPE:
             _base_url = const.URLS.BASE_AUTH_URL.format(tenant_name=_tenant_name)
         else:
-            _error_msg = f"'{_api_type}' is not a valid API type"
-            logger.error(_error_msg)
+            _error_msg = 'The API type value is invalid'
+            logger.error('The API type value is invalid')
             raise ValueError(_error_msg)
 
         # Return the constructed base URL
@@ -752,7 +747,7 @@ class PyDPlus:
                     'A base URL for the Administration API must be defined in order to fully '
                     'instantiate the PyDPlus client object'
                 )
-                logger.error(_error_msg)
+                logger.error('A base URL for the Administration API must be defined')
                 raise errors.exceptions.MissingRequiredDataError(_error_msg)
 
         # Ensure there is no ending slash at the end of the admin_base_url value
@@ -775,7 +770,7 @@ class PyDPlus:
         # Log a warning if the Authentication API base URL could not be defined but do not raise an exception
         if not self.auth_base_url:
             _warn_msg = 'The base URL for the Authentication API could not be defined and calls to that API will fail.'
-            logger.warning(_warn_msg)
+            logger.warning('The base URL for the Authentication API could not be defined')
         else:
             # Ensure there is no ending slash at the end of the admin_base_url value
             self.auth_base_url = core_utils.remove_ending_slash(self.auth_base_url)
@@ -900,7 +895,7 @@ class PyDPlus:
                     _error_msg = (
                         f"The 'oauth_scope_preset' values must be strings (provided element type: {type(_scope_preset_value)})"
                     )
-                    logger.error(_error_msg)
+                    logger.error("The 'oauth_scope_preset' values must be strings")
                     raise TypeError(_error_msg)
                 _parsed_preset_values.extend(_scope_preset_value.replace('+', ' ').replace(',', ' ').split())
             return _parsed_preset_values
@@ -909,7 +904,7 @@ class PyDPlus:
             "The 'oauth_scope_preset' value must be supplied as a string or iterable of strings "
             f'(provided: {type(_oauth_scope_preset)})'
         )
-        logger.error(_error_msg)
+        logger.error("The 'oauth_scope_preset' value must be supplied as a string or iterable of strings")
         raise TypeError(_error_msg)
 
     def _define_oauth_scope_from_presets(
@@ -1039,7 +1034,7 @@ class PyDPlus:
         """Check to see if the object is connected to the tenant and raises an exception if not."""
         if not self.connected:
             _error_msg = 'Must be connected to the tenant before performing an API call. Call the connect() method.'
-            logger.error(_error_msg)
+            logger.error('The client must be connected before performing an API call')
             raise errors.exceptions.APIConnectionError(_error_msg)
 
     def connect(self) -> Tuple[bool, dict[str, str]]:
@@ -1063,7 +1058,7 @@ class PyDPlus:
                 connected = True
             except Exception as exc:
                 exc_type = type(exc).__name__
-                error_msg = f'Failed to connect using Legacy API due to the following {exc_type} exception: {exc}'
+                error_msg = f'Failed to connect using Legacy API due to the following {exc_type} exception'
                 logger.error('Failed to connect using Legacy API')
                 raise errors.exceptions.APIConnectionError(error_msg)
         elif self.connection_type == const.CLIENT_SETTINGS.CONNECTION_TYPE_OAUTH:
@@ -1073,11 +1068,11 @@ class PyDPlus:
                 connected = True
             except Exception as exc:
                 exc_type = type(exc).__name__
-                error_msg = f'Failed to connect using OAuth due to the following {exc_type} exception: {exc}'
+                error_msg = f'Failed to connect using OAuth due to the following {exc_type} exception'
                 logger.error('Failed to connect using OAuth')
                 raise errors.exceptions.APIConnectionError(error_msg)
         else:
-            error_msg = f"Unsupported connection_type '{self.connection_type}'"
+            error_msg = 'Unsupported connection_type configured'
             logger.error('Unsupported connection_type configured')
             raise errors.exceptions.APIConnectionError(error_msg)
         return connected, base_headers
@@ -1652,7 +1647,7 @@ def compile_connection_info(
             "The 'oauth_private_key_jwk' parameter must be supplied as a dictionary or string "
             f'(provided: {type(oauth_private_key_jwk)})'
         )
-        logger.error(_error_msg)
+        logger.error("The 'oauth_private_key_jwk' parameter must be supplied as a dictionary or string")
         raise TypeError(_error_msg)
 
     # Define and normalize the OAuth scope
@@ -1681,25 +1676,25 @@ def compile_connection_info(
         oauth_api_type = const.AUTH_API_TYPE
     if not isinstance(oauth_api_type, str):
         _error_msg = f"The 'oauth_api_type' parameter must be a string (provided: {type(oauth_api_type)})"
-        logger.error(_error_msg)
+        logger.error("The 'oauth_api_type' parameter must be a string")
         raise TypeError(_error_msg)
     oauth_api_type = oauth_api_type.strip().lower()
     if oauth_api_type not in const.VALID_API_TYPES:
         _valid_values = ','.join(sorted(const.VALID_API_TYPES))
-        _error_msg = f"The 'oauth_api_type' value '{oauth_api_type}' is invalid (Expected one of: {_valid_values})"
+        _error_msg = f"The 'oauth_api_type' value is invalid (Expected one of: {_valid_values})"
         logger.error("The 'oauth_api_type' value is invalid")
         raise ValueError(_error_msg)
 
     # Validate and normalize an explicitly provided OAuth issuer URL if defined
     if oauth_issuer_url is not None and not isinstance(oauth_issuer_url, str):
         _error_msg = f"The 'oauth_issuer_url' parameter must be a string (provided: {type(oauth_issuer_url)})"
-        logger.error(_error_msg)
+        logger.error("The 'oauth_issuer_url' parameter must be a string")
         raise TypeError(_error_msg)
     oauth_issuer_url = oauth_issuer_url.strip() if isinstance(oauth_issuer_url, str) else None
     if oauth_issuer_url:
         _parsed_issuer_url = urllib.parse.urlparse(oauth_issuer_url)
         if not _parsed_issuer_url.netloc or not _parsed_issuer_url.scheme:
-            _error_msg = f"The provided OAuth issuer URL '{oauth_issuer_url}' is invalid"
+            _error_msg = 'The provided OAuth issuer URL is invalid'
             logger.error('The provided OAuth issuer URL is invalid')
             raise ValueError(_error_msg)
         issuer_url = core_utils.remove_ending_slash(oauth_issuer_url)
@@ -1742,7 +1737,7 @@ def _infer_auth_base_url_from_admin_base_url(_admin_base_url: Optional[str]) -> 
         _normalized_admin_base_url = core_utils.get_base_url(_admin_base_url)
     except Exception as _exc:
         _exc_type = core_utils.get_exception_type(_exc)
-        _error_msg = f'Failed to infer Authentication API base URL from the Administration due to {_exc_type} exception: {_exc}'
+        _error_msg = f'Failed to infer Authentication API base URL from the Administration API due to {_exc_type} exception'
         logger.error('Failed to infer Authentication API base URL from the Administration API base URL')
         return None
     if '.access.' not in _normalized_admin_base_url:

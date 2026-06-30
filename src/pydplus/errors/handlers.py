@@ -3,8 +3,8 @@
 :Module:            pydplus.errors.handlers
 :Synopsis:          Functions that handle various error situations within the namespace
 :Created By:        Jeff Shurtliff
-:Last Modified:     Jeff Shurtliff
-:Modified Date:     22 Mar 2026
+:Last Modified:     Jeff Shurtliff (via GPT-5.5-codex)
+:Modified Date:     30 Jun 2026
 """
 
 from __future__ import annotations
@@ -46,5 +46,5 @@ def display_warning(
     :returns: None
     """
     if log_warning:
-        logger.warning(message)
+        logger.warning('A warning was emitted')
     warnings.warn(message, category=category, stacklevel=stacklevel)

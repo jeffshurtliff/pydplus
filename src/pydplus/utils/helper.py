@@ -41,7 +41,7 @@ def import_helper_file(file_path: str, file_type: str) -> dict:
         elif file_type.replace('.', '') == const.FILE_EXTENSIONS.JSON:
             helper_cfg = json.load(cfg_file)
         else:
-            logger.error(const._EXCEPTION_CLASSES._INVALID_HELPER_DEFAULT_MSG)
+            logger.error('The helper file type is invalid')
             raise errors.exceptions.InvalidHelperFileTypeError()
     logger.info('The helper file was imported successfully.')
     return helper_cfg
@@ -55,7 +55,7 @@ def _convert_yaml_to_bool(_yaml_bool_value: str) -> bool:
         return False
     else:
         _error_msg = 'An invalid Boolean YAML value was provided and cannot be parsed'
-        logger.error(_error_msg)
+        logger.error('An invalid Boolean YAML value was provided and cannot be parsed')
         raise ValueError(_error_msg)
 
 

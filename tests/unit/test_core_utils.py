@@ -3,12 +3,13 @@
 :Module:            tests.unit.test_core_utils
 :Synopsis:          Unit tests for utility functions in pydplus.utils.core_utils
 :Created By:        Jeff Shurtliff
-:Last Modified:     Jeff Shurtliff (via GPT-5.3-codex)
-:Modified Date:     30 Mar 2026
+:Last Modified:     Jeff Shurtliff (via GPT-5.5-codex)
+:Modified Date:     30 Jun 2026
 """
 
 from __future__ import annotations
 
+import logging
 import os
 import string
 
@@ -202,6 +203,19 @@ def test_normalize_oauth_scope_raises_value_error_for_unknown_scope_values() -> 
     """Ensure unknown OAuth scope values are rejected."""
     with pytest.raises(ValueError):
         core_utils.normalize_oauth_scope('rsa.unknown.scope')
+
+
+def test_normalize_oauth_scope_logs_and_raises_without_unknown_scope_value(caplog) -> None:
+    """Ensure invalid OAuth scope values are not echoed into logs or exceptions."""
+    unknown_scope = 'secret.invalid.scope'
+
+    with caplog.at_level(logging.ERROR, logger='pydplus.utils.core_utils'):
+        with pytest.raises(ValueError) as exc_info:
+            core_utils.normalize_oauth_scope(unknown_scope)
+
+    assert unknown_scope not in caplog.text
+    assert unknown_scope not in str(exc_info.value)
+    assert 'OAuth scope values are invalid' in caplog.text
 
 
 def test_normalize_oauth_scope_raises_type_error_for_non_string_iterable_values() -> None:

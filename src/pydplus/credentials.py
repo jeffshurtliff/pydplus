@@ -61,19 +61,19 @@ class IDPlusLegacyKeyMaterial:
         """
         if not isinstance(text, str):
             exc_msg = f"The 'text' parameter must be a string (Provided: {type(text)})"
-            logger.error(exc_msg)
+            logger.error("The 'text' parameter must be a string")
             raise TypeError(exc_msg)
 
         try:
             payload = json.loads(text)
         except json.JSONDecodeError as exc:
             exc_msg = 'The provided key material is not valid JSON'
-            logger.error(exc_msg)
+            logger.error('The provided key material is not valid JSON')
             raise IDPlusCredentialError(exc_msg) from exc
 
         if not isinstance(payload, dict):
             exc_msg = 'The provided key material JSON must be an object at the root level'
-            logger.error(exc_msg)
+            logger.error('The provided key material JSON must be an object at the root level')
             raise IDPlusCredentialError(exc_msg)
 
         key_material = cls(
@@ -112,15 +112,15 @@ class IDPlusLegacyKeyMaterial:
         """
         if not isinstance(path, (str, Path)):
             exc_msg = f"The 'path' parameter must be a string or Path object (Provided: {type(path)})"
-            logger.error(exc_msg)
+            logger.error("The 'path' parameter must be a string or Path object")
             raise TypeError(exc_msg)
 
         key_path = Path(path).expanduser()
         try:
             key_text = key_path.read_text(encoding='utf-8')
         except OSError as exc:
-            exc_msg = f"Unable to read key material from '{key_path}'"
-            logger.error(exc_msg)
+            exc_msg = 'Unable to read key material from the configured path'
+            logger.error('Unable to read key material from the configured path')
             raise IDPlusCredentialError(exc_msg) from exc
 
         return cls.from_json_text(key_text)
@@ -132,38 +132,38 @@ class IDPlusLegacyKeyMaterial:
         """
         if not self.customer_name.strip():
             exc_msg = 'The customer name cannot be empty'
-            logger.error(exc_msg)
+            logger.error('The customer name cannot be empty')
             raise IDPlusCredentialError(exc_msg)
 
         if not self.access_id.strip():
             exc_msg = 'The access ID cannot be empty'
-            logger.error(exc_msg)
+            logger.error('The access ID cannot be empty')
             raise IDPlusCredentialError(exc_msg)
 
         if not self.access_key_pem.strip():
             exc_msg = 'The access key cannot be empty'
-            logger.error(exc_msg)
+            logger.error('The access key cannot be empty')
             raise IDPlusCredentialError(exc_msg)
 
         if const.CREDENTIAL_VALUES.PEM_BEGIN_MARKER not in self.access_key_pem:
             exc_msg = 'The access key does not appear to be a valid RSA private key PEM value'
-            logger.error(exc_msg)
+            logger.error('The access key does not appear to be a valid RSA private key PEM value')
             raise IDPlusCredentialError(exc_msg)
 
         parsed_url = urlparse(self.admin_rest_api_url)
         if parsed_url.scheme.lower() != const.URLS.HTTPS_SCHEME or not parsed_url.netloc:
             exc_msg = 'The admin REST API URL must be a valid HTTPS URL'
-            logger.error(exc_msg)
+            logger.error('The admin REST API URL must be a valid HTTPS URL')
             raise IDPlusCredentialError(exc_msg)
 
         if not parsed_url.hostname:
             exc_msg = 'The admin REST API URL must include a valid host value'
-            logger.error(exc_msg)
+            logger.error('The admin REST API URL must include a valid host value')
             raise IDPlusCredentialError(exc_msg)
 
         if self.description is not None and not isinstance(self.description, str):
             exc_msg = 'The optional description must be a string when provided'
-            logger.error(exc_msg)
+            logger.error('The optional description must be a string when provided')
             raise IDPlusCredentialError(exc_msg)
 
     @property
@@ -265,7 +265,7 @@ class IDPlusLegacyKeyMaterial:
                 pass
             if temp_path.exists():
                 temp_path.unlink()
-            exc_msg = f"Failed to securely persist the private key to '{final_path}'"
+            exc_msg = 'Failed to securely persist the private key to the configured destination'
             logger.error('Failed to securely persist the private key to the configured destination')
             raise IDPlusCredentialError(exc_msg) from exc
 
@@ -305,7 +305,7 @@ def _slugify(value: str) -> str:
     """
     if not isinstance(value, str):
         exc_msg = f"The 'value' parameter must be a string (Provided: {type(value)})."
-        logger.error(exc_msg)
+        logger.error("The 'value' parameter must be a string")
         raise TypeError(exc_msg)
 
     slug = value.strip().lower()
@@ -317,14 +317,14 @@ def _slugify(value: str) -> str:
 def _extract_required_string(payload: Mapping[str, Any], field_name: str) -> str:
     """Return a required non-empty string field from parsed key material JSON."""
     if field_name not in payload:
-        exc_msg = f"Missing required credential field '{field_name}'."
-        logger.error(exc_msg)
+        exc_msg = 'Missing required credential field.'
+        logger.error('Missing required credential field')
         raise IDPlusCredentialError(exc_msg)
 
     value = payload[field_name]
     if not isinstance(value, str) or not value.strip():
-        exc_msg = f"The '{field_name}' credential field must be a non-empty string."
-        logger.error(exc_msg)
+        exc_msg = 'A required credential field must be a non-empty string.'
+        logger.error('A required credential field must be a non-empty string')
         raise IDPlusCredentialError(exc_msg)
 
     return value.strip()
@@ -337,8 +337,8 @@ def _extract_optional_string(payload: Mapping[str, Any], field_name: str) -> Opt
 
     value = payload[field_name]
     if not isinstance(value, str):
-        exc_msg = f"The optional '{field_name}' credential field must be a string."
-        logger.error(exc_msg)
+        exc_msg = 'An optional credential field must be a string.'
+        logger.error('An optional credential field must be a string')
         raise IDPlusCredentialError(exc_msg)
 
     normalized = value.strip()
@@ -352,7 +352,7 @@ def _ensure_private_dir(path: Path, enforce_mode: bool) -> None:
         if enforce_mode:
             os.chmod(path, const.CREDENTIAL_VALUES.PRIVATE_DIR_MODE)
     except OSError as exc:
-        exc_msg = f"Failed to prepare the private key directory '{path}'."
+        exc_msg = 'Failed to prepare the configured private key directory.'
         logger.error('Failed to prepare the configured private key directory')
         raise IDPlusCredentialError(exc_msg) from exc
 

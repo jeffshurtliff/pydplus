@@ -143,7 +143,7 @@ def api_call_with_payload(
     def _raise_exception_for_payload():
         """Raise a :py:exc:`TypeError` exception when the payload is an invalid data type."""
         _error_msg = f'The API payload must be a dictionary or string (provided: {type(payload)})'
-        logger.error(_error_msg)
+        logger.error('The API payload must be a dictionary or string')
         raise TypeError(_error_msg)
 
     # Define the parameters as an empty dictionary if none are provided
@@ -377,8 +377,8 @@ def _should_allow_failed_responses(_pydp_object, _allow_failed_response: Optiona
             # Use the default strict mode value to define the value if an exception is raised
             _allow_failed_response = False if const.DEFAULT_STRICT_MODE is True else True
             _exc_type = errors.handlers.get_exception_type(_exc)
-            _error_msg = f'Using default strict mode due to the following {_exc_type} exception: {_exc}'
-            logger.error(_error_msg)
+            _error_msg = f'Using default strict mode due to the following {_exc_type} exception'
+            logger.error('Using default strict mode due to an exception')
     return _allow_failed_response
 
 
@@ -436,7 +436,7 @@ def _perform_api_call_with_payload(
     """Perform API requests that include payload data and return the response object."""
     if not full_api_url:
         error_msg = 'A full API URL must be defined before calling _perform_api_call_with_payload()'
-        logger.error(error_msg)
+        logger.error('A full API URL must be defined before calling _perform_api_call_with_payload()')
         raise errors.exceptions.APIMethodError(error_msg)
 
     if isinstance(method, str) and method.upper() == const.API_REQUEST_TYPES.POST:
@@ -474,11 +474,11 @@ def _perform_api_call_with_payload(
             raise_payload_exception()
     elif isinstance(method, str) and method.upper() == const.API_REQUEST_TYPES.GET:
         error_msg = 'The GET API call method is not valid when a payload has been provided.'
-        logger.error(error_msg)
+        logger.error('The GET API call method is not valid when a payload has been provided')
         raise errors.exceptions.APIMethodError(error_msg)
     else:
         error_msg = 'A valid API call method (POST or PATCH or PUT) must be defined.'
-        logger.error(error_msg)
+        logger.error('A valid API call method must be defined')
         raise errors.exceptions.APIMethodError(error_msg)
     return None
 
@@ -504,9 +504,9 @@ def _get_full_api_url(_pydp_object, _endpoint: str, _api_type: str = const.DEFAU
         if not isinstance(_api_type, str):
             _error_msg = f'The API Type value must be a string. (provided: {type(_api_type)})'
         else:
-            _error_msg = f"The value '{_api_type}' is not a valid API type. "
+            _error_msg = 'The configured API type is not valid. '
             _error_msg += f"(expected: '{const.ADMIN_API_TYPE}' or '{const.AUTH_API_TYPE}')"
-        logger.error(_error_msg)
+        logger.error('The configured API type is not valid')
         raise errors.exceptions.InvalidFieldError(_error_msg)
 
     # Make sure the endpoint begins with a slash
@@ -549,7 +549,7 @@ def _convert_response_to_json(_response, _allow_failed_response: bool = False):
         _response = _response.json()
     except Exception as _exc:
         _exc_type = errors.handlers.get_exception_type(_exc)
-        _error_msg = f'Failed to convert the API response to JSON format due to the following {_exc_type} exception: {_exc}'
+        _error_msg = f'Failed to convert the API response to JSON format due to the following {_exc_type} exception'
         logger.error('Failed to convert the API response to JSON format')
         if not _allow_failed_response:
             raise errors.exceptions.APIResponseConversionError(_error_msg)

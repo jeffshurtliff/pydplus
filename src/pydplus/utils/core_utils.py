@@ -61,7 +61,7 @@ def ensure_ending_slash(path: str, path_type: str = const.ARGUMENT_VALUES.URL) -
     valid_path_types = (const.ARGUMENT_VALUES.FILE, const.ARGUMENT_VALUES.URL)
     if not isinstance(path_type, str) or path_type.lower() not in valid_path_types:
         error_msg = "The url_path parameter must be defined as 'url' or 'file'"
-        logger.error(error_msg)
+        logger.error("The url_path parameter must be defined as 'url' or 'file'")
         raise errors.exceptions.InvalidParameterError(error_msg)
     if path and path_type.lower() == const.ARGUMENT_VALUES.URL:
         path = f'{path}/' if not path.endswith('/') else path
@@ -159,7 +159,7 @@ def get_base_url(url: str, include_scheme: bool = True) -> str:
     # Raise an exception if the url is not a string
     if not isinstance(url, str):
         error_msg = f"The 'url' value must be a string (Provided: {type(url)})"
-        logger.error(error_msg)
+        logger.error("The 'url' value must be a string")
         raise TypeError(error_msg)
 
     # Parse the provided URL
@@ -167,7 +167,7 @@ def get_base_url(url: str, include_scheme: bool = True) -> str:
 
     # Raise an exception if an invalid URL was provided
     if not parsed_url.netloc or not parsed_url.scheme:
-        error_msg = f"The provided URL '{url}' is invalid"
+        error_msg = 'The provided URL is invalid'
         logger.error('The provided URL is invalid')
         raise errors.exceptions.InvalidURLError(error_msg)
 
@@ -205,7 +205,7 @@ def get_env_variable_name_by_environment(field: str, env: Optional[str] = None) 
     # Raise an exception if an invalid environment variable field
     if field not in const.ENV_VARIABLES.VALID_FIELDS:
         error_msg = f"'{field}' is not a valid field mapped to an environment variable"
-        logger.error(error_msg)
+        logger.error('The environment variable field is invalid')
         raise ValueError(error_msg)
 
     # Ensure a valid environment is defined
@@ -220,8 +220,8 @@ def get_env_variable_name_by_environment(field: str, env: Optional[str] = None) 
             var_name = const.ENV_VARIABLES.MAPPING[env.upper()].get(field)
     except Exception as exc:
         exc_type = get_exception_type(exc)
-        error_msg = f'Failed to get the environment variable name for the given environment due to {exc_type} exception: {exc}'
-        logger.exception(error_msg)
+        error_msg = f'Failed to get the environment variable name for the given environment due to {exc_type} exception'
+        logger.exception('Failed to get the environment variable name for the given environment')
         raise RuntimeError(error_msg)
     return var_name
 
@@ -243,7 +243,7 @@ def normalize_oauth_scope(scope_value: Any, required: bool = False) -> Optional[
     )
     if scope_value is None:
         if required:
-            logger.error(missing_scope_error_msg)
+            logger.error('A required OAuth scope value is missing')
             raise errors.exceptions.MissingRequiredDataError(missing_scope_error_msg)
         return None
 
@@ -258,7 +258,7 @@ def normalize_oauth_scope(scope_value: Any, required: bool = False) -> Optional[
                     f"The OAuth '{const.CONNECTION_INFO.OAUTH_SCOPE}' values must be strings "
                     f'(provided element type: {type(scope)})'
                 )
-                logger.error(error_msg)
+                logger.error('OAuth scope values must be strings')
                 raise TypeError(error_msg)
             parsed_scopes.append(scope.strip())
     else:
@@ -266,13 +266,13 @@ def normalize_oauth_scope(scope_value: Any, required: bool = False) -> Optional[
             f"The OAuth '{const.CONNECTION_INFO.OAUTH_SCOPE}' value must be provided as a string "
             f'or iterable (provided: {type(scope_value)})'
         )
-        logger.error(error_msg)
+        logger.error('The OAuth scope value must be provided as a string or iterable')
         raise TypeError(error_msg)
 
     parsed_scopes = [scope for scope in parsed_scopes if scope]
     if not parsed_scopes:
         if required:
-            logger.error(missing_scope_error_msg)
+            logger.error('A required OAuth scope value is missing')
             raise errors.exceptions.MissingRequiredDataError(missing_scope_error_msg)
         return None
 
@@ -286,10 +286,10 @@ def normalize_oauth_scope(scope_value: Any, required: bool = False) -> Optional[
     unknown_scopes = sorted(set(normalized_scopes).difference(const.OAUTH_SCOPES.ALL_SCOPES))
     if unknown_scopes:
         error_msg = (
-            f"The OAuth '{const.CONNECTION_INFO.OAUTH_SCOPE}' value(s) are invalid: {', '.join(unknown_scopes)} "
+            f"The OAuth '{const.CONNECTION_INFO.OAUTH_SCOPE}' value(s) are invalid "
             '(Only values defined in const.OAUTH_SCOPES are supported)'
         )
-        logger.error(error_msg)
+        logger.error('One or more OAuth scope values are invalid')
         raise ValueError(error_msg)
 
     return '+'.join(normalized_scopes)

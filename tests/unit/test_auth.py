@@ -89,9 +89,11 @@ def test_load_oauth_private_key_jwk_missing_file_logs_no_sensitive_path(tmp_path
     """Ensure missing OAuth private-key JWK files do not log configured paths."""
     secret_filename = 'tenant-private-key.jwk'
     with caplog.at_level(logging.ERROR, logger='pydplus.auth'):
-        with pytest.raises(FileNotFoundError):
+        with pytest.raises(FileNotFoundError) as exc_info:
             auth._load_oauth_private_key_jwk(_key_file=secret_filename, _key_path=str(tmp_path))
 
+    assert str(tmp_path) not in str(exc_info.value)
+    assert secret_filename not in str(exc_info.value)
     assert str(tmp_path) not in caplog.text
     assert secret_filename not in caplog.text
     assert 'configured OAuth private-key JWK file' in caplog.text
@@ -226,9 +228,12 @@ def test_request_oauth_access_token_failure_logs_no_sensitive_response(monkeypat
     monkeypatch.setattr(auth.requests, 'post', _fake_post)
 
     with caplog.at_level(logging.ERROR, logger='pydplus.auth'):
-        with pytest.raises(errors.exceptions.APIConnectionError):
+        with pytest.raises(errors.exceptions.APIConnectionError) as exc_info:
             auth._request_oauth_access_token(auth._extract_oauth_connection_info(_oauth_connection_info()))
 
+    assert 'secret-token' not in str(exc_info.value)
+    assert 'secret-client-assertion' not in str(exc_info.value)
+    assert 'secret-private-exponent' not in str(exc_info.value)
     assert 'secret-token' not in caplog.text
     assert 'secret-client-assertion' not in caplog.text
     assert 'secret-private-exponent' not in caplog.text

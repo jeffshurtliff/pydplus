@@ -3,8 +3,8 @@
 :Module:            pydplus.users
 :Synopsis:          Defines the user-related functions associated with the RSA ID Plus API
 :Created By:        Jeff Shurtliff
-:Last Modified:     Jeff Shurtliff
-:Modified Date:     30 Mar 2026
+:Last Modified:     Jeff Shurtliff (via GPT-5.5-codex)
+:Modified Date:     30 Jun 2026
 """
 
 from __future__ import annotations
@@ -58,7 +58,7 @@ def get_user_details(
     if search_unsynced is not None:
         if not isinstance(search_unsynced, bool):
             error_msg = f'The value of the search_unsynced parameter must be Boolean. (Provided: {type(search_unsynced)})'
-            logger.error(error_msg)
+            logger.error('The search_unsynced parameter must be Boolean')
             raise TypeError(error_msg)
         payload[const.QUERY_PARAMS.SEARCH_UNSYNCED] = search_unsynced
 
@@ -109,7 +109,7 @@ def get_user_id(
     # Ensure one of the lookup values was provided
     if not any((email, user_details)):
         error_msg = 'An email address or user details dictionary must be provided to retrieve a user ID.'
-        logger.error(error_msg)
+        logger.error('An email address or user details dictionary must be provided to retrieve a user ID')
         raise errors.exceptions.MissingRequiredDataError(error_msg)
 
     # Retrieve the user details if not provided
@@ -126,7 +126,7 @@ def get_user_id(
     # Locate and return the user ID if possible
     if not user_details or not isinstance(user_details, dict) or const.RESPONSE_KEYS.ID not in user_details:
         error_msg = 'Failed to retrieve the user ID for the queried user. An empty string will be returned for the ID.'
-        logger.error(error_msg)
+        logger.error('Failed to retrieve the user ID for the queried user')
         return ''
     return user_details.get(const.RESPONSE_KEYS.ID, '')
 
@@ -170,9 +170,9 @@ def _update_user_status(
 
     # Identify the action to perform and define the payload accordingly
     if _action.lower() not in const.ARGUMENT_VALUES.VALID_USER_STATUS_ACTIONS:
-        _error_msg = f"'{_action}' is not a valid action value when enabling or disabling a user. "
+        _error_msg = 'The action value is not valid when enabling or disabling a user. '
         _error_msg += f"(Expected: '{const.ARGUMENT_VALUES.ENABLE}', '{const.ARGUMENT_VALUES.DISABLE}')"
-        logger.error(_error_msg)
+        logger.error('The user status action value is invalid')
         raise errors.exceptions.InvalidPayloadValueError(_error_msg)
     if _action.lower() == const.ARGUMENT_VALUES.ENABLE:
         _action = const.PAYLOAD_VALUES.ENABLED

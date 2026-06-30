@@ -3,8 +3,8 @@
 :Module:            pydplus.decorators
 :Synopsis:          Decorators that can be used to include additional functionality with functions and methods
 :Created By:        Jeff Shurtliff
-:Last Modified:     Jeff Shurtliff
-:Modified Date:     30 Mar 2026
+:Last Modified:     Jeff Shurtliff (via GPT-5.5-codex)
+:Modified Date:     30 Jun 2026
 """
 
 from __future__ import annotations
@@ -52,7 +52,7 @@ def deprecated(
 
         @functools.wraps(func)
         def wrapper(*args: Any, **kwargs: Any):
-            logger.warning(message)
+            logger.warning('A deprecated callable was invoked')
             warnings.warn(message, category=category, stacklevel=stacklevel)
             return func(*args, **kwargs)
 

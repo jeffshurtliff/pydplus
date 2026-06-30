@@ -72,7 +72,7 @@ def get_legacy_headers(
     if not jwt_string:
         if not all((base_url, connection_info)):
             error_msg = 'The base_url and connection_info parameters must be defined to connect to the tenant'
-            logger.error(error_msg)
+            logger.error('The base_url and connection_info parameters must be defined')
             raise errors.exceptions.MissingRequiredDataError(error_msg)
         jwt_string = get_legacy_jwt_string(base_url, connection_info)
     headers = {
@@ -119,8 +119,8 @@ def get_oauth_headers(
     access_token = token_data.get(const.AUTH_FIELDS.OAUTH_ACCESS_TOKEN)
     token_type = token_data.get(const.AUTH_FIELDS.OAUTH_TOKEN_TYPE, const.AUTH_VALUES.OAUTH_TOKEN_TYPE_BEARER)
     if not isinstance(access_token, str) or not access_token:
-        error_msg = f'The OAuth token response did not include a valid {const.AUTH_FIELDS.OAUTH_ACCESS_TOKEN}'
-        logger.error(error_msg)
+        error_msg = 'The OAuth token response did not include a valid access token'
+        logger.error('The OAuth token response did not include a valid access token')
         raise errors.exceptions.APIConnectionError(error_msg)
 
     authorization_header_value = (
@@ -203,7 +203,7 @@ def _extract_legacy_connection_info(_connection_info: dict) -> Tuple[str, Option
         else:
             _missing_var = f'{const.CONNECTION_INFO.LEGACY_PRIVATE_KEY_FILE} or {const.CONNECTION_INFO.LEGACY_PRIVATE_KEY_PEM}'
         _error_msg = f'The {_missing_var} value is needed to connect to the tenant'
-        logger.error(_error_msg)
+        logger.error('Required legacy authentication data is missing')
         raise errors.exceptions.MissingRequiredDataError(_error_msg)
     return _access_id, _private_key_full_path, _private_key_pem
 
@@ -213,7 +213,7 @@ def _extract_oauth_connection_info(_connection_info: dict) -> dict[str, Any]:
     _oauth_info = _connection_info.get(const.CONNECTION_INFO.OAUTH, {})
     if not isinstance(_oauth_info, dict):
         _error_msg = 'The OAuth connection info must be provided as a dictionary'
-        logger.error(_error_msg)
+        logger.error('The OAuth connection info must be provided as a dictionary')
         raise TypeError(_error_msg)
 
     issuer_url = _oauth_info.get(const.CONNECTION_INFO.OAUTH_ISSUER_URL)
@@ -232,15 +232,15 @@ def _extract_oauth_connection_info(_connection_info: dict) -> dict[str, Any]:
         if not client_id:
             missing_var.append(const.CONNECTION_INFO.OAUTH_CLIENT_ID)
         _error_msg = f'The {" and ".join(missing_var)} value(s) are needed to connect to the tenant via OAuth'
-        logger.error(_error_msg)
+        logger.error('Required OAuth connection data is missing')
         raise errors.exceptions.MissingRequiredDataError(_error_msg)
 
     if grant_type != const.CONNECTION_INFO.OAUTH_GRANT_TYPE_CLIENT_CREDENTIALS:
         _error_msg = (
-            f"The OAuth {const.CONNECTION_INFO.OAUTH_GRANT_TYPE} '{grant_type}' is currently unsupported "
+            f'The OAuth {const.CONNECTION_INFO.OAUTH_GRANT_TYPE} value is currently unsupported '
             f'(Only {const.CONNECTION_INFO.OAUTH_GRANT_TYPE_CLIENT_CREDENTIALS} is currently supported)'
         )
-        logger.error(_error_msg)
+        logger.error('The OAuth grant type is currently unsupported')
         raise errors.exceptions.FeatureNotConfiguredError(_error_msg)
 
     private_key_path = _oauth_info.get(const.CONNECTION_INFO.OAUTH_PRIVATE_KEY_PATH)
@@ -253,14 +253,14 @@ def _extract_oauth_connection_info(_connection_info: dict) -> dict[str, Any]:
                 f"The '{const.CONNECTION_INFO.OAUTH_PRIVATE_KEY_JWK}' or "
                 f"'{const.CONNECTION_INFO.OAUTH_PRIVATE_KEY_FILE}' value is needed for Private Key JWT authentication"
             )
-            logger.error(_error_msg)
+            logger.error('OAuth Private Key JWT authentication requires configured key material')
             raise errors.exceptions.MissingRequiredDataError(_error_msg)
     else:
         _error_msg = (
-            f"The OAuth client authentication method '{client_auth}' is currently unsupported "
+            'The OAuth client authentication method is currently unsupported '
             f'({const.CONNECTION_INFO.OAUTH_DEFAULT_CLIENT_AUTH} is currently the only supported method)'
         )
-        logger.error(_error_msg)
+        logger.error('The OAuth client authentication method is currently unsupported')
         raise errors.exceptions.FeatureNotConfiguredError(_error_msg)
 
     return {
@@ -313,11 +313,11 @@ def _load_private_key(_key_path: Optional[str] = None, _key_pem: Optional[str] =
 
     if not _key_path:
         _error_msg = 'A private key file path or private key PEM value must be defined'
-        logger.error(_error_msg)
+        logger.error('A private key file path or private key PEM value must be defined')
         raise errors.exceptions.MissingRequiredDataError(_error_msg)
 
     if not core_utils.file_exists(_key_path):
-        _error_msg = f"The file '{_key_path}' does not exist and cannot be used for the private key"
+        _error_msg = 'The configured private key file does not exist and cannot be used for authentication'
         logger.error('The configured private key file does not exist and cannot be used for authentication')
         raise FileNotFoundError(_error_msg)
     with open(_key_path, 'rb') as _key_file:
@@ -331,7 +331,7 @@ def _normalize_oauth_grant_type(_grant_type: Optional[str]) -> str:
         _grant_type = const.CONNECTION_INFO.OAUTH_DEFAULT_GRANT_TYPE
     if not isinstance(_grant_type, str):
         _error_msg = f'The OAuth {const.CONNECTION_INFO.OAUTH_GRANT_TYPE} must be a string (provided: {type(_grant_type)})'
-        logger.error(_error_msg)
+        logger.error('The OAuth grant type must be a string')
         raise TypeError(_error_msg)
 
     _raw_value = _grant_type.strip().lower()
@@ -346,11 +346,11 @@ def _normalize_oauth_grant_type(_grant_type: Optional[str]) -> str:
             return const.CONNECTION_INFO.OAUTH_GRANT_TYPE_MAPPING[_lookup]
 
     _error_msg = (
-        f"Unsupported OAuth {const.CONNECTION_INFO.OAUTH_GRANT_TYPE} value '{_grant_type}' "
+        f'Unsupported OAuth {const.CONNECTION_INFO.OAUTH_GRANT_TYPE} value '
         f'(Only {const.CONNECTION_INFO.OAUTH_DEFAULT_GRANT_TYPE} '
         f'({const.CONNECTION_INFO.OAUTH_GRANT_TYPE_CLIENT_CREDENTIALS}) is currently supported)'
     )
-    logger.error(_error_msg)
+    logger.error('The OAuth grant type is currently unsupported')
     raise errors.exceptions.FeatureNotConfiguredError(_error_msg)
 
 
@@ -363,7 +363,7 @@ def _normalize_oauth_client_auth(_client_auth: Optional[str]) -> str:
             f'The OAuth {const.CONNECTION_INFO.OAUTH_CLIENT_AUTHENTICATION} value must be a string '
             f'(provided: {type(_client_auth)})'
         )
-        logger.error(_error_msg)
+        logger.error('The OAuth client authentication value must be a string')
         raise TypeError(_error_msg)
 
     _raw_value = _client_auth.strip().lower()
@@ -377,8 +377,8 @@ def _normalize_oauth_client_auth(_client_auth: Optional[str]) -> str:
         if _lookup in const.CONNECTION_INFO.OAUTH_CLIENT_AUTH_MAPPING:
             return const.CONNECTION_INFO.OAUTH_CLIENT_AUTH_MAPPING[_lookup]
 
-    _error_msg = f"Unsupported OAuth {const.CONNECTION_INFO.OAUTH_CLIENT_AUTHENTICATION} value '{_client_auth}'"
-    logger.error(_error_msg)
+    _error_msg = f'Unsupported OAuth {const.CONNECTION_INFO.OAUTH_CLIENT_AUTHENTICATION} value'
+    logger.error('The OAuth client authentication value is unsupported')
     raise errors.exceptions.FeatureNotConfiguredError(_error_msg)
 
 
@@ -415,13 +415,13 @@ def _load_oauth_private_key_jwk(
                 f'The {const.CONNECTION_INFO.OAUTH_PRIVATE_KEY_JWK} value must be a dict or JSON string '
                 f'(provided: {type(_key_jwk)})'
             )
-            logger.error(_error_msg)
+            logger.error('The OAuth private key JWK value must be a dict or JSON string')
             raise TypeError(_error_msg)
 
     if _parsed_jwk is None and _key_file:
         _full_key_path = _resolve_oauth_private_key_path(_key_path, _key_file)
         if not core_utils.file_exists(_full_key_path):
-            _error_msg = f'The file {_full_key_path} does not exist and cannot be used for OAuth private-key JWK data'
+            _error_msg = 'The configured OAuth private-key JWK file does not exist'
             logger.error('The configured OAuth private-key JWK file does not exist')
             raise FileNotFoundError(_error_msg)
         with open(_full_key_path, encoding=const.UTF8_ENCODING) as _jwk_file:
@@ -432,12 +432,12 @@ def _load_oauth_private_key_jwk(
             f'A {const.CONNECTION_INFO.OAUTH_PRIVATE_KEY_FILE} or '
             f'{const.CONNECTION_INFO.OAUTH_PRIVATE_KEY_JWK} value must be defined for OAuth Private Key JWT'
         )
-        logger.error(_error_msg)
+        logger.error('OAuth Private Key JWT authentication requires configured key material')
         raise errors.exceptions.MissingRequiredDataError(_error_msg)
 
     if not isinstance(_parsed_jwk, dict):
         _error_msg = 'The OAuth private key JWK payload must be a dictionary'
-        logger.error(_error_msg)
+        logger.error('The OAuth private key JWK payload must be a dictionary')
         raise TypeError(_error_msg)
 
     _kty_value = _parsed_jwk.get(const.AUTH_FIELDS.JWA_KEY_TYPE)
@@ -458,7 +458,7 @@ def _load_oauth_private_key_jwk(
         }
     else:
         _error_msg = (
-            f"The OAuth private key JWK type '{_kty_value}' is unsupported "
+            'The OAuth private key JWK type is unsupported '
             f'(Only {const.AUTH_VALUES.JWA_RSA} and {const.AUTH_VALUES.JWA_EC} key types are supported)'
         )
         logger.error('The OAuth private key JWK type is unsupported')
@@ -466,8 +466,8 @@ def _load_oauth_private_key_jwk(
 
     _missing_fields = sorted(_required_fields.difference(_parsed_jwk.keys()))
     if _missing_fields:
-        _error_msg = f'The OAuth private key JWK data is missing required field(s): {", ".join(_missing_fields)}'
-        logger.error(_error_msg)
+        _error_msg = 'The OAuth private key JWK data is missing required field(s)'
+        logger.error('The OAuth private key JWK data is missing required field(s)')
         raise errors.exceptions.MissingRequiredDataError(_error_msg)
 
     return _parsed_jwk
@@ -479,7 +479,7 @@ def _convert_oauth_jwk_to_signing_key(_private_key_jwk: dict[str, Any]):
         return jwt.PyJWK.from_dict(_private_key_jwk).key
     except Exception as _exc:
         _exc_type = core_utils.get_exception_type(_exc)
-        _error_msg = f'Failed to parse OAuth private key JWK data due to {_exc_type} exception: {_exc}'
+        _error_msg = f'Failed to parse OAuth private key JWK data due to {_exc_type} exception'
         logger.error('Failed to parse OAuth private key JWK data')
         raise ValueError(_error_msg)
 
@@ -522,7 +522,7 @@ def _create_private_key_jwt_client_assertion(
         )
     except Exception as _exc:
         _exc_type = core_utils.get_exception_type(_exc)
-        _error_msg = f'Failed to generate private_key_jwt assertion due to {_exc_type} exception: {_exc}'
+        _error_msg = f'Failed to generate private_key_jwt assertion due to {_exc_type} exception'
         logger.error('Failed to generate private_key_jwt assertion')
         raise errors.exceptions.APIConnectionError(_error_msg)
 
@@ -571,10 +571,10 @@ def _request_oauth_access_token(
         )
     else:
         _error_msg = (
-            f"The OAuth {const.CONNECTION_INFO.OAUTH_CLIENT_AUTHENTICATION} method '{_client_auth}' is currently unsupported "
+            f'The OAuth {const.CONNECTION_INFO.OAUTH_CLIENT_AUTHENTICATION} method is currently unsupported '
             '(Private Key JWT is currently the only supported method)'
         )
-        logger.error(_error_msg)
+        logger.error('The OAuth client authentication method is currently unsupported')
         raise errors.exceptions.FeatureNotConfiguredError(_error_msg)
 
     _headers = {
@@ -590,7 +590,7 @@ def _request_oauth_access_token(
     )
 
     if _response.status_code >= 300:
-        _error_msg = f'The OAuth token request failed with a {_response.status_code} status code.\n{_response.text}'
+        _error_msg = f'The OAuth token request failed with a {_response.status_code} status code.'
         logger.error('The OAuth token request failed')
         raise errors.exceptions.APIConnectionError(_error_msg)
 
@@ -598,7 +598,7 @@ def _request_oauth_access_token(
         _response_data = _response.json()
     except Exception as _exc:
         _exc_type = core_utils.get_exception_type(_exc)
-        _error_msg = f'Failed to parse OAuth token response due to {_exc_type} exception: {_exc}'
+        _error_msg = f'Failed to parse OAuth token response due to {_exc_type} exception'
         logger.error('Failed to parse OAuth token response')
         raise errors.exceptions.APIConnectionError(_error_msg)
 
@@ -611,8 +611,8 @@ def _parse_oauth_token_response(_response_data: dict[str, Any]) -> dict[str, Any
     """Parse and validate an OAuth token endpoint response payload."""
     _access_token = _response_data.get(const.AUTH_FIELDS.OAUTH_ACCESS_TOKEN)
     if not isinstance(_access_token, str) or not _access_token:
-        _error_msg = f'The OAuth token response did not include a valid {const.AUTH_FIELDS.OAUTH_ACCESS_TOKEN}'
-        logger.error(_error_msg)
+        _error_msg = 'The OAuth token response did not include a valid access token'
+        logger.error('The OAuth token response did not include a valid access token')
         raise errors.exceptions.APIConnectionError(_error_msg)
 
     _token_type = _response_data.get(const.AUTH_FIELDS.OAUTH_TOKEN_TYPE, const.AUTH_VALUES.OAUTH_TOKEN_TYPE_BEARER)
@@ -646,7 +646,7 @@ def _is_oauth_token_valid(
         logger.debug('No OAauth token data was provided when checking if the token is valid')
         return False
     elif not isinstance(_token_data, dict):
-        logger.error(f'The OAuth token data is an invalid type (Expected: dict, Provided: {type(_token_data)})')
+        logger.error('The OAuth token data is an invalid type')
         return False
 
     _access_token = _token_data.get(const.AUTH_FIELDS.OAUTH_ACCESS_TOKEN)
@@ -658,10 +658,10 @@ def _is_oauth_token_valid(
     if not isinstance(_expires_at, (int, float)):
         _error_msg = f"The '{const.AUTH_FIELDS.OAUTH_EXPIRES_AT}' value is an invalid type "
         _error_msg += f'(Expected: int, float; Provided: {type(_expires_at)})'
-        logger.error(_error_msg)
+        logger.error('The OAuth token expiration value is an invalid type')
         return False
     if _expected_scope is not None and _cached_scope != _expected_scope:
-        logger.error(f"The cached '{const.AUTH_FIELDS.OAUTH_SCOPE}' does not match the expected value")
+        logger.error('The cached OAuth scope does not match the expected value')
         return False
 
     _now = int(datetime.datetime.now(datetime.UTC).timestamp())
@@ -721,7 +721,7 @@ def _get_scope_from_preset(
         _error_msg = (
             f"The 'oauth_scope_preset' value must be supplied as a string or iterable of strings (provided: {type(_preset)})"
         )
-        logger.error(_error_msg)
+        logger.error("The 'oauth_scope_preset' value must be supplied as a string or iterable of strings")
         raise TypeError(_error_msg)
 
     _added: list[str] = []
@@ -729,7 +729,7 @@ def _get_scope_from_preset(
     for _val in _preset_values:
         if not isinstance(_val, str):
             _error_msg = f"The 'oauth_scope_preset' values must be strings (provided element type: {type(_val)})"
-            logger.error(_error_msg)
+            logger.error("The 'oauth_scope_preset' values must be strings")
             raise TypeError(_error_msg)
 
         _preset_name = _val.strip().lower()
@@ -743,9 +743,8 @@ def _get_scope_from_preset(
             logger.warning('An invalid OAuth scope preset was ignored')
             _skipped.append(_preset_name)
 
-    _results_msg = f'Processed {len(_preset_values)} OAuth scope presets (Added: {len(_added)}; Skipped: {len(_skipped)})'
     if _added or _skipped:
-        logger.info(_results_msg)
+        logger.info('Processed OAuth scope presets')
     else:
-        logger.debug(_results_msg)
+        logger.debug('Processed OAuth scope presets')
     return _merged_scope

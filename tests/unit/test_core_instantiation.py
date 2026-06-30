@@ -17,7 +17,7 @@ import pytest
 
 from pydplus import PyDPlus, errors
 from pydplus import constants as const
-from pydplus.core import compile_connection_info
+from pydplus.core import _log_configured_setting, _log_default_setting, compile_connection_info
 
 pytestmark = pytest.mark.unit
 
@@ -26,6 +26,18 @@ def test_instantiate_empty_core_object_raises_missing_required_data_error() -> N
     """Ensure missing base_url raises the expected exception."""
     with pytest.raises(errors.exceptions.MissingRequiredDataError):
         PyDPlus(auto_connect=False)
+
+
+def test_setting_selection_logs_do_not_include_setting_names(caplog) -> None:
+    """Ensure setting-selection debug logs do not expose sensitive-looking setting names."""
+    with caplog.at_level(logging.DEBUG, logger='pydplus.core'):
+        _log_configured_setting('oauth_private_key_jwk', 'environment variable')
+        _log_default_setting('access_token')
+
+    assert 'oauth_private_key_jwk' not in caplog.text
+    assert 'environment variable' not in caplog.text
+    assert 'access_token' not in caplog.text
+    assert 'client setting' in caplog.text
 
 
 def test_compile_connection_info_builds_expected_structure(sample_base_url: str) -> None:
@@ -284,7 +296,7 @@ def test_compile_connection_info_invalid_oauth_issuer_logs_no_raw_url(sample_bas
     secret_issuer_url = 'secret-invalid-issuer-url'
 
     with caplog.at_level(logging.ERROR, logger='pydplus.core'):
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError) as exc_info:
             compile_connection_info(
                 base_url=sample_base_url,
                 oauth_client_id='oauth-client-id',
@@ -292,6 +304,7 @@ def test_compile_connection_info_invalid_oauth_issuer_logs_no_raw_url(sample_bas
                 oauth_scope=const.OAUTH_SCOPES.USER_READ,
             )
 
+    assert secret_issuer_url not in str(exc_info.value)
     assert secret_issuer_url not in caplog.text
     assert 'OAuth issuer URL is invalid' in caplog.text
 
