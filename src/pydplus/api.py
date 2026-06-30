@@ -3,8 +3,8 @@
 :Module:            pydplus.api
 :Synopsis:          Defines the basic functions associated with the RSA ID Plus API
 :Created By:        Jeff Shurtliff
-:Last Modified:     Jeff Shurtliff
-:Modified Date:     30 Mar 2026
+:Last Modified:     Jeff Shurtliff (via GPT-5.5-codex)
+:Modified Date:     30 Jun 2026
 """
 
 from __future__ import annotations
@@ -530,7 +530,7 @@ def _raise_status_code_exception(_response, _method: str, _show_full_error: bool
     _exc_msg = f'The {_method.upper()} request failed with a {_response.status_code} status code.'
     if _show_full_error:
         _exc_msg += f'\n{_response.text}'
-    logger.error(_exc_msg)
+    logger.error('The API request failed with a non-success status code')
     raise errors.exceptions.APIRequestError(_exc_msg)
 
 
@@ -550,7 +550,7 @@ def _convert_response_to_json(_response, _allow_failed_response: bool = False):
     except Exception as _exc:
         _exc_type = errors.handlers.get_exception_type(_exc)
         _error_msg = f'Failed to convert the API response to JSON format due to the following {_exc_type} exception: {_exc}'
-        logger.error(_error_msg)
+        logger.error('Failed to convert the API response to JSON format')
         if not _allow_failed_response:
             raise errors.exceptions.APIResponseConversionError(_error_msg)
     return _response

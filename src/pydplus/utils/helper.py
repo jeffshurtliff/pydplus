@@ -5,8 +5,8 @@
 :Usage:             ``from pydplus.utils import helper``
 :Example:           ``helper_settings = helper.get_settings('/tmp/helper.yml', 'yaml')``
 :Created By:        Jeff Shurtliff
-:Last Modified:     Jeff Shurtliff
-:Modified Date:     01 Apr 2026
+:Last Modified:     Jeff Shurtliff (via GPT-5.5-codex)
+:Modified Date:     30 Jun 2026
 """
 
 from __future__ import annotations
@@ -43,7 +43,7 @@ def import_helper_file(file_path: str, file_type: str) -> dict:
         else:
             logger.error(const._EXCEPTION_CLASSES._INVALID_HELPER_DEFAULT_MSG)
             raise errors.exceptions.InvalidHelperFileTypeError()
-    logger.info(f'The helper file {file_path} was imported successfully.')
+    logger.info('The helper file was imported successfully.')
     return helper_cfg
 
 

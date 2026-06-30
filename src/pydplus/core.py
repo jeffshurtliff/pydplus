@@ -5,8 +5,8 @@
 :Usage:             ``from pydplus import PyDPlus``
 :Example:           ``pydp = PyDPlus()``
 :Created By:        Jeff Shurtliff
-:Last Modified:     Jeff Shurtliff (via GPT-5.3-codex)
-:Modified Date:     01 Apr 2026
+:Last Modified:     Jeff Shurtliff (via GPT-5.5-codex)
+:Modified Date:     30 Jun 2026
 """
 
 from __future__ import annotations
@@ -26,6 +26,16 @@ from .utils import core_utils
 from .utils.helper import get_helper_settings
 
 logger = logging.getLogger(__name__)
+
+
+def _log_configured_setting(setting: str, method: str) -> None:
+    """Log that a setting was configured without exposing the configured value."""
+    logger.debug("Configured '%s' via %s", setting, method)
+
+
+def _log_default_setting(setting: str) -> None:
+    """Log that a setting default was selected without exposing the configured value."""
+    logger.debug("Using the default value for '%s'", setting)
 
 
 class PyDPlus:
@@ -265,7 +275,7 @@ class PyDPlus:
             ):
                 _path_to_material_file = core_utils.ensure_ending_slash(_connection_info[_legacy_key][_material_path_key])
                 _key_material_path = _path_to_material_file + _key_material_path
-            logger.debug(f"Defined '{_key_material_path}' as the path to the key material file via connection_info")
+            logger.debug('Configured legacy key material file path via connection_info')
 
         # Attempt to define the full path using the helper settings if defined
         elif (
@@ -286,7 +296,7 @@ class PyDPlus:
                     self._helper_settings[_helper_conn_key][_legacy_key][_material_path_key]
                 )
                 _key_material_path = _path_to_material_file + _key_material_path
-            logger.debug(f"Defined '{_key_material_path}' as the path to the key material file via helper settings")
+            logger.debug('Configured legacy key material file path via helper settings')
 
         # Attempt to define the full path using environment variables if defined
         elif (
@@ -300,7 +310,7 @@ class PyDPlus:
             if isinstance(self._env_variables.get(_env_material_path_key), str) and self._env_variables[_env_material_path_key]:
                 _path_to_material_file = core_utils.ensure_ending_slash(self._env_variables[_env_material_path_key])
                 _key_material_path = _path_to_material_file + _key_material_path
-            logger.debug(f"Defined '{_key_material_path}' as the path to the key material file via environment variables")
+            logger.debug('Configured legacy key material file path via environment variables')
 
         # Returned the defined (or empty) path to the key material file
         if not _key_material_path:
@@ -334,7 +344,6 @@ class PyDPlus:
         """Identify the environment name if defined with an argument or environment variable."""
         setting = 'environment name'
         methods = const.ARGUMENT_VALUES.PROVIDED_METHODS  # arg, helper, or env
-        debug_msg = const._LOG_MESSAGES._CLIENT_SETTING_CONFIGURED
 
         # Attempt to define the environment name using a passed argument
         if _env:
@@ -343,7 +352,7 @@ class PyDPlus:
                 logger.error(_error_msg)
                 raise TypeError(_error_msg)
             self.env = _env.upper()
-            logger.debug(debug_msg.format(setting=setting, value=self.env, method=methods[0]))
+            _log_configured_setting(setting, methods[0])
 
         # Attempt to define the environment name using helper settings if configured
         if (
@@ -353,14 +362,14 @@ class PyDPlus:
             and self._helper_settings[const.HELPER_SETTINGS.ENV_NAME]
         ):
             self.env = self._helper_settings[const.HELPER_SETTINGS.ENV_NAME].upper()
-            logger.debug(debug_msg.format(setting=setting, value=self.env, method=methods[1]))
+            _log_configured_setting(setting, methods[1])
 
         # Define the environment name (or lack thereof) using the environment variable
         if not self.env:
             _env = os.getenv(const.ENV_VARIABLES.ENV_NAME)  # Returns None if not found
             self.env = _env.upper() if _env else None
             if self.env:
-                logger.debug(debug_msg.format(setting=setting, value=self.env, method=methods[2]))
+                _log_configured_setting(setting, methods[2])
             else:
                 logger.debug('The environment name could not be defined as it was not specified anywhere')
 
@@ -399,7 +408,7 @@ class PyDPlus:
                         f"Failed to retrieve the '{_name_key}' environment variable name specific to the "
                         f'{self.env} environment due to {_exc_type} exception: {_exc}'
                     )
-                    logger.exception(_error_msg)
+                    logger.exception('Failed to retrieve an environment-specific variable name')
                     logger.warning(f"Defaulting to the environment variable {_name_value} for '{_name_key}'")
                     _env_specific_names[_name_key] = _name_value
             _env_variable_names.update(_env_specific_names)
@@ -432,8 +441,6 @@ class PyDPlus:
         """Define the strict_mode setting using a passed argument, helper setting, or environment variable."""
         setting = const.CLIENT_SETTINGS.STRICT_MODE
         methods = const.ARGUMENT_VALUES.PROVIDED_METHODS  # arg, helper, or env
-        debug_msg = const._LOG_MESSAGES._CLIENT_SETTING_CONFIGURED
-        default_debug_msg = const._LOG_MESSAGES._WILL_USE_DEFAULT_VALUE
 
         # Check if the strict_mode value was passed as an argument
         if _strict_mode_from_arg is not None:
@@ -442,7 +449,7 @@ class PyDPlus:
                 logger.error(_error_msg)
                 raise TypeError(_error_msg)
             self.strict_mode = _strict_mode_from_arg
-            logger.debug(debug_msg.format(setting=setting, value=self.strict_mode, method=methods[0]))
+            _log_configured_setting(setting, methods[0])
 
         # Check the helper settings to see if strict mode was defined
         elif (
@@ -452,7 +459,7 @@ class PyDPlus:
             and self._helper_settings[const.HELPER_SETTINGS.STRICT_MODE] is not None
         ):
             self.strict_mode = self._helper_settings.get(const.HELPER_SETTINGS.STRICT_MODE)
-            logger.debug(debug_msg.format(setting=setting, value=self.strict_mode, method=methods[1]))
+            _log_configured_setting(setting, methods[1])
 
         # Check the environment variables to see if strict mode was defined
         elif (
@@ -461,12 +468,12 @@ class PyDPlus:
             and self._env_variables[const.ENV_VARIABLES.STRICT_MODE_FIELD] is not None
         ):
             self.strict_mode = self._env_variables.get(const.ENV_VARIABLES.STRICT_MODE_FIELD)
-            logger.debug(debug_msg.format(setting=setting, value=self.strict_mode, method=methods[2]))
+            _log_configured_setting(setting, methods[2])
 
         # Use the default value (True) if not strict mode was not explicitly defined
         else:
             self.strict_mode = const.DEFAULT_STRICT_MODE
-            logger.debug(default_debug_msg.format(setting=setting, value=self.strict_mode))
+            _log_default_setting(setting)
 
     def _check_for_connection_type_mismatch(self):
         if self.legacy_key_material and self.connection_type == const.CONNECTION_INFO.OAUTH:
@@ -507,18 +514,17 @@ class PyDPlus:
         self.connection_type = None
         setting = const.CLIENT_SETTINGS.CONNECTION_TYPE
         methods = const.ARGUMENT_VALUES.PROVIDED_METHODS  # arg, helper, or env
-        debug_msg = const._LOG_MESSAGES._CLIENT_SETTING_CONFIGURED
 
         # Check if the connection type was passed as an argument and leverage it if valid
         if _connection_type_from_arg is not None:
             if _connection_type_from_arg in const.CONNECTION_INFO.VALID_CONNECTION_TYPES:
                 self.connection_type = _connection_type_from_arg
-                logger.debug(debug_msg.format(setting=setting, value=self.connection_type, method=methods[0]))
+                _log_configured_setting(setting, methods[0])
             else:
                 _error_msg = const._LOG_MESSAGES._INVALID_ARG_IGNORE.format(arg=setting)
                 _expected_types = ','.join(const.CONNECTION_INFO.VALID_CONNECTION_TYPES)
                 _error_msg += f' (Expected: {_expected_types}; Provided: {_connection_type_from_arg})'
-                logger.error(_error_msg)
+                logger.error("The 'connection_type' argument is invalid and will be ignored")
 
         # Attempt to retrieve the connection type via helper settings if present and populated
         if (
@@ -530,12 +536,12 @@ class PyDPlus:
             _helper_connection_type = self._helper_settings.get(const.HELPER_SETTINGS.CONNECTION_TYPE)
             if _helper_connection_type in const.CONNECTION_INFO.VALID_CONNECTION_TYPES:
                 self.connection_type = _helper_connection_type
-                logger.debug(debug_msg.format(setting=setting, value=self.connection_type, method=methods[1]))
+                _log_configured_setting(setting, methods[1])
             else:
                 _error_msg = 'The connection_type value in the helper settings is invalid and will be ignored'
                 _expected_types = ','.join(const.CONNECTION_INFO.VALID_CONNECTION_TYPES)
                 _error_msg += f' (Expected: {_expected_types}; Provided: {_helper_connection_type})'
-                logger.error(_error_msg)
+                logger.error('The connection_type value in the helper settings is invalid and will be ignored')
 
         # Attempt to retrieve the connection type via environment variable if defined
         if (
@@ -547,12 +553,12 @@ class PyDPlus:
             _env_connection_type = self._env_variables[const.ENV_VARIABLES.CONNECTION_TYPE_FIELD]
             if _env_connection_type in const.CONNECTION_INFO.VALID_CONNECTION_TYPES:
                 self.connection_type = _env_connection_type
-                logger.debug(debug_msg.format(setting=setting, value=self.connection_type, method=methods[2]))
+                _log_configured_setting(setting, methods[2])
             else:
                 _error_msg = 'The connection_type environment variable is invalid and will be ignored'
                 _expected_types = ','.join(const.CONNECTION_INFO.VALID_CONNECTION_TYPES)
                 _error_msg += f' (Expected: {_expected_types}; Provided: {_env_connection_type})'
-                logger.error(_error_msg)
+                logger.error('The connection_type environment variable is invalid and will be ignored')
 
         # Explicit/declared connection type wins over auto-detection
         if self.connection_type:
@@ -580,13 +586,11 @@ class PyDPlus:
         """Determine the ``verify_ssl`` value from a passed argument, helper setting, or environment variable."""
         setting = const.CLIENT_SETTINGS.VERIFY_SSL
         methods = const.ARGUMENT_VALUES.PROVIDED_METHODS  # arg, helper, or env
-        debug_msg = const._LOG_MESSAGES._CLIENT_SETTING_CONFIGURED
-        default_debug_msg = const._LOG_MESSAGES._WILL_USE_DEFAULT_VALUE
 
         # Define the verify_ssl value using the argument if defined
         if _verify_ssl_from_arg is not None and isinstance(_verify_ssl_from_arg, bool):
             self.verify_ssl = _verify_ssl_from_arg
-            logger.debug(debug_msg.format(setting=setting, value=self.verify_ssl, method=methods[0]))
+            _log_configured_setting(setting, methods[0])
 
         # Attempt to define the verify_ssl value using Helper Settings if present and populated
         elif (
@@ -598,7 +602,7 @@ class PyDPlus:
                 const.HELPER_SETTINGS.VERIFY_SSL,
                 const.CLIENT_SETTINGS.DEFAULT_VERIFY_SSL_VALUE,  # Fallback value
             )
-            logger.debug(debug_msg.format(setting=setting, value=self.verify_ssl, method=methods[1]))
+            _log_configured_setting(setting, methods[1])
 
         # Attempt to define the verify_ssl value using an environment variable if defined
         elif (
@@ -610,19 +614,17 @@ class PyDPlus:
                 const.ENV_VARIABLES.VERIFY_SSL_FIELD,
                 const.CLIENT_SETTINGS.DEFAULT_VERIFY_SSL_VALUE,  # Fallback value
             )
-            logger.debug(debug_msg.format(setting=setting, value=self.verify_ssl, method=methods[2]))
+            _log_configured_setting(setting, methods[2])
 
         # Use the default value (True) if not defined elsewhere
         else:
             self.verify_ssl = const.CLIENT_SETTINGS.DEFAULT_VERIFY_SSL_VALUE
-            logger.debug(default_debug_msg.format(setting=setting, value=self.verify_ssl))
+            _log_default_setting(setting)
 
     def _define_oauth_api_type(self, _oauth_api_type_from_arg: Optional[str]) -> None:
         """Define which API type should be used for OAuth issuer URL inference."""
         setting = const.CLIENT_SETTINGS.OAUTH_API_TYPE
         methods = const.ARGUMENT_VALUES.PROVIDED_METHODS  # arg, helper, or env
-        debug_msg = const._LOG_MESSAGES._CLIENT_SETTING_CONFIGURED
-        default_debug_msg = const._LOG_MESSAGES._WILL_USE_DEFAULT_VALUE
 
         if _oauth_api_type_from_arg is not None:
             if not isinstance(_oauth_api_type_from_arg, str):
@@ -636,14 +638,14 @@ class PyDPlus:
             if _oauth_api_type not in const.VALID_API_TYPES:
                 _valid_values = ','.join(sorted(const.VALID_API_TYPES))
                 _error_msg = f"The '{setting}' value '{_oauth_api_type_from_arg}' is invalid (Expected one of: {_valid_values})"
-                logger.error(_error_msg)
+                logger.error("The 'oauth_api_type' value is invalid")
                 raise ValueError(_error_msg)
             self.oauth_api_type = _oauth_api_type
-            logger.debug(debug_msg.format(setting=setting, value=self.oauth_api_type, method=methods[0]))
+            _log_configured_setting(setting, methods[0])
             return
 
         self.oauth_api_type = const.AUTH_API_TYPE
-        logger.debug(default_debug_msg.format(setting=setting, value=self.oauth_api_type))
+        _log_default_setting(setting)
 
     def _construct_base_url_with_tenant_name(self, _api_type: str, _tenant_name: Optional[str] = None) -> str:
         """Construct the base URL for a given API type using a tenant name."""
@@ -674,11 +676,10 @@ class PyDPlus:
         # Attempt to define the base URL value for the Administration API by first checking if defined via argument
         setting = const.CLIENT_SETTINGS.BASE_URL
         methods = const.ARGUMENT_VALUES.PROVIDED_METHODS  # arg, helper, or env
-        debug_msg = const._LOG_MESSAGES._CLIENT_SETTING_CONFIGURED
 
         if _base_url_from_arg:
             self.base_url = core_utils.get_base_url(_base_url_from_arg)
-            logger.debug(debug_msg.format(setting=setting, value=self.base_url, method=methods[0]))
+            _log_configured_setting(setting, methods[0])
 
         # Attempt to define the base URL using the helper settings if defined and populated
         elif (
@@ -687,14 +688,14 @@ class PyDPlus:
             and self._helper_settings[const.HELPER_SETTINGS.BASE_URL]
         ):
             self.base_url = core_utils.get_base_url(self._helper_settings.get(const.HELPER_SETTINGS.BASE_URL))
-            logger.debug(debug_msg.format(setting=setting, value=self.base_url, method=methods[1]))
+            _log_configured_setting(setting, methods[1])
 
         # Attempt to define the base URL using an environment variable if defined
         elif (
             const.ENV_VARIABLES.BASE_URL_FIELD in self._env_variables and self._env_variables[const.ENV_VARIABLES.BASE_URL_FIELD]
         ):
             self.base_url = core_utils.get_base_url(self._env_variables.get(const.ENV_VARIABLES.BASE_URL_FIELD))
-            logger.debug(debug_msg.format(setting=setting, value=self.base_url, method=methods[2]))
+            _log_configured_setting(setting, methods[2])
 
         # Set the value to None if the base URL could not be found
         else:
@@ -1063,7 +1064,7 @@ class PyDPlus:
             except Exception as exc:
                 exc_type = type(exc).__name__
                 error_msg = f'Failed to connect using Legacy API due to the following {exc_type} exception: {exc}'
-                logger.error(error_msg)
+                logger.error('Failed to connect using Legacy API')
                 raise errors.exceptions.APIConnectionError(error_msg)
         elif self.connection_type == const.CLIENT_SETTINGS.CONNECTION_TYPE_OAUTH:
             # Connect to the tenant using the OAuth method
@@ -1073,11 +1074,11 @@ class PyDPlus:
             except Exception as exc:
                 exc_type = type(exc).__name__
                 error_msg = f'Failed to connect using OAuth due to the following {exc_type} exception: {exc}'
-                logger.error(error_msg)
+                logger.error('Failed to connect using OAuth')
                 raise errors.exceptions.APIConnectionError(error_msg)
         else:
             error_msg = f"Unsupported connection_type '{self.connection_type}'"
-            logger.error(error_msg)
+            logger.error('Unsupported connection_type configured')
             raise errors.exceptions.APIConnectionError(error_msg)
         return connected, base_headers
 
@@ -1686,7 +1687,7 @@ def compile_connection_info(
     if oauth_api_type not in const.VALID_API_TYPES:
         _valid_values = ','.join(sorted(const.VALID_API_TYPES))
         _error_msg = f"The 'oauth_api_type' value '{oauth_api_type}' is invalid (Expected one of: {_valid_values})"
-        logger.error(_error_msg)
+        logger.error("The 'oauth_api_type' value is invalid")
         raise ValueError(_error_msg)
 
     # Validate and normalize an explicitly provided OAuth issuer URL if defined
@@ -1699,7 +1700,7 @@ def compile_connection_info(
         _parsed_issuer_url = urllib.parse.urlparse(oauth_issuer_url)
         if not _parsed_issuer_url.netloc or not _parsed_issuer_url.scheme:
             _error_msg = f"The provided OAuth issuer URL '{oauth_issuer_url}' is invalid"
-            logger.error(_error_msg)
+            logger.error('The provided OAuth issuer URL is invalid')
             raise ValueError(_error_msg)
         issuer_url = core_utils.remove_ending_slash(oauth_issuer_url)
     else:
@@ -1742,7 +1743,7 @@ def _infer_auth_base_url_from_admin_base_url(_admin_base_url: Optional[str]) -> 
     except Exception as _exc:
         _exc_type = core_utils.get_exception_type(_exc)
         _error_msg = f'Failed to infer Authentication API base URL from the Administration due to {_exc_type} exception: {_exc}'
-        logger.error(_error_msg)
+        logger.error('Failed to infer Authentication API base URL from the Administration API base URL')
         return None
     if '.access.' not in _normalized_admin_base_url:
         return None

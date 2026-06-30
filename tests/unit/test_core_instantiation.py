@@ -3,13 +3,14 @@
 :Module:            tests.unit.test_core_instantiation
 :Synopsis:          Unit tests for client object instantiation and connection-info compilation
 :Created By:        Jeff Shurtliff
-:Last Modified:     Jeff Shurtliff (via GPT-5.3-codex)
-:Modified Date:     01 Apr 2026
+:Last Modified:     Jeff Shurtliff (via GPT-5.5-codex)
+:Modified Date:     30 Jun 2026
 """
 
 from __future__ import annotations
 
 import json
+import logging
 from pathlib import Path
 
 import pytest
@@ -276,6 +277,23 @@ def test_compile_connection_info_uses_explicit_oauth_issuer_url(sample_base_url:
     assert connection_info[const.CONNECTION_INFO.OAUTH][const.CONNECTION_INFO.OAUTH_ISSUER_URL] == (
         'https://issuer.example.com/oauth'
     )
+
+
+def test_compile_connection_info_invalid_oauth_issuer_logs_no_raw_url(sample_base_url: str, caplog) -> None:
+    """Ensure invalid OAuth issuer URLs are not echoed into logs."""
+    secret_issuer_url = 'secret-invalid-issuer-url'
+
+    with caplog.at_level(logging.ERROR, logger='pydplus.core'):
+        with pytest.raises(ValueError):
+            compile_connection_info(
+                base_url=sample_base_url,
+                oauth_client_id='oauth-client-id',
+                oauth_issuer_url=secret_issuer_url,
+                oauth_scope=const.OAUTH_SCOPES.USER_READ,
+            )
+
+    assert secret_issuer_url not in caplog.text
+    assert 'OAuth issuer URL is invalid' in caplog.text
 
 
 def test_compile_connection_info_raises_for_invalid_oauth_api_type(sample_base_url: str) -> None:

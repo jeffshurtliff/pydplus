@@ -5,8 +5,8 @@
 :Usage:             ``from pydplus.utils import core_utils``
 :Example:           ``encoded_string = core_utils.encode_url(decoded_string)``
 :Created By:        Jeff Shurtliff
-:Last Modified:     Jeff Shurtliff
-:Modified Date:     30 Mar 2026
+:Last Modified:     Jeff Shurtliff (via GPT-5.5-codex)
+:Modified Date:     30 Jun 2026
 """
 
 from __future__ import annotations
@@ -110,7 +110,7 @@ def get_file_type(file_path: str) -> str:
             file_type = const.FILE_EXTENSIONS.YAML
         else:
             warn_msg = f"Unable to recognize the file type of '{file_path}' by its extension."
-            logger.warning(warn_msg)
+            logger.warning('Unable to recognize a file type by its extension')
             errors.handlers.display_warning(warn_msg)
             with open(file_path) as cfg_file:
                 for line in cfg_file:
@@ -121,11 +121,11 @@ def get_file_type(file_path: str) -> str:
                             file_type = const.FILE_EXTENSIONS.JSON
                             break
         if file_type == 'unknown':
-            logger.error(f'The file type of {file_path} could not be identified')
+            logger.error('The file type could not be identified')
             raise errors.exceptions.UnknownFileTypeError(file=file_path)
     else:
         error_msg = const._EXCEPTION_CLASSES._CANNOT_LOCATE_FILE.format(file_path=file_path)
-        logger.error(error_msg)
+        logger.error('The configured file could not be located')
         raise FileNotFoundError(error_msg)
     return file_type
 
@@ -168,7 +168,7 @@ def get_base_url(url: str, include_scheme: bool = True) -> str:
     # Raise an exception if an invalid URL was provided
     if not parsed_url.netloc or not parsed_url.scheme:
         error_msg = f"The provided URL '{url}' is invalid"
-        logger.error(error_msg)
+        logger.error('The provided URL is invalid')
         raise errors.exceptions.InvalidURLError(error_msg)
 
     # Extract and return the base URL

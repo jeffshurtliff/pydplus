@@ -6,7 +6,7 @@
 :Example:           ``jwt_string = auth.get_legacy_jwt_string(base_url, connection_info)``
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff (via GPT-5.5-codex)
-:Modified Date:     17 May 2026
+:Modified Date:     30 Jun 2026
 """
 
 from __future__ import annotations
@@ -318,7 +318,7 @@ def _load_private_key(_key_path: Optional[str] = None, _key_pem: Optional[str] =
 
     if not core_utils.file_exists(_key_path):
         _error_msg = f"The file '{_key_path}' does not exist and cannot be used for the private key"
-        logger.error(_error_msg)
+        logger.error('The configured private key file does not exist and cannot be used for authentication')
         raise FileNotFoundError(_error_msg)
     with open(_key_path, 'rb') as _key_file:
         _private_key = serialization.load_pem_private_key(_key_file.read(), password=None, backend=default_backend())
@@ -408,7 +408,7 @@ def _load_oauth_private_key_jwk(
                     _parsed_jwk = json.loads(_key_jwk)
                 except json.JSONDecodeError as _exc:
                     _error_msg = f'Failed to parse OAuth private key JWK string due to JSONDecodeError: {_exc}'
-                    logger.error(_error_msg)
+                    logger.error('Failed to parse OAuth private key JWK string due to a JSON decoding error')
                     raise ValueError(_error_msg)
         else:
             _error_msg = (
@@ -422,7 +422,7 @@ def _load_oauth_private_key_jwk(
         _full_key_path = _resolve_oauth_private_key_path(_key_path, _key_file)
         if not core_utils.file_exists(_full_key_path):
             _error_msg = f'The file {_full_key_path} does not exist and cannot be used for OAuth private-key JWK data'
-            logger.error(_error_msg)
+            logger.error('The configured OAuth private-key JWK file does not exist')
             raise FileNotFoundError(_error_msg)
         with open(_full_key_path, encoding=const.UTF8_ENCODING) as _jwk_file:
             _parsed_jwk = json.load(_jwk_file)
@@ -461,7 +461,7 @@ def _load_oauth_private_key_jwk(
             f"The OAuth private key JWK type '{_kty_value}' is unsupported "
             f'(Only {const.AUTH_VALUES.JWA_RSA} and {const.AUTH_VALUES.JWA_EC} key types are supported)'
         )
-        logger.error(_error_msg)
+        logger.error('The OAuth private key JWK type is unsupported')
         raise errors.exceptions.FeatureNotConfiguredError(_error_msg)
 
     _missing_fields = sorted(_required_fields.difference(_parsed_jwk.keys()))
@@ -480,7 +480,7 @@ def _convert_oauth_jwk_to_signing_key(_private_key_jwk: dict[str, Any]):
     except Exception as _exc:
         _exc_type = core_utils.get_exception_type(_exc)
         _error_msg = f'Failed to parse OAuth private key JWK data due to {_exc_type} exception: {_exc}'
-        logger.error(_error_msg)
+        logger.error('Failed to parse OAuth private key JWK data')
         raise ValueError(_error_msg)
 
 
@@ -523,7 +523,7 @@ def _create_private_key_jwt_client_assertion(
     except Exception as _exc:
         _exc_type = core_utils.get_exception_type(_exc)
         _error_msg = f'Failed to generate private_key_jwt assertion due to {_exc_type} exception: {_exc}'
-        logger.error(_error_msg)
+        logger.error('Failed to generate private_key_jwt assertion')
         raise errors.exceptions.APIConnectionError(_error_msg)
 
 
@@ -591,7 +591,7 @@ def _request_oauth_access_token(
 
     if _response.status_code >= 300:
         _error_msg = f'The OAuth token request failed with a {_response.status_code} status code.\n{_response.text}'
-        logger.error(_error_msg)
+        logger.error('The OAuth token request failed')
         raise errors.exceptions.APIConnectionError(_error_msg)
 
     try:
@@ -599,7 +599,7 @@ def _request_oauth_access_token(
     except Exception as _exc:
         _exc_type = core_utils.get_exception_type(_exc)
         _error_msg = f'Failed to parse OAuth token response due to {_exc_type} exception: {_exc}'
-        logger.error(_error_msg)
+        logger.error('Failed to parse OAuth token response')
         raise errors.exceptions.APIConnectionError(_error_msg)
 
     _token_data = _parse_oauth_token_response(_response_data)
@@ -740,12 +740,10 @@ def _get_scope_from_preset(
                     _merged_scope.append(_scope)
             _added.append(_preset_name)
         else:
-            logger.warning(f"'{_preset_name}' is not a valid OAuth scope preset and will be ignored")
+            logger.warning('An invalid OAuth scope preset was ignored')
             _skipped.append(_preset_name)
 
-    _results_msg = (
-        f'Processed {len(_preset_values)} OAuth scope presets (Added: {",".join(_added)}; Skipped: {",".join(_skipped)})'
-    )
+    _results_msg = f'Processed {len(_preset_values)} OAuth scope presets (Added: {len(_added)}; Skipped: {len(_skipped)})'
     if _added or _skipped:
         logger.info(_results_msg)
     else:

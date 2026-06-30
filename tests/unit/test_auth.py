@@ -4,13 +4,14 @@
 :Synopsis:          Unit tests for OAuth and legacy authentication helper functions
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff (via GPT-5.5-codex)
-:Modified Date:     17 May 2026
+:Modified Date:     30 Jun 2026
 """
 
 from __future__ import annotations
 
 import datetime
 import json
+import logging
 
 import pytest
 
@@ -84,6 +85,18 @@ def test_load_oauth_private_key_jwk_reads_json_file(tmp_path) -> None:
     assert parsed_jwk == jwk_payload
 
 
+def test_load_oauth_private_key_jwk_missing_file_logs_no_sensitive_path(tmp_path, caplog) -> None:
+    """Ensure missing OAuth private-key JWK files do not log configured paths."""
+    secret_filename = 'tenant-private-key.jwk'
+    with caplog.at_level(logging.ERROR, logger='pydplus.auth'):
+        with pytest.raises(FileNotFoundError):
+            auth._load_oauth_private_key_jwk(_key_file=secret_filename, _key_path=str(tmp_path))
+
+    assert str(tmp_path) not in caplog.text
+    assert secret_filename not in caplog.text
+    assert 'configured OAuth private-key JWK file' in caplog.text
+
+
 def test_load_oauth_private_key_jwk_supports_ec_keys() -> None:
     """Ensure EC JWK payloads pass structural validation for OAuth private keys."""
     ec_jwk_payload = {
@@ -130,6 +143,17 @@ def test_extract_oauth_connection_info_raises_for_unknown_scope_values() -> None
     """Ensure unknown scope values are rejected during OAuth connection parsing."""
     with pytest.raises(ValueError):
         auth._extract_oauth_connection_info(_oauth_connection_info(scope='rsa.unknown.scope'))
+
+
+def test_get_scope_from_preset_logs_no_invalid_preset_value(caplog) -> None:
+    """Ensure invalid OAuth scope preset values are not echoed into logs."""
+    preset_name = 'secret-invalid-preset'
+
+    with caplog.at_level(logging.WARNING, logger='pydplus.auth'):
+        auth._get_scope_from_preset(preset_name)
+
+    assert preset_name not in caplog.text
+    assert 'invalid OAuth scope preset' in caplog.text
 
 
 def test_get_oauth_access_token_posts_expected_private_key_jwt_payload(monkeypatch) -> None:
@@ -179,6 +203,36 @@ def test_get_oauth_access_token_posts_expected_private_key_jwt_payload(monkeypat
     assert observed_request['verify'] is False
     assert token_data['access_token'] == 'fresh-token'
     assert token_data['scope'] == f'{const.OAUTH_SCOPES.USER_READ}+{const.OAUTH_SCOPES.USER_MANAGE}'
+
+
+def test_request_oauth_access_token_failure_logs_no_sensitive_response(monkeypatch, caplog) -> None:
+    """Ensure failed token requests do not log response bodies or assertions."""
+
+    def _fake_load_oauth_private_key_jwk(**kwargs):
+        return {'kty': 'RSA', 'n': 'abc', 'e': 'AQAB', 'd': 'secret-private-exponent'}
+
+    def _fake_assertion(**kwargs):
+        return 'secret-client-assertion'
+
+    def _fake_post(url, headers, data, timeout, verify):
+        return DummyResponse(
+            400,
+            {},
+            text='token failure: access_token=secret-token client_assertion=secret-client-assertion',
+        )
+
+    monkeypatch.setattr(auth, '_load_oauth_private_key_jwk', _fake_load_oauth_private_key_jwk)
+    monkeypatch.setattr(auth, '_create_private_key_jwt_client_assertion', _fake_assertion)
+    monkeypatch.setattr(auth.requests, 'post', _fake_post)
+
+    with caplog.at_level(logging.ERROR, logger='pydplus.auth'):
+        with pytest.raises(errors.exceptions.APIConnectionError):
+            auth._request_oauth_access_token(auth._extract_oauth_connection_info(_oauth_connection_info()))
+
+    assert 'secret-token' not in caplog.text
+    assert 'secret-client-assertion' not in caplog.text
+    assert 'secret-private-exponent' not in caplog.text
+    assert 'OAuth token request failed' in caplog.text
 
 
 def test_get_oauth_headers_returns_bearer_authorization_header(monkeypatch) -> None:

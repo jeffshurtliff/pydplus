@@ -4,7 +4,7 @@
 :Synopsis:          Secure parsing and handling for RSA ID Plus legacy key material
 :Created By:        Jeff Shurtliff
 :Last Modified:     Jeff Shurtliff (via GPT-5.5-codex)
-:Modified Date:     17 May 2026
+:Modified Date:     30 Jun 2026
 """
 
 from __future__ import annotations
@@ -224,7 +224,7 @@ class IDPlusLegacyKeyMaterial:
 
         if final_path.exists() and not overwrite:
             exc_msg = const._EXCEPTION_CLASSES._PRIVATE_KEY_ALREADY_EXISTS.format(final_path=final_path)
-            logger.error(exc_msg)
+            logger.error('The private key file already exists at the configured destination')
             raise FileExistsError(exc_msg)
 
         temp_fd, temp_name = tempfile.mkstemp(
@@ -243,7 +243,7 @@ class IDPlusLegacyKeyMaterial:
 
             if final_path.exists() and not overwrite:
                 exc_msg = const._EXCEPTION_CLASSES._PRIVATE_KEY_ALREADY_EXISTS.format(final_path=final_path)
-                logger.error(exc_msg)
+                logger.error('The private key file already exists at the configured destination')
                 raise FileExistsError(exc_msg)
 
             os.replace(temp_path, final_path)
@@ -266,7 +266,7 @@ class IDPlusLegacyKeyMaterial:
             if temp_path.exists():
                 temp_path.unlink()
             exc_msg = f"Failed to securely persist the private key to '{final_path}'"
-            logger.error(exc_msg)
+            logger.error('Failed to securely persist the private key to the configured destination')
             raise IDPlusCredentialError(exc_msg) from exc
 
 
@@ -353,7 +353,7 @@ def _ensure_private_dir(path: Path, enforce_mode: bool) -> None:
             os.chmod(path, const.CREDENTIAL_VALUES.PRIVATE_DIR_MODE)
     except OSError as exc:
         exc_msg = f"Failed to prepare the private key directory '{path}'."
-        logger.error(exc_msg)
+        logger.error('Failed to prepare the configured private key directory')
         raise IDPlusCredentialError(exc_msg) from exc
 
 
