@@ -34,7 +34,7 @@ A Python toolset for the RSA<sup>&reg;</sup> ID Plus cloud authentication platfo
     <tr>
          <td>Commits Since Latest Release</td>
          <td>
-            <a href="https://github.com/jeffshurtliff/pydplus/compare/1.0.1...HEAD">
+            <a href="https://github.com/jeffshurtliff/pydplus/compare/2.0.0...HEAD">
                 <img alt="GitHub commits since latest release" src="https://img.shields.io/github/commits-since/jeffshurtliff/pydplus/latest">
             </a>
         </td>

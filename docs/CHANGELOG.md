@@ -18,12 +18,24 @@ No unreleased additions at this time.
 (unreleased-changed)=
 ### Changed
 
-- Began the `2.0.0` development line by updating the package version to `2.0.0.dev0`.
+No unreleased changes at this time.
+
+---
+(relnotes-2.0.0)=
+## [2.0.0] - 2026-06-30
+
+This major release begins the PyDPlus 2.x release line and updates the supported
+runtime baseline to Python 3.12 or newer.
+
+### Changed
+
+- Updated the package version to `2.0.0` in `pyproject.toml`.
 - Dropped Python 3.9, 3.10, and 3.11 support; PyDPlus 2.x now requires Python 3.12 or newer.
 - Simplified security-sensitive dependency constraints after dropping older Python support, including the `urllib3>=2.7.0,<3` runtime floor and removal of the `tomli` backport.
 - Updated the minimum `PyJWT` version to `2.13.0` to remediate CVE-2026-48522, CVE-2026-48523, CVE-2026-48524, CVE-2026-48525, and CVE-2026-48526.
 - Updated the minimum `cryptography` version to `48.0.1` to remediate the OpenSSL security advisory affecting `cryptography` wheels before `48.0.1`.
 - Updated the minimum `idna` version to `3.15` to remediate CVE-2026-45409.
+- Aligned `requirements.txt` with the runtime dependency floors defined in `pyproject.toml`.
 - Hardened logging and related exception messages so sensitive authentication, credential, URL, token, scope, and private-key
   configuration values are not written to diagnostic output.
 - Updated CI, Read the Docs, and testing documentation to use the Python 3.12+ support matrix.
@@ -91,6 +103,7 @@ features and functionality.
 
 
 <!-- The reference definitions are listed below -->
-[Unreleased]: https://github.com/jeffshurtliff/pydplus/compare/1.0.1...HEAD
+[Unreleased]: https://github.com/jeffshurtliff/pydplus/compare/2.0.0...HEAD
+[2.0.0]: https://github.com/jeffshurtliff/pydplus/compare/1.0.1...2.0.0
 [1.0.1]: https://github.com/jeffshurtliff/pydplus/compare/1.0.0...1.0.1
 [1.0.0]: https://github.com/jeffshurtliff/pydplus/releases/tag/1.0.0

@@ -5,17 +5,17 @@
 requests>=2.32.5
 PyYAML>=6,<7
 
-# Minimum PyJWT version to avoid CVE-2026-32597
-pyjwt>=2.12.0
+# Minimum PyJWT version to address known PyJWT security advisories
+pyjwt>=2.13.0
 
 # Minimum cryptography version to address known cryptography security advisories
-cryptography>=46.0.7
+cryptography>=48.0.1
 
 # Minimum urllib3 version to address known urllib3 security advisories
 urllib3>=2.7.0,<3
 
-# Minimum idna version to avoid CVE-2024-3651
-idna>=3.7,<4
+# Minimum idna version to address known IDNA security advisories
+idna>=3.15,<4
 
 # Minimum certifi version to mitigate CA removals (e-Tugra, GLOBALTRUST)
 certifi>=2024.7.4
