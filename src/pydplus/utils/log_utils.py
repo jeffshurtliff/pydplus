@@ -5,8 +5,8 @@
 :Usage:             ``from pydplus.utils import log_utils``
 :Example:           ``logger = log_utils.initialize_logging(__name__)``
 :Created By:        Jeff Shurtliff
-:Last Modified:     Jeff Shurtliff
-:Modified Date:     30 Mar 2026
+:Last Modified:     Jeff Shurtliff (via GPT-5.5-codex)
+:Modified Date:     30 Jun 2026
 """
 
 from __future__ import annotations
@@ -16,7 +16,7 @@ import logging.handlers
 import sys
 from pathlib import Path
 from types import MappingProxyType
-from typing import Dict, Mapping, Optional, Tuple, Union
+from typing import Any, Dict, Mapping, Optional, Tuple, Union
 
 LOGGING_DEFAULTS: Mapping[str, str] = MappingProxyType(
     {
@@ -45,6 +45,20 @@ LOG_LEVELS: Mapping[str, int] = MappingProxyType(
     }
 )
 MANAGED_HANDLER_ATTR = '_pydplus_managed_handler'
+REDACTED_VALUE = '[REDACTED]'
+SENSITIVE_FIELD_MARKERS: Tuple[str, ...] = (
+    'password',
+    'secret',
+    'token',
+    'authorization',
+    'access_id',
+    'access_key',
+    'private_key',
+    'private_key_jwk',
+    'private_key_pem',
+    'client_assertion',
+    'key_material',
+)
 
 
 def initialize_logging(
@@ -130,6 +144,41 @@ class LessThanFilter(logging.Filter):
         .. note:: A truthy return indicates that the message will be logged.
         """
         return record.levelno < self.max_level
+
+
+def is_sensitive_field(name: object) -> bool:
+    """Return whether a field name indicates sensitive data."""
+    if not isinstance(name, str):
+        return False
+    normalized_name = name.strip().lower().replace('-', '_')
+    return any(marker in normalized_name for marker in SENSITIVE_FIELD_MARKERS)
+
+
+def redact_for_log(value: object, field_name: object = None) -> str:
+    """Return a string representation that is safe to write to logs.
+
+    :param value: The value to render for logging.
+    :param field_name: Optional field name used to identify sensitive data.
+    :returns: A redacted, stringified representation of the provided value.
+    """
+    return str(_redact_value(value, field_name))
+
+
+def _redact_value(value: object, field_name: object = None) -> Any:
+    """Return a recursively redacted value for log rendering."""
+    if is_sensitive_field(field_name):
+        return REDACTED_VALUE
+    if isinstance(value, Mapping):
+        return {key: _redact_value(item, key) for key, item in value.items()}
+    if isinstance(value, tuple):
+        return tuple(_redact_value(item) for item in value)
+    if isinstance(value, list):
+        return [_redact_value(item) for item in value]
+    if isinstance(value, set):
+        return {_redact_value(item) for item in value}
+    if isinstance(value, frozenset):
+        return frozenset(_redact_value(item) for item in value)
+    return value
 
 
 def _apply_defaults(

@@ -3,8 +3,8 @@
 :Module:            tests.unit.test_logging
 :Synopsis:          Unit tests for pydplus.utils.log_utils
 :Created By:        Jeff Shurtliff
-:Last Modified:     Jeff Shurtliff (via GPT-5.3-codex)
-:Modified Date:     30 Mar 2026
+:Last Modified:     Jeff Shurtliff (via GPT-5.5-codex)
+:Modified Date:     30 Jun 2026
 """
 
 from __future__ import annotations
@@ -270,3 +270,47 @@ def test_less_than_filter_only_allows_records_below_the_maximum_level() -> None:
 
     assert level_filter.filter(info_record) is True
     assert level_filter.filter(warning_record) is False
+
+
+@pytest.mark.parametrize(
+    ('field_name', 'expected'),
+    (
+        ('password', True),
+        ('oauth_private_key_jwk', True),
+        ('client-assertion', True),
+        ('custom_access_token_value', True),
+        ('base_url', False),
+        ('scope_preset', False),
+        (None, False),
+    ),
+)
+def test_is_sensitive_field_detects_secret_markers(field_name, expected) -> None:
+    """Ensure sensitive field names are identified consistently."""
+    assert log_utils.is_sensitive_field(field_name) is expected
+
+
+def test_redact_for_log_redacts_sensitive_scalar_values() -> None:
+    """Ensure scalar values are redacted when the field name is sensitive."""
+    rendered = log_utils.redact_for_log('super-secret-token', field_name='access_token')
+
+    assert rendered == log_utils.REDACTED_VALUE
+
+
+def test_redact_for_log_recursively_redacts_sensitive_mapping_values() -> None:
+    """Ensure nested mappings and iterables are redacted by sensitive field name."""
+    payload = {
+        'client_id': 'visible-client',
+        'access_token': 'secret-token',
+        'nested': {
+            'private_key_jwk': {'d': 'secret-private-exponent'},
+            'scopes': ['rsa.user.read'],
+        },
+    }
+
+    rendered = log_utils.redact_for_log(payload)
+
+    assert 'visible-client' in rendered
+    assert 'rsa.user.read' in rendered
+    assert 'secret-token' not in rendered
+    assert 'secret-private-exponent' not in rendered
+    assert rendered.count(log_utils.REDACTED_VALUE) == 2
