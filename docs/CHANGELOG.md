@@ -23,6 +23,7 @@ No unreleased additions at this time.
 - Simplified security-sensitive dependency constraints after dropping older Python support, including the `urllib3>=2.7.0,<3` runtime floor and removal of the `tomli` backport.
 - Updated the minimum `PyJWT` version to `2.13.0` to remediate CVE-2026-48522, CVE-2026-48523, CVE-2026-48524, CVE-2026-48525, and CVE-2026-48526.
 - Updated the minimum `cryptography` version to `48.0.1` to remediate the OpenSSL security advisory affecting `cryptography` wheels before `48.0.1`.
+- Updated the minimum `idna` version to `3.15` to remediate CVE-2026-45409.
 - Updated CI, Read the Docs, and testing documentation to use the Python 3.12+ support matrix.
 - Retained documentation that PyDPlus `1.0.1` is the final release line supporting Python 3.9.
 

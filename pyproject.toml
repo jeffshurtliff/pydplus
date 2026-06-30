@@ -71,7 +71,7 @@ dependencies = [
 
     # Explicit pin to address known urllib3 security advisories
     "urllib3>=2.7.0,<3",
-    "idna>=3.7,<4",             # Explicit pin to avoid CVE-2024-3651
+    "idna>=3.15,<4",            # Explicit pin to address known IDNA security advisories
     "certifi>=2024.7.4",        # Explicit pin to mitigate CA removals (e-Tugra, GLOBALTRUST)
 ]
 
