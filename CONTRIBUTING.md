@@ -770,25 +770,41 @@ PRs that do not follow naming or structural rules may be closed without review.
 
 ## Manual Release Preflight Checklist
 
+Use the [maintainer release runbook](docs/maintainers/releasing.md) for the
+complete preparation, validation, publication, and recovery procedure. Track
+one release window with the [Maintainer Release issue template](.github/ISSUE_TEMPLATE/maintainer-release.md),
+using the `chore/<issue-number>-prepare-<version>-release` branch convention.
+Agent-assisted local preparation is documented in the
+[repository skill guide](docs/maintainers/stable-release-prep-skill.md).
+These maintainer procedures are separate from the public API documentation.
+
 Before cutting a release, run the following checks from the repository root:
 
 ```bash
-poetry check
+poetry check --lock --strict
 poetry run ruff check .
 poetry run ruff format --check .
-poetry run pytest --run-integration -q
+poetry run pytest -q
 poetry run bandit -r src
-poetry run sphinx-build -b html docs docs/_build/html
-poetry build
-poetry run python -m twine check dist/*
+poetry run sphinx-build -W --keep-going -E -a -b html docs docs/_build/html
+git diff --check
 ```
 
-For manual releases, the maintainer is responsible for final release actions:
+Integration validation is recommended when access to an authorized ID Plus test
+environment is available, but is not a mandatory release prerequisite when access
+is not feasible. Run `poetry run pytest --run-integration tests/integration -q`
+when the appropriate environment is available; appropriately mocked integration
+checks may also be run. Record whether validation used a real or mocked
+environment, or was skipped and why. Skipping because environment access is
+unavailable does not block release readiness. Investigate any failures from
+checks that are run before declaring readiness. Do not inspect private helper
+files to determine environment availability.
 
-- Push/merge release-ready changes to `origin/main`
-- Create the release tag (for example `1.0.0`)
-- Publish artifacts to PyPI
-- Create the GitHub release notes entry
+Follow the runbook to build a fresh candidate sdist and wheel in a temporary
+directory, run strict Twine and artifact inspection, and smoke-test the wheel.
+Publishing requires a new build from the exact merged, CI-verified `main` commit.
+Each history-changing or external release action requires explicit maintainer
+authorization; preparation alone does not authorize publication.
 
 ---
 

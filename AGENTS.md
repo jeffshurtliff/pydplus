@@ -250,6 +250,9 @@ def api_version(self) -> str:
 - Integration tests are opt-in: they are skipped by default and only run with
   `poetry run pytest --run-integration tests/integration -q`. Do not attempt to
   run them without a real (or appropriately mocked) helper/tenant configuration.
+  For releases, integration validation is recommended when an authorized ID Plus
+  test environment is available, but may be skipped with a recorded reason when
+  access is not feasible; that skip does not block release readiness.
 
 ## Documentation expectations
 

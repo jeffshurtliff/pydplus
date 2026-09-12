@@ -26,6 +26,13 @@ Integration tests are opt-in and skipped by default. To run them:
 poetry run pytest --run-integration -m integration -q
 ```
 
+For release preparation, integration validation is recommended when an authorized
+ID Plus test environment is available, but may be skipped when access is not
+feasible. Record the reason for skipping; unavailable environment access does
+not block a release. Distinguish checks against real environments from mocked
+checks, and investigate failures from any checks that are run. See the
+{doc}`../maintainers/releasing` runbook for the complete release procedure.
+
 ## Linting and Formatting
 
 This project uses Ruff for linting, import sorting, and formatting.
