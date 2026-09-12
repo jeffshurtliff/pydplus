@@ -1,0 +1,4 @@
+interface:
+  display_name: "PyDPlus Stable Release Prep"
+  short_description: "Prepare validated PyDPlus stable releases"
+  default_prompt: "Use $pydplus-stable-release-prep to prepare PyDPlus for its next stable release."

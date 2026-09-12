@@ -13,10 +13,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 (unreleased-added)=
 ### Added
 
-No unreleased additions at this time.
+- Added the repository-owned `pydplus-stable-release-prep` skill, an artifact inspector with regression tests,
+  maintainer release and skill usage guides, and a dedicated Maintainer Release issue template.
 
 (unreleased-changed)=
 ### Changed
+
+- Made pre-release integration validation recommended when an authorized ID Plus test environment is available,
+  but optional when access is not feasible; retained integration tests and their opt-in execution.
 
 - Replaced the placeholder `CLAUDE.md` with Claude Code-specific guidance that complements `AGENTS.md` (header-block
   attribution format, secrets handling, git/branch conventions, and a pre-submit checklist reminder).
