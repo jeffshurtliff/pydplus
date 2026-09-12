@@ -31,6 +31,13 @@ No unreleased additions at this time.
 - Softened the `CONTRIBUTING.md` Testing Requirements wording so it no longer claims CI enforces a hard 50%
   coverage gate, since coverage is currently reported (via `pytest-cov`/Codecov) but not enforced as a CI failure
   condition.
+- Updated the minimum `cryptography` version to `50.0.0` to remediate CVE-2026-69247 (a Bleichenbacher oracle in
+  PKCS#7 `EnvelopedData` decryption via distinguishable errors and timing).
+- Updated the locked `setuptools` development dependency to `84.0.0` to remediate CVE-2026-59890 (a `MANIFEST.in`
+  exclusion bypass in sdist builds via Unicode NFC/NFD normalization collisions on macOS APFS/HFS+).
+- Updated the locked `soupsieve` development dependency (a transitive dependency of `beautifulsoup4`, used by the
+  Sphinx docs theme) to `2.9.2` to remediate CVE-2026-49477 (a ReDoS in the CSS selector parser) and
+  CVE-2026-49476 (unbounded memory allocation via large comma-separated selector lists).
 
 ---
 (relnotes-2.0.0)=
