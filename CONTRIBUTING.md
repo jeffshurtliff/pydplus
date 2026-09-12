@@ -436,7 +436,7 @@ Security changes typically justify:
 All contributions must:
 
 - Follow PEP 8
-- Use type hints where appropriate that support Python 3.9+
+- Use type hints where appropriate that support Python 3.12+
 - Maintain or increase test coverage
 - Avoid introducing public API instability without justification
 - Avoid adding third-party dependencies unless strongly justified
@@ -473,9 +473,10 @@ CI enforces these Ruff checks.
 - All new behavior must include tests.
 - All bug fixes must include regression tests.
 - CI must pass before PR approval.
-- CI enforces a minimum total test coverage threshold of 50%.
+- CI reports total test coverage (via `pytest-cov` and Codecov); aim to keep total coverage at or above roughly 50%,
+  though this is not currently a hard CI gate.
 - Tests must be deterministic and isolated.
-- Keep test modules under `tests/`.
+- Keep test modules under either `tests/unit/` or `tests/integration/`.
 - Avoid unnecessary mocking when integration tests are more appropriate.
 
 ---
@@ -573,6 +574,23 @@ Do not use version directives for:
 
 Implementation changes belong in the CHANGELOG, not in docstrings.
 
+#### `versionadded` and `versionchanged` in docstrings
+
+- Every **new** public function, method, class, decorator, or exception must
+  include a `.. versionadded:: X.Y.Z` directive in its docstring.
+- Every **change** to an existing public callable (behavior, signature,
+  parameters, return value, raised exceptions, or defaults) must add a
+  `.. versionchanged:: X.Y.Z` directive with a brief note describing the change.
+  Keep prior directives in place and append the new one.
+- `X.Y.Z` is always the **stable** version the change will be released in, not
+  the in-development version. Derive it from the `version` in `pyproject.toml` by
+  removing any `.devN`, `aN`, `bN`, `rcN`, or `.postN` suffix:
+  - `2.0.1.dev0` → `.. versionadded:: 2.0.1`
+  - `2.1.0rc1` → `.. versionchanged:: 2.1.0`
+- Place the directive(s) at the end of the docstring, after the field list
+  (`:param:` / `:returns:` / `:raises:`), separated by a blank line.
+- Do not add version directives to private/internal (`_`-prefixed) items.
+
 ---
 
 ### CHANGELOG vs Documentation
@@ -596,6 +614,17 @@ Documentation should always describe the present state of the library — not it
 
 ---
 
+### Markdown and MyST Formatting
+
+In Markdown/MyST (`.md`) documentation files, delimit inline code with a single
+backtick on each side. Do not use reStructuredText-style double-backtick delimiters
+in Markdown files.
+
+Double-backtick inline literals remain appropriate in reStructuredText (`.rst`) files
+and reStructuredText-formatted docstrings.
+
+---
+
 ### Docstring Standards
 
 Docstrings must:
@@ -604,6 +633,8 @@ Docstrings must:
 - Include type hints in signatures (not repeated redundantly)
 - Document parameters and return values clearly
 - Document raised exceptions when applicable
+- Carry `.. versionadded::` / `.. versionchanged::` directives for new or changed
+  public callables (see "Version Directives Policy" above)
 - Avoid excessive verbosity
 - Avoid implementation detail leakage
 

@@ -18,7 +18,19 @@ No unreleased additions at this time.
 (unreleased-changed)=
 ### Changed
 
-No unreleased changes at this time.
+- Replaced the placeholder `CLAUDE.md` with Claude Code-specific guidance that complements `AGENTS.md` (header-block
+  attribution format, secrets handling, git/branch conventions, and a pre-submit checklist reminder).
+- Updated `AGENTS.md` to correct the documented Python support baseline to 3.12/3.13 (matching `pyproject.toml` and
+  the CI matrix), and added sections covering files not to edit by hand, secrets and local-only files, module
+  layout, opt-in integration testing (`--run-integration`), branch/PR hygiene, security expectations, and a
+  pre-submit checklist.
+- Updated `CONTRIBUTING.md` to correct the documented Python support baseline to 3.12+ in the Code Standards
+  section, corrected the test-module location guidance to reference `tests/unit/` and `tests/integration/`, added
+  a "Markdown and MyST Formatting" policy section, and expanded the Version Directives Policy with concrete
+  `versionadded`/`versionchanged` docstring guidance (stable-version derivation and placement rules).
+- Softened the `CONTRIBUTING.md` Testing Requirements wording so it no longer claims CI enforces a hard 50%
+  coverage gate, since coverage is currently reported (via `pytest-cov`/Codecov) but not enforced as a CI failure
+  condition.
 
 ---
 (relnotes-2.0.0)=

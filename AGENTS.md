@@ -1,6 +1,15 @@
 # AGENTS.md
 
-Instructions for coding agents (Codex, etc.) working in this repository.
+Instructions for coding agents (Codex, Claude Code, etc.) working in this repository.
+
+This file is the **canonical, tool-agnostic guide**. `CLAUDE.md` is a thin
+companion file for Claude Code specifically — it points back here and adds only
+what is unique to that tool. If guidance applies to every agent, it belongs
+here, not in a companion file.
+
+`CONTRIBUTING.md` is the authoritative reference for the branch/issue/PR
+workflow and the full documentation policy. This file summarizes the parts an
+agent needs day to day and defers to `CONTRIBUTING.md` for the rest.
 
 ## Project overview
 
@@ -18,20 +27,48 @@ Use Poetry for dependency management and packaging.
 Common commands (prefer these unless the user asks otherwise):
 - Install: `poetry install`
 - Run tests: `poetry run pytest`
-- Test suite location: `tests/` (repository root)
-- Lint/format (if configured in this repo): `poetry run ruff check .` and `poetry run ruff format .`
+- Test suite location: `tests/unit/` and `tests/integration/` (repository root)
+- Lint: `poetry run ruff check .`
+- Format: `poetry run ruff format .`
+- Format check (what CI runs): `poetry run ruff format --check .`
 - Build: `poetry build`
 
 If you add a dependency, add it via Poetry (`poetry add ...` / `poetry add --group dev ...`) rather than 
-editing `pyproject.toml` by hand.
+editing `pyproject.toml` by hand, and regenerate `poetry.lock` through Poetry.
+
+## Files not to edit by hand
+
+- `poetry.lock` — regenerate via Poetry.
+- `src/pydplus.egg-info/` — build-generated.
+- `dist/`, `.coverage`, `coverage.xml`, `.ruff_cache/`, `.pytest_cache/` — generated.
+- `docs/_build/` — generated Sphinx output.
+
+## Secrets and local-only files
+
+This project authenticates against real RSA ID Plus tenants. Treat the following
+as **off-limits** — never open, print, echo, paste into code/docs/commit
+messages, or otherwise surface their contents, and never add real credentials
+to any tracked file:
+
+- `local/` — untracked; contains real helper configuration files, private keys,
+  and other tenant-specific material.
+- `.env` — untracked local environment file; `.env.example` is the tracked,
+  placeholder-only template.
+- `.github/scripts/decrypt_helper.sh` / `encrypt_secret.sh` — manage encrypted
+  helper files used by CI; do not run or modify them unless explicitly asked.
+
+When you need a configuration reference, use `examples/helper_example.json`,
+which contains only placeholder values. Documentation and code examples must
+use obviously fake placeholder values for tenant names, base URLs, client IDs,
+client secrets, and keys/tokens.
 
 ## Python version support
 
-The `pydplus` package is intended to support Python versions 3.9 and above. Support for version 3.9 should
-**not** be removed (i.e, requiring 3.10+) unless there is a critical need to do so, such as a high-severity 
-security vulnerability that requires 3.10 or higher to patch, crucial functionality cannot be implemented, 
-or similar situations. Agents should never remove 3.9 support unilaterally without explicit authorization 
-from a package maintainer.
+The `pydplus` package supports Python **3.12 and 3.13** (see `requires-python`
+in `pyproject.toml` and the CI matrix in `.github/workflows/ci.yml`). Do not
+add code that targets older Python versions, and do not silently narrow or
+widen this support range (e.g. adding 3.14 support, or dropping 3.12) without
+explicit authorization from a package maintainer.
 
 ## Coding style
 
@@ -40,7 +77,11 @@ from a package maintainer.
 - Avoid unnecessary abstraction.
 - Keep changes localized; don’t reformat unrelated code.
 - Use type hints where they improve readability and tooling, especially for public APIs.
-  - Type hints should be compatible with Python 3.9 and above.
+  - Type hints should be compatible with Python 3.12 and above.
+- Follow the existing module layout: core client in `core.py`, low-level request/
+  auth helpers in `api.py` / `auth.py` / `credentials.py`, user-related
+  functionality in `users.py`, shared utilities under `utils/`, errors under
+  `errors/`, and package-wide constants in `constants.py`.
 
 ### Constants
 
@@ -202,9 +243,13 @@ def api_version(self) -> str:
 
 ## Tests
 
-- Add or update tests for behavior changes.
+- Test suites live at the repository root under `tests/unit/` and `tests/integration/`.
+- Add or update tests for behavior changes; add a regression test for every bug fix.
 - Prefer pytest-style tests.
 - Keep tests deterministic (no real network calls unless explicitly requested).
+- Integration tests are opt-in: they are skipped by default and only run with
+  `poetry run pytest --run-integration tests/integration -q`. Do not attempt to
+  run them without a real (or appropriately mocked) helper/tenant configuration.
 
 ## Documentation expectations
 
@@ -231,9 +276,47 @@ def api_version(self) -> str:
   - Update the `Modified Date` field where applicable with the current date (local time) in the same format as the existing value.
 - Keep examples accurate and runnable.
 
-## PR / commit hygiene (if applicable)
+## Branch, commit, and PR hygiene
 
+`CONTRIBUTING.md` has the full rules (branch prefixes, required Issue linkage,
+PR requirements); the essentials:
+
+- Branch from `main`; never commit directly to `main`.
+- Branch names must include the GitHub Issue number and use one of the valid
+  prefixes (`feature/`, `fix/`, `refactor/`, `chore/`, `docs/`, `test/`, `ci/`,
+  `security/`) — see `CONTRIBUTING.md` for the full convention.
+- Do not commit or push unless the user asks.
 - Keep commits focused and descriptive and prefer past-tense over present-tense. ("Updated the ..." over "Update the ...")
 - Explicitly mention the file name if it fits organically and does not distract from the commit message itself.
 - Avoid large refactors unless requested.
 - Don’t change formatting in unrelated files.
+- Every PR should reference a GitHub Issue and use the matching branch prefix.
+- For suspected vulnerabilities, use GitHub Private Vulnerability Reporting —
+  do not open a public issue or include exploit details, payloads, or secrets.
+
+## Security
+
+`pydplus` handles authentication flows and API tokens/keys for RSA ID Plus.
+Contributions must (see `CONTRIBUTING.md` → "Security Expectations" for the
+full policy):
+
+- Never log secrets (client IDs/secrets, private keys, JWTs, session tokens).
+- Avoid insecure defaults; keep SSL verification on by default.
+- Validate user input where applicable.
+- Justify any cryptographic or authentication change.
+- Keep security-sensitive dependency floors (see the pinned versions and
+  comments in `pyproject.toml`) intact or higher.
+- CI runs Bandit (`poetry run bandit -r src`) for static security analysis;
+  don't introduce findings it would flag.
+
+## Pre-submit checklist
+
+Before handing work back or opening a PR:
+
+1. `poetry run ruff check .`
+2. `poetry run ruff format --check .`
+3. `poetry run pytest -q`
+4. Docstrings and `docs/` updated for any public-behavior change.
+5. `docs/CHANGELOG.md` updated for any user-facing change.
+6. Header blocks (`Last Modified` / `Modified Date`) updated on changed files only.
+7. No secrets or real credentials added to tracked files.
