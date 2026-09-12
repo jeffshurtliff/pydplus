@@ -16,6 +16,11 @@ The skill is stored at:
 Invoke the repository skill by name in a compatible agent, or direct the agent
 to read its `SKILL.md` file explicitly. No user-level skill installation is required.
 
+Claude Code discovers repository skills under `.claude/skills/`. Rather than
+maintaining a second copy there, the repository provides `.claude/skills/pydplus-stable-release-prep`
+as a symlink to the canonical `.agents/skills/pydplus-stable-release-prep/` directory, so both agent
+families read the same `SKILL.md` and stay in sync automatically.
+
 It is repository-owned and contains no credentials, private helper data, local
 filesystem paths, or maintainer-specific environment configuration.
 
@@ -162,6 +167,11 @@ When the release workflow changes, update these sources together:
   authorization checkpoints change;
 - {doc}`releasing`; and
 - this usage guide.
+
+`.claude/skills/pydplus-stable-release-prep` is a symlink to the canonical
+`.agents/skills/pydplus-stable-release-prep/` directory, not a separate copy, so it
+requires no maintenance of its own; confirm the symlink still resolves after any
+repository restructuring.
 
 Validate the skill structure with the agent platform's skill validator when one
 is available. Always run Ruff against the Python helper, build the Sphinx

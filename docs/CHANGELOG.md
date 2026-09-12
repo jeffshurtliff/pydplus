@@ -15,6 +15,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added the repository-owned `pydplus-stable-release-prep` skill, an artifact inspector with regression tests,
   maintainer release and skill usage guides, and a dedicated Maintainer Release issue template.
+- Added Claude Code support for the `pydplus-stable-release-prep` skill via a `.claude/skills/pydplus-stable-release-prep`
+  symlink to the canonical `.agents/skills/pydplus-stable-release-prep/` directory, so both agent families share one
+  `SKILL.md` instead of two skills that could drift out of sync.
 
 (unreleased-changed)=
 ### Changed
