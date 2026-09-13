@@ -13,18 +13,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 (unreleased-added)=
 ### Added
 
+No unreleased additions at this time.
+
+(unreleased-changed)=
+### Changed
+
+No unreleased changes at this time.
+
+---
+(relnotes-2.0.1)=
+## [2.0.1] - 2026-09-12
+
+This patch release adds agent-assisted release tooling and documentation, and updates
+security-sensitive development dependencies. There are no public API or behavior changes.
+
+(relnotes-2.0.1-added)=
+### Added
+
 - Added the repository-owned `pydplus-stable-release-prep` skill, an artifact inspector with regression tests,
   maintainer release and skill usage guides, and a dedicated Maintainer Release issue template.
 - Added Claude Code support for the `pydplus-stable-release-prep` skill via a `.claude/skills/pydplus-stable-release-prep`
   symlink to the canonical `.agents/skills/pydplus-stable-release-prep/` directory, so both agent families share one
   `SKILL.md` instead of two skills that could drift out of sync.
 
-(unreleased-changed)=
+(relnotes-2.0.1-changed)=
 ### Changed
 
 - Made pre-release integration validation recommended when an authorized ID Plus test environment is available,
   but optional when access is not feasible; retained integration tests and their opt-in execution.
-
 - Replaced the placeholder `CLAUDE.md` with Claude Code-specific guidance that complements `AGENTS.md` (header-block
   attribution format, secrets handling, git/branch conventions, and a pre-submit checklist reminder).
 - Updated `AGENTS.md` to correct the documented Python support baseline to 3.12/3.13 (matching `pyproject.toml` and
@@ -45,6 +61,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated the locked `soupsieve` development dependency (a transitive dependency of `beautifulsoup4`, used by the
   Sphinx docs theme) to `2.9.2` to remediate CVE-2026-49477 (a ReDoS in the CSS selector parser) and
   CVE-2026-49476 (unbounded memory allocation via large comma-separated selector lists).
+- Migrated packaging metadata to the PEP 639 SPDX license expression (`license = "MIT"` with
+  `license-files = ["LICENSE"]`) and removed the now-deprecated `License ::` classifiers, resolving
+  `poetry check --lock --strict` license-metadata deprecation warnings.
 
 ---
 (relnotes-2.0.0)=
@@ -129,7 +148,8 @@ features and functionality.
 
 
 <!-- The reference definitions are listed below -->
-[Unreleased]: https://github.com/jeffshurtliff/pydplus/compare/2.0.0...HEAD
+[Unreleased]: https://github.com/jeffshurtliff/pydplus/compare/2.0.1...HEAD
+[2.0.1]: https://github.com/jeffshurtliff/pydplus/compare/2.0.0...2.0.1
 [2.0.0]: https://github.com/jeffshurtliff/pydplus/compare/1.0.1...2.0.0
 [1.0.1]: https://github.com/jeffshurtliff/pydplus/compare/1.0.0...1.0.1
 [1.0.0]: https://github.com/jeffshurtliff/pydplus/releases/tag/1.0.0
