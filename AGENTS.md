@@ -64,10 +64,10 @@ client secrets, and keys/tokens.
 
 ## Python version support
 
-The `pydplus` package supports Python **3.12 and 3.13** (see `requires-python`
+The `pydplus` package supports Python **3.12, 3.13, and 3.14** (see `requires-python`
 in `pyproject.toml` and the CI matrix in `.github/workflows/ci.yml`). Do not
 add code that targets older Python versions, and do not silently narrow or
-widen this support range (e.g. adding 3.14 support, or dropping 3.12) without
+widen this support range (e.g. adding 3.15 support, or dropping 3.12) without
 explicit authorization from a package maintainer.
 
 ## Coding style

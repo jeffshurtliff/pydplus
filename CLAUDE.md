@@ -11,7 +11,7 @@ Keep it that way: if a rule applies to every agent or contributor, put it in
 ## Environment and commands
 
 - Dependency management and builds use **Poetry** (see `AGENTS.md` →
-  "Dev environment"). Supported Python: 3.12 and 3.13.
+  "Dev environment"). Supported Python: 3.12, 3.13, and 3.14.
 - Before handing work back, run and report the same checks CI runs:
   - `poetry run ruff check .`
   - `poetry run ruff format --check .`
