@@ -13,11 +13,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 (unreleased-added)=
 ### Added
 
+No unreleased additions at this time.
+
+(unreleased-changed)=
+### Changed
+
+No unreleased changes at this time.
+
+---
+(relnotes-2.1.0)=
+## [2.1.0] - 2026-10-04
+
+This minor release adds full support for Python 3.14 and raises the minimum `PyJWT` and `urllib3` versions to
+remediate security advisories. There are no public API or behavior changes.
+
+(relnotes-2.1.0-added)=
+### Added
+
 - Added full support for Python 3.14: the `3.14` trove classifier and a widened `requires-python` range
   (`>=3.12,<3.15`) in `pyproject.toml`, a `3.14` runner in the CI test matrix, and updated documentation
   ([#7](https://github.com/jeffshurtliff/pydplus/issues/7)).
 
-(unreleased-changed)=
+(relnotes-2.1.0-changed)=
 ### Changed
 
 - Updated the minimum `PyJWT` version to `2.15.0` (locked at `2.15.1`) to remediate Dependabot alerts
@@ -162,7 +179,8 @@ features and functionality.
 
 
 <!-- The reference definitions are listed below -->
-[Unreleased]: https://github.com/jeffshurtliff/pydplus/compare/2.0.1...HEAD
+[Unreleased]: https://github.com/jeffshurtliff/pydplus/compare/2.1.0...HEAD
+[2.1.0]: https://github.com/jeffshurtliff/pydplus/compare/2.0.1...2.1.0
 [2.0.1]: https://github.com/jeffshurtliff/pydplus/compare/2.0.0...2.0.1
 [2.0.0]: https://github.com/jeffshurtliff/pydplus/compare/1.0.1...2.0.0
 [1.0.1]: https://github.com/jeffshurtliff/pydplus/compare/1.0.0...1.0.1
