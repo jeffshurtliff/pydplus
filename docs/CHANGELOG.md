@@ -18,7 +18,19 @@ No unreleased additions at this time.
 (unreleased-changed)=
 ### Changed
 
-No unreleased changes at this time.
+- Updated the minimum `PyJWT` version to `2.15.0` (locked at `2.15.1`) to remediate Dependabot alerts
+  [#23](https://github.com/jeffshurtliff/pydplus/security/dependabot/23)–[#33](https://github.com/jeffshurtliff/pydplus/security/dependabot/33),
+  [#37](https://github.com/jeffshurtliff/pydplus/security/dependabot/37), and
+  [#38](https://github.com/jeffshurtliff/pydplus/security/dependabot/38), including a critical asymmetric-PEM detection
+  bypass of the HS/asymmetric key-confusion guard (CVE-2026-102268), and several high-severity issues involving
+  HMAC-key validation and `PyJWKClient` redirect handling.
+- Updated the minimum `urllib3` version to `2.8.0` (locked at `2.8.0`) to remediate Dependabot alerts
+  [#34](https://github.com/jeffshurtliff/pydplus/security/dependabot/34),
+  [#35](https://github.com/jeffshurtliff/pydplus/security/dependabot/35), and
+  [#36](https://github.com/jeffshurtliff/pydplus/security/dependabot/36) (CVE-2026-97687, CVE-2026-97689, and
+  CVE-2026-97688: HTTPS proxy TLS configuration being ignored, unbounded chunk-size line buffering, and an infinite
+  loop in chunked deflate streaming).
+- Aligned `requirements.txt` with the new `PyJWT` and `urllib3` runtime floors defined in `pyproject.toml`.
 
 ---
 (relnotes-2.0.1)=
