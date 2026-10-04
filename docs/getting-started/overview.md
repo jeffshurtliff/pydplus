@@ -16,7 +16,7 @@ such as:
 
 This library requires the following:
 
-- Python version 3.12 or above (version 3.14 not yet officially supported)
+- Python version 3.12 or above (3.12, 3.13, and 3.14 are officially supported)
 - An RSA ID Plus tenant (Production or Development)
 - An RSA ID Plus administrative user that has API privileges in the RSA ID Plus tenant
 - OAuth client credentials (recommended) or Legacy API credentials

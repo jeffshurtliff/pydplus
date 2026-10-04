@@ -13,7 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 (unreleased-added)=
 ### Added
 
-No unreleased additions at this time.
+- Added full support for Python 3.14: the `3.14` trove classifier and a widened `requires-python` range
+  (`>=3.12,<3.15`) in `pyproject.toml`, a `3.14` runner in the CI test matrix, and updated documentation
+  ([#7](https://github.com/jeffshurtliff/pydplus/issues/7)).
 
 (unreleased-changed)=
 ### Changed

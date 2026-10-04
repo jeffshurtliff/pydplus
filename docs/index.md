@@ -24,7 +24,7 @@ CHANGELOG
 
 - Purpose: Simplify RSA REST API interactions in Python
 - Primary interface: `pydplus.PyDPlus`
-- Supported Python versions: 3.12+
+- Supported Python versions: 3.12, 3.13, 3.14
 - License: MIT
 
 ```{warning}
