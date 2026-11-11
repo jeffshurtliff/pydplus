@@ -1,0 +1,5 @@
+# Keep source, configuration and documentation consistent with Ruff's LF policy
+* text=auto eol=lf
+
+# Compatibility fixtures are byte-exact inputs, including text and ciphertext
+tests/fixtures/** -text
