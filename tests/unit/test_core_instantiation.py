@@ -3,14 +3,15 @@
 :Module:            tests.unit.test_core_instantiation
 :Synopsis:          Unit tests for client object instantiation and connection-info compilation
 :Created By:        Jeff Shurtliff
-:Last Modified:     Jeff Shurtliff (via GPT-5.5-codex)
-:Modified Date:     30 Jun 2026
+:Last Modified:     Jeff Shurtliff (via claude-opus-5-5)
+:Modified Date:     11 Nov 2026
 """
 
 from __future__ import annotations
 
 import json
 import logging
+import os
 from pathlib import Path
 
 import pytest
@@ -51,7 +52,7 @@ def test_compile_connection_info_builds_expected_structure(sample_base_url: str)
     )
 
     assert connection_info[const.CONNECTION_INFO.LEGACY][const.CONNECTION_INFO.LEGACY_ACCESS_ID] == 'legacy-access-id'
-    assert connection_info[const.CONNECTION_INFO.LEGACY][const.CONNECTION_INFO.LEGACY_PRIVATE_KEY_PATH] == '/tmp/'
+    assert connection_info[const.CONNECTION_INFO.LEGACY][const.CONNECTION_INFO.LEGACY_PRIVATE_KEY_PATH] == f'/tmp{os.sep}'
     assert connection_info[const.CONNECTION_INFO.LEGACY][const.CONNECTION_INFO.LEGACY_PRIVATE_KEY_FILE] == 'private.pem'
     assert connection_info[const.CONNECTION_INFO.OAUTH][const.CONNECTION_INFO.OAUTH_ISSUER_URL] == 'https://example.com/oauth'
     assert connection_info[const.CONNECTION_INFO.OAUTH][const.CONNECTION_INFO.OAUTH_CLIENT_ID] == 'oauth-client-id'
@@ -68,7 +69,7 @@ def test_compile_connection_info_adds_oauth_private_key_fields(sample_base_url: 
         oauth_scope=const.OAUTH_SCOPES.USER_READ,
     )
 
-    assert connection_info[const.CONNECTION_INFO.OAUTH][const.CONNECTION_INFO.OAUTH_PRIVATE_KEY_PATH] == '/tmp/'
+    assert connection_info[const.CONNECTION_INFO.OAUTH][const.CONNECTION_INFO.OAUTH_PRIVATE_KEY_PATH] == f'/tmp{os.sep}'
     assert connection_info[const.CONNECTION_INFO.OAUTH][const.CONNECTION_INFO.OAUTH_PRIVATE_KEY_FILE] == 'oauth-private-key.jwk'
     assert connection_info[const.CONNECTION_INFO.OAUTH][const.CONNECTION_INFO.OAUTH_PRIVATE_KEY_JWK] == (
         '{"kty":"RSA","n":"abc","e":"AQAB","d":"xyz"}'
