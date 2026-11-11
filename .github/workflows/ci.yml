@@ -93,6 +93,20 @@ jobs:
         run: |
           poetry run pytest -q
 
+      # Bandit can log "[manager] ERROR" for every file, scan nothing, and still exit 0
+      # when it does not support the running Python version (#10). Findings are reported
+      # by the dedicated Bandit job, so this step fails only on analyzer errors.
+      - name: Check Bandit compatibility with Python ${{ matrix.python-version }}
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          poetry run bandit --version
+          poetry run bandit -r src -q > bandit.log 2>&1 || true
+          cat bandit.log
+          if grep -q "\[manager\] ERROR" bandit.log; then
+            echo "::error::Bandit could not analyze src on Python ${{ matrix.python-version }}"
+            exit 1
+          fi
+
       - name: Coverage (pytest-cov) and report
         run: |
           poetry run pytest --cov-report=xml --cov=pydplus tests/unit tests/integration --color=yes

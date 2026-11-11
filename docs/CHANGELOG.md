@@ -34,6 +34,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated the locked `bandit` development dependency from `1.8.6` to `1.9.4`, which fixes scan errors on Python 3.14
   and newer caused by the removal of the deprecated `ast.Constant.s` attribute
   ([#11](https://github.com/jeffshurtliff/pydplus/issues/11)).
+- Raised the `bandit` development dependency constraint from `^1.7.8` to `^1.9.4` in `pyproject.toml` so that
+  versions which cannot scan code on Python 3.14 and newer can no longer be resolved
+  ([#10](https://github.com/jeffshurtliff/pydplus/issues/10)).
+- Added a step to the CI test matrix that runs Bandit on every supported Python version (3.12 through 3.15) and fails
+  if Bandit reports analyzer errors, since Bandit exits `0` even when it could not scan any files
+  ([#10](https://github.com/jeffshurtliff/pydplus/issues/10)).
 
 ---
 (relnotes-2.1.0)=
