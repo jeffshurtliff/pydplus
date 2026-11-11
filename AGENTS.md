@@ -323,3 +323,8 @@ Before handing work back or opening a PR:
 5. `docs/CHANGELOG.md` updated for any user-facing change.
 6. Header blocks (`Last Modified` / `Modified Date`) updated on changed files only.
 7. No secrets or real credentials added to tracked files.
+
+<!-- entire-agent:begin -->
+Read .entire/agent-guide.md for this repository's workflow, source inspection, and verification guidance.
+@.entire/agent-guide.md
+<!-- entire-agent:end -->
