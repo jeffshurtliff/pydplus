@@ -6,7 +6,7 @@ name = "pydplus"
 version = "2.1.1.dev0"
 description = "A Python toolset for the RSA ID Plus cloud authentication platform"
 readme = "README.md"
-requires-python = ">=3.12,<3.15"
+requires-python = ">=3.12,<3.16"
 license = "MIT"
 license-files = ["LICENSE"]
 authors = [
@@ -29,6 +29,7 @@ keywords = [
     "mfa",
     "iam",
     "identity",
+    "identity-access-management",
     "authentication",
     "multifactor-authentication",
     "fido",
@@ -59,6 +60,7 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3.15",
 ]
 
 dependencies = [
@@ -74,11 +76,10 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/jeffshurtliff/pydplus"
-Repository = "https://github.com/jeffshurtliff/pydplus"
 Documentation = "https://pydplus.readthedocs.io/en/stable/"
 Changelog = "https://pydplus.readthedocs.io/en/latest/CHANGELOG.html"
-"Issue Tracker" = "https://github.com/jeffshurtliff/pydplus/issues"
+Repository = "https://github.com/jeffshurtliff/pydplus"
+Issues = "https://github.com/jeffshurtliff/pydplus/issues"
 
 # --------------------------------------------------------------------
 # Poetry-specific Configuration
@@ -110,7 +111,13 @@ src = ["src", "tests"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP"]
-ignore = ["UP006", "UP007", "UP009", "UP035", "UP045"]
+ignore = [
+    "UP006",
+    "UP007",
+    "UP009",
+    "UP035",
+    "UP045",
+]
 
 [tool.ruff.format]
 quote-style = "single"

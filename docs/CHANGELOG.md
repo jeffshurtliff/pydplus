@@ -13,7 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 (unreleased-added)=
 ### Added
 
-No unreleased additions at this time.
+- Added full support for Python 3.15: the `3.15` trove classifier and a widened `requires-python` range
+  (`>=3.12,<3.16`) in `pyproject.toml`, a `3.15` runner in the CI test matrix, and updated documentation
+  ([#11](https://github.com/jeffshurtliff/pydplus/issues/11)).
 
 (unreleased-changed)=
 ### Changed
@@ -26,6 +28,12 @@ No unreleased additions at this time.
   low-severity Dependabot alert [#40](https://github.com/jeffshurtliff/pydplus/security/dependabot/40)
   (GHSA-xmj3-9gf7-h52w), a Windows path escape during legacy wheel installation. `setuptools` is pulled in
   transitively by `pbr` (via `bandit`) and is not a runtime dependency.
+- Refreshed locked transitive dependencies in `poetry.lock` so that prebuilt Python 3.15 wheels are available:
+  `cffi` `2.1.1`, `charset-normalizer` `3.5.2`, `coverage` `7.17.2`, and `MarkupSafe` `3.0.4`
+  ([#11](https://github.com/jeffshurtliff/pydplus/issues/11)).
+- Updated the locked `bandit` development dependency from `1.8.6` to `1.9.4`, which fixes scan errors on Python 3.14
+  and newer caused by the removal of the deprecated `ast.Constant.s` attribute
+  ([#11](https://github.com/jeffshurtliff/pydplus/issues/11)).
 
 ---
 (relnotes-2.1.0)=

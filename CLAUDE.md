@@ -11,7 +11,7 @@ Keep it that way: if a rule applies to every agent or contributor, put it in
 ## Environment and commands
 
 - Dependency management and builds use **Poetry** (see `AGENTS.md` →
-  "Dev environment"). Supported Python: 3.12, 3.13, and 3.14.
+  "Dev environment"). Supported Python: 3.12, 3.13, 3.14, and 3.15.
 - Before handing work back, run and report the same checks CI runs:
   - `poetry run ruff check .`
   - `poetry run ruff format --check .`
@@ -65,3 +65,8 @@ credentials to any tracked file. Use `examples/helper_example.json`
 - `/code-review` before opening a PR catches the correctness and cleanup
   issues reviewers here look for.
 - Follow the pre-submit checklist in `AGENTS.md` before wrapping up.
+
+<!-- entire-agent:begin -->
+Read .entire/agent-guide.md for this repository's workflow, source inspection, and verification guidance.
+@.entire/agent-guide.md
+<!-- entire-agent:end -->

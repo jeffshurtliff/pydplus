@@ -64,10 +64,10 @@ client secrets, and keys/tokens.
 
 ## Python version support
 
-The `pydplus` package supports Python **3.12, 3.13, and 3.14** (see `requires-python`
+The `pydplus` package supports Python **3.12, 3.13, 3.14, and 3.15** (see `requires-python`
 in `pyproject.toml` and the CI matrix in `.github/workflows/ci.yml`). Do not
 add code that targets older Python versions, and do not silently narrow or
-widen this support range (e.g. adding 3.15 support, or dropping 3.12) without
+widen this support range (e.g. adding 3.16 support, or dropping 3.12) without
 explicit authorization from a package maintainer.
 
 ## Coding style
@@ -323,3 +323,8 @@ Before handing work back or opening a PR:
 5. `docs/CHANGELOG.md` updated for any user-facing change.
 6. Header blocks (`Last Modified` / `Modified Date`) updated on changed files only.
 7. No secrets or real credentials added to tracked files.
+
+<!-- entire-agent:begin -->
+Read .entire/agent-guide.md for this repository's workflow, source inspection, and verification guidance.
+@.entire/agent-guide.md
+<!-- entire-agent:end -->
