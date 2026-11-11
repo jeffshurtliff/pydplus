@@ -94,7 +94,7 @@ include = ["LICENSE", "README.md"]
 [tool.poetry.group.dev.dependencies]
 pytest = ">=9.0.3"
 pytest-cov = "^7.0.0"
-bandit = { version = "^1.7.8", extras = ["sarif"] }
+bandit = { version = "^1.9.4", extras = ["sarif"] }  # 1.9+ required for Python 3.14+ (#10)
 Sphinx = "^7.4.7"
 pydata-sphinx-theme = "^0.15.4"
 myst-parser = "^3.0.1"
