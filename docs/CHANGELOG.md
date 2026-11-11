@@ -18,7 +18,14 @@ No unreleased additions at this time.
 (unreleased-changed)=
 ### Changed
 
-No unreleased changes at this time.
+- Updated the minimum `certifi` version to `2026.10.18` (locked at `2026.10.23`) in `pyproject.toml` and
+  `requirements.txt` to remediate critical Dependabot alert
+  [#41](https://github.com/jeffshurtliff/pydplus/security/dependabot/41) (GHSA-6q48-6c7w-9gw2), which removes emSign
+  root CAs whose intermediate CA keys were compromised.
+- Added an explicit `setuptools>=84.1.0` floor to the development dependency group (locked at `84.2.1`) to remediate
+  low-severity Dependabot alert [#40](https://github.com/jeffshurtliff/pydplus/security/dependabot/40)
+  (GHSA-xmj3-9gf7-h52w), a Windows path escape during legacy wheel installation. `setuptools` is pulled in
+  transitively by `pbr` (via `bandit`) and is not a runtime dependency.
 
 ---
 (relnotes-2.1.0)=
